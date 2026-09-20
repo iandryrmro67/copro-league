@@ -1,0 +1,28 @@
+import {test,mock} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+import {createDatabase,type SQLConnection} from '../lib/server/sql.ts';
+test('all season 2 records round-trip through the real repositories on PostgreSQL',async()=>{
+ const pg=new PGlite();
+ const wrap=(client:any):SQLConnection=>({query:async(s,a)=>{const r=await client.query(s,a);return {rows:r.rows,count:r.affectedRows??r.rows.length}},transaction:fn=>client.transaction((tx:any)=>fn(wrap(tx)))});
+ await pg.exec(await readFile(new URL('../supabase/migrations/202609200001_league.sql',import.meta.url),'utf8'));
+ const database=createDatabase(wrap(pg));
+ mock.module('../lib/server/database.ts',{namedExports:{db:()=>database}});
+ const {savePlayer,saveSeason,saveMatch,readLeague}=await import('../lib/repository.ts');
+ const {recognitionData}=await import('../lib/recognition-repository.ts');
+ const data=JSON.parse(await readFile(new URL('../data/imports/saison-2.json',import.meta.url),'utf8'));
+ for(const p of data.players)await savePlayer(p);
+ for(const s of data.seasons)await saveSeason(s);
+ for(const m of data.matches)await saveMatch(m);
+ const restored=await readLeague();
+ assert.equal(restored.players.length,22);assert.equal(restored.matches.length,6);
+ assert.equal(restored.matches.flatMap(m=>m.participants).reduce((n,p)=>n+(p.stats.goals??0),0),271);
+ assert.equal(restored.matches.flatMap(m=>m.participants).reduce((n,p)=>n+(p.stats.assists??0),0),184);
+ const match=restored.matches[0];await saveMatch({...match,notes:'PostgreSQL test'});
+ await assert.rejects(saveMatch({...match,notes:'stale'}),/Conflit/);
+ assert.equal((await readLeague()).matches.find(m=>m.id===match.id)?.notes,'PostgreSQL test');
+ const awards=await recognitionData(await readLeague());assert.equal(awards.players.length,22);
+ assert.equal(awards.seasons[0].awards.length,25);
+ await pg.close();mock.restoreAll();
+});

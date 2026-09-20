@@ -4,7 +4,7 @@ Application de football à 5, en français, construite à partir du logo, du moo
 
 ## Utiliser le site
 
-L’aperçu local fonctionne sur http://localhost:5173. Cliquez sur **Connexion** pour ouvrir l’administration. En développement local, cette connexion est simulée ; sur le site hébergé, elle utilise le compte ChatGPT. Sur une nouvelle base privée, **Activer mon compte administrateur** initialise le premier administrateur. Faites cette initialisation avant tout élargissement des accès.
+Cette branche fonctionne avec Next.js sur Vercel, PostgreSQL et Supabase Auth. Le développement local utilise http://localhost:5174. La connexion est réelle, privée, réservée aux adresses configurées dans `ADMIN_EMAILS` et `MEMBER_EMAILS`. Voir [le guide de configuration et de migration](docs/vercel-supabase.md).
 
 L’administration permet de gérer joueurs et photos, caractéristiques de draft, saisons et récompenses, matchs, participants, équipes, résultats, statistiques, vidéos et événements. Les champs vides représentent des données inconnues ; un zéro représente une mesure réelle. Les profils et classements sont générés automatiquement.
 
@@ -28,7 +28,7 @@ Le classement par points spécifique à l’ancien classeur n’est pas repris :
 
 ## Architecture et données
 
-React 19, TypeScript, routes compatibles Next via Vinext/Vite, Tailwind et composants accessibles Radix. Backend Worker Cloudflare ; base SQL D1 via Drizzle ; photos dans R2. Ce choix conserve un déploiement intégré sans serveur séparé.
+React 19, TypeScript, Next.js natif sur Vercel, Tailwind et composants Radix. Base PostgreSQL, comptes Supabase Auth et médias Supabase Storage privés. Les migrations PostgreSQL se trouvent dans `supabase/migrations` ; les anciens fichiers D1/Vinext sont conservés comme référence historique.
 
 `db/schema.ts` décrit joueurs, caractéristiques, saisons, matchs, équipes, participations, statistiques individuelles, événements, vidéos, récompenses et administrateurs. `MatchPlayerStats` reste la source centrale. `lib/engine.ts` calcule agrégats, pourcentages, ELO, duos, facts, records et radars à partir des matchs. L’historique ELO est recalculé plutôt que stocké en double. Les champs suivis par événements sont projetés dans les statistiques sans additionner une seconde saisie manuelle.
 

@@ -1,0 +1,31 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+import {restoreRawBackup,leagueTables,type RawBackup} from '../lib/server/import-data.ts';
+import type {SQLConnection} from '../lib/server/sql.ts';
+test('raw restore preserves settings, votes and history, resets identity IDs, never overwrites',async()=>{
+ const pg=new PGlite();
+ const wrap=(client:any):SQLConnection=>({query:async(s,a)=>{const r=await client.query(s,a);return {rows:r.rows,count:r.affectedRows}},transaction:fn=>client.transaction((tx:any)=>fn(wrap(tx)))});
+ await pg.exec(await readFile(new URL('../supabase/migrations/202609200001_league.sql',import.meta.url),'utf8'));
+ const backup:RawBackup={format:'copro-raw-v1',tables:Object.fromEntries(leagueTables.map(t=>[t,[]]))};
+ backup.tables.players=[{id:'a',name:'A'}];
+ backup.tables.seasons=[{id:'s',name:'Saison',start:'',end:'',status:'finished'}];
+ backup.tables.settings=[{id:'thresholds',data:'{"minRating":4}'}];
+ backup.tables.recognition_seasons=[{season_id:'s',data:'[{"winnerId":"a"}]',finalized_at:'2026-09-20'}];
+ backup.tables.award_identities=[{email:'player@example.com',user_id:'old-chatgpt-id',player_id:'a'}];
+ backup.tables.award_definitions=[{id:'award',season_id:'s',name:'MVP',kind:'player',mode:'vote',stat_weight:0,vote_weight:1}];
+ backup.tables.award_votes=[{season_id:'s',award_id:'award',voter_player_id:'a',candidate_id:'a'}];
+ // A late foreign-key error must roll back every earlier table.
+ const invalid=structuredClone(backup);invalid.tables.award_votes[0].voter_player_id='missing';
+ await assert.rejects(restoreRawBackup(wrap(pg),invalid));
+ assert.equal((await pg.query('SELECT * FROM players')).rows.length,0);
+ await restoreRawBackup(wrap(pg),backup);
+ assert.equal((await pg.query<any>('SELECT user_id FROM award_identities')).rows[0].user_id,null);
+ assert.equal((await pg.query<any>('SELECT data FROM settings')).rows[0].data,'{"minRating":4}');
+ assert.equal((await pg.query('SELECT * FROM award_votes')).rows.length,1);
+ assert.equal((await pg.query<any>('SELECT data FROM recognition_seasons')).rows[0].data,'[{"winnerId":"a"}]');
+ await assert.rejects(restoreRawBackup(wrap(pg),backup),/déjà des données/);
+ assert.equal((await pg.query('SELECT * FROM players')).rows.length,1);
+ await pg.close();
+});
