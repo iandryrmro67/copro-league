@@ -1,7 +1,8 @@
+import {postgresTLS} from '../lib/server/postgres-options';
 import postgres from 'postgres';
 import {readFile,readdir} from 'node:fs/promises';
 if(!process.env.DATABASE_URL)throw Error('DATABASE_URL manquante dans .env.local');
-const sql=postgres(process.env.DATABASE_URL,{prepare:false,max:1,ssl:'verify-full'});
+const sql=postgres(process.env.DATABASE_URL,{prepare:false,max:1,ssl:postgresTLS});
 try{
  await sql`CREATE TABLE IF NOT EXISTS copro_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())`;
  await sql`ALTER TABLE copro_migrations ENABLE ROW LEVEL SECURITY`;

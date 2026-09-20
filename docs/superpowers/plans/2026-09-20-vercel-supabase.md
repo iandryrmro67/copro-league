@@ -4,7 +4,7 @@
 
 **Goal:** Exécuter Copro League sur Vercel avec sa base, ses comptes et ses médias privés dans Supabase.
 **Architecture:** Next.js Node, adaptateur PostgreSQL transactionnel, Supabase SSR et envois Storage directs.
-**Tech Stack:** Next.js, postgres.js, @supabase/ssr, @supabase/supabase-js, PGlite pour les tests PostgreSQL.
+**Tech Stack:** Next.js, node-postgres (pg) pour le serveur, postgres.js pour les migrations, @supabase/ssr, @supabase/supabase-js, PGlite pour les tests PostgreSQL.
 **Spec:** ../specs/2026-09-20-vercel-supabase-design.md
 
 ## Contraintes

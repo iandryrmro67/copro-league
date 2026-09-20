@@ -5,7 +5,7 @@ Le site utilise Next.js, PostgreSQL Supabase et Supabase Auth. Les médias reste
 ## Configuration
 
 1. Créer un projet Supabase gratuit, région Europe. Désactiver l’exposition automatique des nouvelles tables et activer la RLS automatique.
-2. Copier `.env.example` dans `.env.local` (ignoré par Git). Renseigner l’URL du projet, sa clé publishable, la clé serveur secret/service_role et la connexion PostgreSQL **transaction pooler** (port 6543). Encoder les caractères spéciaux du mot de passe dans DATABASE_URL. La connexion vérifie le certificat TLS ; ne pas désactiver cette vérification.
+2. Copier `.env.example` dans `.env.local` (ignoré par Git). Renseigner l’URL du projet, sa clé publishable, la clé serveur secret/service_role et la connexion PostgreSQL **transaction pooler** (port 6543). Encoder les caractères spéciaux du mot de passe dans DATABASE_URL. La connexion vérifie le certificat TLS avec l’autorité Supabase officielle intégrée dans `lib/server/postgres-options.ts` ; ne pas désactiver cette vérification.
 3. Exécuter `npm run db:migrate`. Les migrations sont transactionnelles, suivies dans `copro_migrations`, et ne sont pas rejouées. Elles créent les tables, révoquent l’accès direct des navigateurs et créent le bucket privé `league-media`.
 4. Dans Supabase Authentication, créer les utilisateurs autorisés avec une adresse confirmée et leur propre mot de passe. Désactiver les inscriptions publiques. `ADMIN_EMAILS` contient les administrateurs ; `MEMBER_EMAILS` contient les lecteurs autorisés, séparés par des virgules. Aucun utilisateur ne devient administrateur simplement en étant le premier à se connecter. Les anciennes identités ChatGPT ne sont pas des identités Supabase.
 5. Dans Vercel, importer `iandryrmro67/copro-league`, sélectionner la branche de migration, framework Next.js, et renseigner les mêmes variables. Les clés serveur ne doivent jamais porter le préfixe `NEXT_PUBLIC_`.
@@ -48,3 +48,7 @@ Le test HTTP sans compte vérifie notamment qu’un en-tête ChatGPT forgé ne d
 ## Retour à la version précédente
 
 Le snapshot GitHub initial est `d0465a40675afad5020a992015acc9b42c1bcd36`. Il correspond au site Sites v6. Restaurer cette version sur Sites ne migre pas une base PostgreSQL vers D1. Conserver les sauvegardes et l’ancien site tant que le transfert n’a pas été validé.
+
+## Vérification réelle du 20 septembre 2026
+
+Projet Supabase `cifxjpybkszppxtmsuap`, région eu-west-1. Les deux migrations ont été appliquées. Les 22 joueurs, 6 matchs, 60 participations et 124 événements ont été copiés depuis le site Sites publié, dont la version 3 du match 6. Aucun média R2 référencé ne nécessitait de copie. Le test `tests/supabase-live.mjs` a vérifié la connexion réelle, le rôle administrateur, les données, les badges, le refus de lecture directe anonyme et un cycle complet de photo signée (avec nettoyage).

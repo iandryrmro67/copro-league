@@ -1,0 +1,10 @@
+.env*
+!.env.example
+outputs
+.wrangler
+.sites-runtime
+.openai
+.git
+node_modules
+.next
+dist

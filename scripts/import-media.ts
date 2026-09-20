@@ -1,3 +1,4 @@
+import {postgresTLS} from '../lib/server/postgres-options';
 import {createClient} from '@supabase/supabase-js';
 import postgres from 'postgres';
 import {readFile,readdir,stat} from 'node:fs/promises';
@@ -6,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {mediaSpec,validMediaHeader,validMediaId,type MediaKind} from '../lib/media-policy';
 const directory=process.argv[2];
 if(!directory||!process.env.DATABASE_URL||!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)throw Error('Dossier et variables Supabase requis.');
-const sql=postgres(process.env.DATABASE_URL,{prepare:false,max:1,ssl:'verify-full'});
+const sql=postgres(process.env.DATABASE_URL,{prepare:false,max:1,ssl:postgresTLS});
 const bucket=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}).storage.from('league-media');
 const digest=(data:Uint8Array)=>createHash('sha256').update(data).digest('hex');
 let copied=0,failed=0;
