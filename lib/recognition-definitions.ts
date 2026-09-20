@@ -1,0 +1,71 @@
+import type {Definition,Rule,Weight} from './recognition.ts';
+const g=(key:string,value:number):Rule=>({key,op:'gte',value});const l=(key:string,value:number):Rule=>({key,op:'lte',value});const lt=(key:string,value:number):Rule=>({key,op:'lt',value});const p=(key:string,value:number,low=false):Rule=>({key,op:'gte',value,percentile:true,low});const bottom=(key:string,value:number):Rule=>({key,op:'lte',value,percentile:true});const any=(...any:Rule[]):Rule=>({any});const count=(count:number,...of:Rule[]):Rule=>({count,of});
+const w=(key:string,weight:number,low=false):Weight=>({key,weight,low});
+function award(id:string,name:string,icon:string,description:string,weights:Weight[],rules:Rule[],ratio=false,category='Principaux'):Definition{return{id,name,icon,description,weights,rules,ratio,category}}
+export const awardDefinitions:Definition[]=[
+{...award('copro-or','COPRO D’OR','👑','Le meilleur joueur global de la saison.',[w('rating',50),w('mvpPM',20),w('collective',20),w('matches',10)],[]),always:true},
+award('tn-or','TN D’OR','👟','Le meilleur buteur de la saison.',[w('goals',90),w('collective',10)],[g('goals',5),g('goalsPM',.4)],true),
+award('maestro','MAESTRO','🎼','La dernière passe et celle qui la prépare.',[w('assistsPM',25),w('secondaryAssistsPM',20),w('xaPM',25),w('chancesCreatedPM',20),w('collective',10)],[g('assistsSecondary',4),g('assistsSecondaryPM',.3)],true),
+award('bullseye','BULLSEYE','🎯','Le finisseur le plus efficace.',[w('conversion',35),w('shotPct',25),w('goalsMinusXg',25),w('collective',15)],[g('goals',4),g('shots',10),g('conversion',25)],true),
+award('ankle-breaker','ANKLE BREAKER','🕺','Domine ses un contre un offensifs.',[w('dribblesCompletedPM',40),w('dribblePct',30),w('foulsWon',15),w('collective',15)],[g('dribblesAttempted',15),g('dribblePct',55)],true),
+award('metronome','METRONOME','🎛️','Contrôle et fait circuler le ballon.',[w('passesAttemptedPM',30),w('passPct',25),w('longPassesCompleted',15),w('lossRatio',15,true),w('collective',15)],[g('passesAttemptedPM',15),g('passPct',75)],true),
+award('golden-glue','GOLDEN GLUE','🧲','Connecte son équipe et fait fonctionner le collectif.',[w('passesCompleted',20),w('passPct',15),w('secondaryAssists',15),w('recoveries',15),w('lossRatio',15,true),w('collective',20)],[count(4,p('passesCompleted',55),p('passPct',55),p('secondaryAssists',55),p('recoveries',55),p('lossRatio',55,true)),p('collective',60)],true),
+award('v8','V8','🏎️','Du volume dans plusieurs dimensions du jeu.',[w('touches',20),w('passesAttempted',20),w('recoveries',20),w('duelsWon',15),w('foulsWon',10),w('collective',15)],[count(4,...['touches','passesAttempted','recoveries','duelsWon','foulsWon'].map(k=>p(k,65)))]),
+award('mr-propre','MR. PROPRE','🧼','Nettoie les situations défensives.',[w('recoveries',30),w('interceptions',25),w('successfulTackles',20),w('blocks',10),w('collective',15)],[g('recoveriesPM',3),g('interceptionTacklePM',1)],true),
+award('lockdown','LOCKDOWN','🔒','Le défenseur global le plus complet.',[w('duelPct',20),w('interceptions',15),w('tackles',15),w('blocks',10),w('aerialDuelsWon',10),w('dribbledPast',10,true),w('defensiveCollective',10),w('collective',10)],[g('duelPct',55),g('defActionsPM',2)],true),
+award('duelist','DUELIST','⚔️','Domine ses confrontations directes.',[w('duelsWonPM',45),w('duelPct',40),w('collective',15)],[g('duelsAttempted',30),g('duelPct',60)],true),
+award('glow-up','THE GLOW UP','🚀','La plus grande progression dans la saison.',[w('improvement',80),w('collectiveProgress',20)],[g('matches',8),g('improvement',.5)],true),
+award('consistent','MR. CONSISTENT','🧊','Un bon niveau, avec très peu de mauvaises performances.',[w('variance',60,true),w('rating',20),w('collective',20)],[g('ratingCount',8),g('rating',6.5),l('std',.75)],true),
+award('clutch','CLUTCH GENE','🧬','Avec lui, les équipes gagnent régulièrement.',[w('winRate',60),w('wins',40)],[g('winRate',60),g('wins',5)],true),
+award('ironman','IRONMAN','🫡','Le joueur le plus présent et fiable.',[w('matches',70),w('wins',30)],[g('attendance',75)]),
+{...award('dynamic-duo','DYNAMIC DUO','🤝','La meilleure paire lorsqu’elle joue dans la même équipe.',[w('winRate',45),w('wins',25),w('rating',20),w('duoGaPM',10)],[g('matches',5),g('winRate',60),g('wins',3)],true),kind:'duo'},
+award('bicraveur','BICRAVEUR','🌾','Le plus grand écart entre xG et buts inscrits.',[w('wastedXg',100)],[g('shots',10),g('wastedXg',2)],false,'Banter'),
+award('interstellar','INTERSTELLAR','🌌','Beaucoup de frappes hors cadre.',[w('offTarget',100)],[g('shots',12),lt('shotPct',40)],true,'Banter'),
+award('croqueur','CROQUEUR','🐊','Beaucoup de tirs pour peu de rendement.',[w('shots',40),w('conversion',35,true),w('wastedXg',25)],[g('shots',15),lt('conversion',15),g('wastedXg',1)],true,'Banter'),
+award('drunk-driving','CONDUITE DE BALLE EN ÉTAT D’IVRESSE','🚔','Beaucoup de dribbles tentés, peu de réussites.',[w('failedDribbles',60),w('dribblePct',40,true)],[g('dribblesAttempted',20),lt('dribblePct',45)],true,'Banter'),
+award('frere-arrete','FRÈRE ARRÊTE','🛑','Les pertes pèsent lourd par rapport aux touches.',[w('lossRatio',100)],[g('turnovers',30),p('lossRatio',85)],true,'Banter'),
+award('traffic-cone','TRAFFIC CONE','🚧','Trop facilement éliminé dans les confrontations défensives.',[w('dribbledPast',60),w('duelPct',40,true)],[g('defensiveDuels',15),lt('defensiveDuelPct',40)],true,'Banter'),
+award('casino','CASINO FC','🎰','Le joueur le plus irrégulier.',[w('std',100)],[g('ratingCount',8),g('ratingRange',3)],true,'Banter'),
+award('washed','WASHED ALLEGATIONS','🧼','Une forte baisse entre les deux moitiés de saison.',[w('decline',100)],[g('ratingCount',8),g('decline',.75)],true,'Banter'),
+award('main-character','MAIN CHARACTER SYNDROME','🎭','Monopolise les tirs et dribbles sans création proportionnelle.',[w('shotShare',40),w('dribbleShare',30),w('assists',-15),w('secondaryChances',-15)],[any(p('shots',80),p('dribblesAttempted',80)),bottom('creation',50)],true,'Banter')
+];
+const badge=(id:string,name:string,icon:string,category:string,description:string,rules:Rule[]):Definition=>({id,name,icon,category,description,rules,weights:[]});
+export const badgeDefinitions:Definition[]=[
+badge('aura','1000 AURA','👑','Status','Dominant individuellement et souvent gagnant.',[p('rating',90),p('collective',75),p('mvpPM',70)]),
+badge('boss','FINAL BOSS','👹','Status','Une présence dominante des deux côtés du jeu.',[p('rating',90),p('mvpPM',90),any(p('gaPM',75),p('defensiveImpact',75)),g('rating',7)]),
+badge('locked','LOCKED IN','🔐','Status','Performant et régulier.',[p('rating',75),bottom('variance',25),g('ratingCount',6)]),
+badge('lowkey','LOWKEY CARRY','🤫','Status','Décisif sans remplir uniquement les colonnes buts et assists.',[p('rating',75),p('collective',75),bottom('gaPM',50),g('matches',6)]),
+badge('demon','DEMON TIME','😈','Finishing','Produit et marque avec régularité.',[p('gaPM',85),p('goalsPM',75),g('ga',4)]),
+badge('aimbot','AIMBOT','🎯','Finishing','Cadre avec une grande efficacité.',[p('shotPct',90),p('conversion',70),g('shots',10)]),
+badge('ice','ICE IN MY VEINS','🧊','Finishing','Marque davantage que les occasions ne le promettaient.',[p('goalsMinusXg',85),g('goals',4),g('goalsMinusXg',1)]),
+badge('one-shot','ONE SHOT ONE KILL','💥','Finishing','Peu de tirs, beaucoup de rendement.',[p('conversion',90),bottom('shotsPM',50),g('goals',3)]),
+badge('ghost','GHOST MODE','👻','Finishing','Peu de touches, des contributions décisives.',[bottom('touchesPM',30),p('gaPM',75),g('ga',3)]),
+badge('optic','OPTIC 2000','👓','Creation / Technique','Voit les passes qui créent de vraies occasions.',[p('xaPM',85),p('chancesCreatedPM',85),g('chancesCreated',5)]),
+badge('baller','CERTIFIED BALLER','🪄','Creation / Technique','Élimine avec volume et réussite.',[p('dribblesCompletedPM',80),p('dribblePct',70),g('dribblePct',55),g('dribblesAttempted',15)]),
+badge('menace','MENACE II SOCIETY','⚡','Creation / Technique','Percussion, fautes obtenues et implication offensive.',[count(2,p('dribblesCompleted',75),p('foulsWon',75),p('ga',70))]),
+badge('sees','HE SEES IT','🔭','Creation / Technique','Trouve les partenaires à longue distance.',[p('longPassesCompletedPM',85),p('longPassPct',70),g('longPassesAttempted',10)]),
+badge('system','THE SYSTEM','🧠','Control','Le ballon et les occasions passent par lui.',[p('touchesPM',85),p('passesAttemptedPM',85),p('chancesCreated',65),g('passPct',70)]),
+badge('magnet','BALL MAGNET','🧲','Control','Toujours disponible pour toucher le ballon.',[p('touchesPM',90),g('matches',6)]),
+badge('controller','THE CONTROLLER','🎛️','Control','Fait circuler sans gaspiller.',[p('passesAttemptedPM',80),p('passPct',80),bottom('lossRatio',30),g('passesAttemptedPM',15)]),
+badge('glue','THE GLUE','🧩','Control','Connecte les phases de jeu et son collectif.',[count(4,p('passesCompleted',70),p('secondaryAssists',65),p('recoveries',65),p('lossRatio',60,true),p('collective',70))]),
+badge('v12','V12','🏎️','Volume','Un très gros volume dans plusieurs domaines.',[count(4,...['touches','passesAttempted','recoveries','duelsWon','dribblesCompleted','foulsWon'].map(k=>p(k,75))),g('matches',6)]),
+badge('two-way','TWO-WAY PLAYER','↔️','Volume','Impact offensif et défensif.',[p('offensiveImpact',65),p('defensiveImpact',65)]),
+badge('vacuum','VACUUM CLEANER','🧹','Defensive','Récupère et coupe les trajectoires.',[p('recoveriesPM',85),p('interceptionsPM',70),g('recoveriesPM',3)]),
+badge('no-entry','NO ENTRY','⛔','Defensive','Gagne ses duels et se fait rarement éliminer.',[p('duelPct',80),bottom('dribbledPastPM',25),g('duelsAttempted',20)]),
+badge('hawk','BALL HAWK','🦅','Defensive','Lit et intercepte les passes.',[p('interceptionsPM',90),g('interceptions',8)]),
+badge('no-fly','NO-FLY ZONE','✈️','Defensive','Domine dans les airs.',[p('aerialDuelsWon',85),p('aerialPct',75),g('aerialDuelsAttempted',10)]),
+badge('aura-defender','AURA DEFENDER','🛡️','Defensive','Son équipe concède peu lorsqu’il est sur le terrain.',[bottom('goalsConcededPM',25),bottom('xgConcededPM',25),p('collective',60),g('matches',6)]),
+badge('silent','SILENT CARRY','🥷','Defensive','Porte le collectif par la défense.',[p('defensiveImpact',80),p('collective',75),bottom('ga',40),g('matches',6)]),
+badge('fraud','FRAUD WATCH','🕵️','Allegations','La forme récente ne ressemble plus à la précédente.',[bottom('recentRating',35),p('previousRating',65),g('recentDrop',.6)]),
+badge('merchant','xG MERCHANT','🛒','Allegations','Des occasions de qualité, une finition en retrait.',[p('xg',75),bottom('goalsMinusXg',20),g('xg',3)]),
+badge('brick','BRICKLAYER','🧱','Allegations','Beaucoup de frappes, peu dans le cadre.',[p('shots',75),bottom('shotPct',25),g('shots',12)]),
+badge('lache','LÂCHE LE BALLON','🛑','Allegations','Les pertes s’accumulent par rapport aux touches.',[p('lossRatio',90),g('turnovers',30)]),
+badge('drunk','DRUNK DRIBBLING','🥴','Allegations','Les tentatives dépassent largement les réussites.',[p('dribblesAttempted',75),bottom('dribblePct',25),g('dribblesAttempted',15)]),
+badge('traffic','TRAFFIC CONE','🚧','Allegations','Un passage trop facile pour les adversaires.',[p('dribbledPast',80),bottom('duelPct',30),g('defensiveDuels',15)]),
+badge('casino-mode','CASINO MODE','🎲','Allegations','La performance varie fortement d’un match à l’autre.',[p('variance',90),g('ratingCount',6)]),
+badge('washed-badge','WASHED ALLEGATIONS','📉','Allegations','Les cinq derniers matchs décrochent des cinq précédents.',[g('recentDrop',.75),g('matches',10)]),
+badge('main','MAIN CHARACTER','🎭','Allegations','Prend la lumière offensive sans création proportionnelle.',[p('shotShare',80),p('dribbleShare',80),bottom('creation',50)]),
+badge('vibes','NO TOUCHES JUST VIBES','🫥','Allegations','Présent dans le vestiaire, discret sur le ballon.',[bottom('touchesPM',10),g('matches',5)])
+];
+// Explicitly unavailable counters: total duels cannot stand in for defensive duels.
+export const recognitionLimits=[{metric:'defensiveDuels',affected:['TRAFFIC CONE (Award)','TRAFFIC CONE (Badge)'],reason:'Les duels spécifiquement défensifs ne sont pas distingués dans les statistiques existantes. Ces récompenses restent indisponibles.'},{metric:'successfulTackles',affected:['MR. PROPRE'],reason:'Les tacles réussis sont utilisables uniquement si tous les tacles ont un résultat WON / LOST / FOUL dans les événements. Le total de tacles ne remplace pas les réussites.'},{metric:'offTarget',affected:['INTERSTELLAR'],reason:'Les tirs hors cadre sont comptés uniquement sur une annotation complète des résultats de tirs. Tirs moins tirs cadrés inclurait aussi les tirs bloqués.'}];

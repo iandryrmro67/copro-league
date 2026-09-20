@@ -1,0 +1,1694 @@
+Tu es responsable de la conception UX/UI, de l’architecture produit, du développement full-stack, de la base de données et de la mise en place d’une plateforme web complète de football à 5 entre amis.
+
+Je vais joindre à cette demande :
+- un moodboard
+- un logo
+- une palette de couleurs
+
+Analyse ces références AVANT de concevoir l’interface.
+
+Le moodboard, le logo, la palette et les règles de direction artistique décrites ci-dessous constituent la source de vérité visuelle du projet.
+
+Ne crée pas une identité visuelle générique de SaaS ou une interface “IA” standard si cela contredit mes références.
+
+==================================================
+1. OBJECTIF DU PROJET
+==================================================
+
+Je veux créer une vraie plateforme web pour gérer nos matchs de football à 5 entre amis.
+
+Ce n’est PAS un simple site vitrine.
+
+Je veux un produit réellement fonctionnel permettant de :
+
+- créer et gérer des joueurs
+- créer des saisons
+- créer et gérer des matchs
+- gérer les participants à chaque match
+- générer les équipes grâce à plusieurs systèmes de draft
+- enregistrer les scores
+- enregistrer les statistiques individuelles
+- afficher les statistiques de chaque match
+- afficher les statistiques cumulées des joueurs
+- afficher des statistiques par saison
+- créer automatiquement des classements
+- créer automatiquement des facts / insights
+- afficher les vidéos YouTube des matchs
+- suivre les performances des joueurs
+- calculer un ELO
+- générer des radars de performance
+- conserver l’historique des saisons
+- ajouter les matchs au calendrier personnel
+- administrer entièrement le site depuis une interface web
+
+PRINCIPE CENTRAL :
+
+“UNE SEULE SAISIE → PLUSIEURS CONSÉQUENCES AUTOMATIQUES.”
+
+Si une statistique est modifiée dans un match, tout ce qui en dépend doit se recalculer automatiquement :
+
+Match
+→ Profil joueur
+→ Saison
+→ Classements
+→ Radar
+→ Facts
+→ Records
+→ Dashboard
+
+Je ne veux jamais saisir deux fois la même donnée.
+
+==================================================
+2. CONTRAINTE ABSOLUE : ADMINISTRATION SANS CODE
+==================================================
+
+Une fois le site développé et déployé, je ne dois JAMAIS avoir besoin de modifier le code pour l’utiliser normalement.
+
+Créer un véritable back-office sécurisé.
+
+Depuis le site, un administrateur doit pouvoir :
+
+- ajouter un joueur
+- modifier un joueur
+- archiver un joueur
+- changer sa photo
+- modifier ses informations
+- modifier ses caractéristiques utilisées pour le draft
+- ajouter des fun facts
+- créer une saison
+- modifier une saison
+- terminer / archiver une saison
+- créer un match
+- modifier un match
+- sélectionner les participants
+- modifier date / heure / lieu
+- lancer un draft
+- modifier les équipes
+- entrer un résultat
+- entrer les statistiques
+- corriger des statistiques
+- ajouter des événements
+- corriger la timeline
+- choisir le MVP
+- ajouter une vidéo YouTube
+- définir le joueur de la saison
+- gérer la récompense de fin de saison
+
+Quand un nouveau joueur est ajouté, son profil doit apparaître automatiquement.
+
+Quand une nouvelle saison est créée, toutes les pages et statistiques correspondantes doivent fonctionner automatiquement.
+
+Aucune page joueur ou saison ne doit être codée individuellement.
+
+==================================================
+3. STACK TECHNIQUE
+==================================================
+
+Choisis une architecture moderne, simple à maintenir et suffisamment robuste.
+
+Préférence :
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- PostgreSQL / Supabase
+- authentification admin
+- stockage des photos
+- API/backend réellement fonctionnel
+
+Tu peux adapter cette stack si tu identifies une meilleure solution, mais évite toute complexité inutile.
+
+Le site doit être responsive.
+
+Priorité élevée :
+
+- desktop
+- smartphone
+
+Une grande partie de l’administration sera faite depuis un téléphone après ou pendant les matchs.
+
+==================================================
+4. DIRECTION ARTISTIQUE
+==================================================
+
+Analyse précisément :
+
+- le moodboard fourni
+- le logo fourni
+- la palette fournie
+
+Construis un design system complet à partir de ces références :
+
+- couleurs
+- typographies
+- tailles
+- espacements
+- rayons
+- boutons
+- cartes
+- états interactifs
+- icônes
+- composants statistiques
+- tableaux
+- navigation
+- responsive
+
+Le résultat doit avoir une vraie personnalité.
+
+------------------------------------------
+RÈGLE COULEUR : 60 / 30 / 10
+------------------------------------------
+
+La répartition visuelle des couleurs doit suivre approximativement la règle :
+
+60 % NOIR
+30 % BLANC
+10 % VERT
+
+Cette règle doit guider l’ensemble du design system.
+
+-------------------------
+60 % — NOIR
+-------------------------
+
+Le noir est la couleur dominante.
+
+Il doit surtout servir à :
+
+- fonds principaux
+- navigation
+- grandes surfaces
+- arrière-plans
+- cartes
+- sections
+- panneaux statistiques
+- modals
+- menus
+
+Je veux beaucoup de contraste.
+
+L’interface doit être majoritairement sombre.
+
+Le noir doit donner une impression :
+
+- premium
+- sportive
+- moderne
+- forte
+- immersive
+
+Éviter cependant un site totalement plat.
+
+Créer de la profondeur grâce à :
+
+- plusieurs nuances très proches de noir
+- bordures légères
+- variations de luminosité
+- surfaces légèrement différenciées
+- séparateurs
+- ombres très discrètes si pertinentes
+
+Ne pas introduire d’autres couleurs importantes simplement pour créer de la profondeur.
+
+-------------------------
+30 % — BLANC
+-------------------------
+
+Le blanc est principalement utilisé pour l’information.
+
+Utilisations :
+
+- textes
+- titres
+- chiffres
+- statistiques
+- labels
+- icônes
+- informations principales
+- éléments graphiques nécessitant de la lisibilité
+
+Créer une hiérarchie avec plusieurs niveaux :
+
+BLANC PUR
+→ données importantes
+→ titres
+→ score
+→ chiffres clés
+
+BLANC / GRIS CLAIR
+→ informations secondaires
+
+GRIS PLUS DISCRET
+→ métadonnées
+→ dates
+→ labels secondaires
+
+Je veux un contraste fort texte / fond.
+
+Les informations importantes doivent être immédiatement lisibles.
+
+-------------------------
+10 % — VERT
+-------------------------
+
+Le vert est la couleur d’accent principale.
+
+Il doit rester minoritaire pour conserver sa force visuelle.
+
+Utiliser le vert principalement pour :
+
+- boutons principaux
+- CTA
+- éléments actifs
+- onglets sélectionnés
+- highlights
+- accents
+- éléments décoratifs
+- interactions importantes
+- progression
+- éléments positifs
+- graphiques
+- détails du radar
+- sélection
+- focus
+- hover lorsque pertinent
+
+Le vert ne doit PAS envahir les écrans.
+
+Si tout est vert, plus rien n’est mis en valeur.
+
+Le vert doit attirer naturellement le regard vers les éléments importants.
+
+Utiliser précisément la nuance de vert fournie dans la palette que je joins.
+
+------------------------------------------
+HIÉRARCHIE VISUELLE
+------------------------------------------
+
+Le principe général doit donc être :
+
+NOIR
+= structure / environnement
+
+BLANC
+= information
+
+VERT
+= action / accent / attention
+
+Exemple :
+
+Fond noir
++
+statistiques blanches
++
+CTA vert
+
+C’est cette logique qui doit dominer toute l’application.
+
+Ne pas utiliser arbitrairement :
+
+- bleu
+- violet
+- orange
+- rouge
+- jaune
+
+comme couleurs principales.
+
+Une couleur fonctionnelle ponctuelle peut être utilisée si réellement nécessaire pour des états comme erreur / alerte / carton, mais elle ne doit jamais devenir une couleur de branding concurrente au vert.
+
+------------------------------------------
+INSPIRATIONS UX
+------------------------------------------
+
+FotMob principalement pour :
+
+- hiérarchie de l’information
+- pages match
+- profils joueurs
+- stats par saison
+- tableaux
+- ratings
+- densité de données
+- navigation par onglets
+
+EA Sports FC peut servir ponctuellement pour :
+
+- draft
+- cartes
+- animations
+- reveal des joueurs
+
+Ne copie PAS directement ces interfaces.
+
+Reprends leurs bons principes UX et adapte-les à notre identité.
+
+ÉVITER :
+
+- dashboard SaaS générique
+- glassmorphism partout
+- énormes cartes avec beaucoup d’espace vide
+- gradients IA génériques
+- interface trop corporate
+- surcharge décorative
+- trop de couleurs
+- vert utilisé partout sans hiérarchie
+
+PRIVILÉGIER :
+
+- interface sportive
+- premium
+- compacte
+- lisible
+- dynamique
+- contraste élevé
+- forte hiérarchie
+- statistiques facilement scannables
+- photos des joueurs
+- petites animations pertinentes
+- noir très présent
+- blanc très lisible
+- vert utilisé stratégiquement
+
+==================================================
+5. NAVIGATION PRINCIPALE
+==================================================
+
+Prévoir au minimum :
+
+ACCUEIL
+MATCHS
+JOUEURS
+STATS
+DRAFT
+SAISONS
+ADMIN
+
+Admin visible uniquement pour les utilisateurs autorisés.
+
+==================================================
+6. ACCUEIL
+==================================================
+
+Créer une homepage dynamique.
+
+Afficher notamment :
+
+PROCHAIN MATCH
+
+- date
+- heure
+- lieu
+- nombre de participants
+- bouton Voir le match
+- bouton Ajouter au calendrier
+
+DERNIER MATCH
+
+- score
+- MVP
+- accès rapide
+
+LEADERS DE LA SAISON
+
+- buts
+- assists
+- G+A
+- rating
+- ELO
+- MVP
+
+STORYLINES / FACTS
+
+Exemples :
+
+“Djo a marqué 8 buts sur ses 4 derniers matchs.”
+
+“Xan → Djo est la combinaison la plus prolifique cette saison.”
+
+“Iandj a réalisé au moins 5 récupérations lors de ses 5 derniers matchs.”
+
+VIDÉOS RÉCENTES
+
+FORME RÉCENTE
+
+Utiliser les données réelles de la plateforme.
+
+==================================================
+7. AJOUT AU CALENDRIER
+==================================================
+
+Pour chaque match futur, afficher clairement :
+
+“+ Ajouter à mon calendrier”
+
+Proposer :
+
+- Google Calendar
+- Apple Calendar
+- Outlook
+- fichier .ics
+
+Utiliser automatiquement :
+
+Titre :
+Foot à 5 — Match #XX
+
+Date
+Heure
+Durée
+Lieu
+Lien vers la page du match
+
+Description éventuelle :
+
+“Pense à arriver 10 minutes avant.”
+
+L’administrateur ne doit entrer date / heure / lieu qu’une seule fois.
+
+==================================================
+8. JOUEURS
+==================================================
+
+Créer une page listant les joueurs.
+
+PAS DE POSTES.
+
+Je ne veux PAS de notion :
+
+- attaquant
+- milieu
+- défenseur
+- BU
+- MDC
+- DD
+etc.
+
+Les rôles sont trop fluides pour notre football à 5.
+
+Ne pas afficher non plus de rang global du joueur du type :
+
+#1
+#2
+#3
+
+Les classements existent dans les pages statistiques, mais pas de “rang global” dans le header du profil.
+
+==================================================
+9. PROFIL JOUEUR
+==================================================
+
+Créer des profils inspirés de la structure FotMob.
+
+Header :
+
+- photo
+- prénom / pseudo
+- ELO
+- rating moyen
+- matchs
+- buts
+- assists
+- G+A
+
+Sélecteur :
+
+SAISON 2026/27 ▼
+
+Navigation :
+
+APERÇU
+MATCHS
+STATS
+PROFIL
+
+==================================================
+10. APERÇU JOUEUR
+==================================================
+
+Afficher :
+
+- résumé saison
+- forme récente
+- radar
+- derniers matchs
+- facts
+- records
+- meilleures associations
+- évolution ELO
+- palmarès
+
+==================================================
+11. HISTORIQUE DES MATCHS DU JOUEUR
+==================================================
+
+Afficher une liste type FotMob.
+
+Pour chaque match :
+
+- date
+- score
+- victoire / défaite
+- buts
+- assists
+- rating
+
+Chaque ligne est cliquable.
+
+Filtres :
+
+- saison
+- tous
+- 5 derniers
+- 10 derniers
+
+==================================================
+12. STATISTIQUES JOUEUR
+==================================================
+
+Créer les catégories suivantes.
+
+TIR
+
+- Buts
+- Buts attendus (xG)
+- xG cadrés / xGOT
+- xG hors penalties
+- Tirs
+- Tirs cadrés
+
+PASSE
+
+- Passes décisives
+- Passes décisives attendues (xA)
+- Passes réussies
+- Passes réussies %
+- Passes longues précises
+- Passes longues précises %
+- Occasions créées
+- Centres réussis
+- Centres réussis %
+
+POSSESSION
+
+- Dribbles réussis
+- Dribbles réussis %
+- Duels remportés
+- Duels remportés %
+- Duels aériens remportés
+- Duels aériens remportés %
+- Touches
+- Touches dans la surface adverse
+- Ballons perdus
+- Fautes subies
+
+DÉFENSE
+
+- Actions défensives
+- Tacles
+- Interceptions
+- Tirs bloqués
+- Fautes
+- Récupérations
+- Possession remportée dans le dernier tiers
+- Dribbles subis
+- Dégagements
+- Matchs sans encaisser / clean sheets
+- Buts encaissés lorsque le joueur est sur le terrain
+- xG concédés lorsque le joueur est sur le terrain
+
+DISCIPLINE
+
+- Cartons jaunes
+- Cartons rouges
+
+==================================================
+13. CALCUL AUTOMATIQUE DES POURCENTAGES
+==================================================
+
+Ne jamais saisir manuellement un pourcentage si les données sources existent.
+
+Stocker les valeurs brutes :
+
+passes réussies
+passes tentées
+
+puis calculer :
+
+passes réussies %
+
+Même principe pour :
+
+- passes longues
+- centres
+- dribbles
+- duels
+- duels aériens
+- tirs cadrés
+
+==================================================
+14. EXPLICATION DES STATISTIQUES
+==================================================
+
+Ajouter ⓘ sur les statistiques nécessitant une explication.
+
+Desktop :
+tooltip / popover.
+
+Mobile :
+bottom sheet / modal.
+
+Expliquer concrètement :
+
+- ce que mesure la stat
+- comment l’interpréter
+- un exemple lorsque nécessaire
+
+Créer également :
+
+COMPRENDRE LES STATS
+
+avec un glossaire complet.
+
+==================================================
+15. RADAR JOUEUR
+==================================================
+
+Créer un radar à 6 axes :
+
+FINITION
+CRÉATION
+PASSE
+PERCUSSION
+DUELS
+DÉFENSE
+
+Scores calculés automatiquement.
+
+Pas de note arbitraire.
+
+Utiliser les statistiques réelles et une normalisation par rapport aux autres joueurs possédant suffisamment de données.
+
+FINITION :
+- buts
+- xG
+- buts - xG
+- tirs cadrés %
+- buts / tir
+
+CRÉATION :
+- assists
+- xA
+- occasions créées
+- passes clés
+
+PASSE :
+- passes réussies %
+- passes réussies / match
+- passes longues %
+- centres %
+
+PERCUSSION :
+- dribbles réussis
+- dribbles %
+- touches surface adverse
+- fautes subies
+
+DUELS :
+- duels gagnés
+- duels %
+- duels aériens %
+- dribbles subis en négatif
+
+DÉFENSE :
+- tacles
+- interceptions
+- récupérations
+- blocs
+- récupérations dernier tiers
+- dégagements
+
+Le radar existe :
+
+SUR UNE FEUILLE DE MATCH
+→ performance du match
+
+SUR LE PROFIL
+→ période sélectionnée
+
+Filtres :
+
+SAISON
+5 DERNIERS
+10 DERNIERS
+CARRIÈRE
+
+==================================================
+16. EXPLICATION DU RADAR
+==================================================
+
+Ne jamais afficher uniquement :
+
+DÉFENSE 86
+
+Afficher également une interprétation :
+
+“Très forte activité défensive.”
+
+Puis les statistiques principales expliquant le score.
+
+==================================================
+17. MATCHS
+==================================================
+
+Organiser les matchs par saison.
+
+Chaque match possède une feuille détaillée.
+
+==================================================
+18. FEUILLE DE MATCH TYPE FOTMOB
+==================================================
+
+Navigation :
+
+RÉSUMÉ
+COMPOSITION
+STATS
+VIDÉO
+
+Optionnel :
+
+TIMELINE
+
+Header :
+
+SAISON
+MATCH #
+DATE
+
+TEAM NOIR
+10 – 7
+TEAM BLANC
+
+TERMINÉ
+
+MVP :
+Djo — 9,1
+
+==================================================
+19. COMPOSITION
+==================================================
+
+Afficher les équipes sur un terrain de football à 5.
+
+PAS DE POSTES OBLIGATOIRES.
+
+Afficher :
+
+- avatar
+- pseudo
+- rating
+
+Un clic sur un joueur ouvre ses stats du match.
+
+==================================================
+20. PERFORMANCE JOUEUR SUR UN MATCH
+==================================================
+
+Afficher :
+
+- rating
+- buts
+- assists
+- radar du match
+- statistiques détaillées
+
+Puis :
+
+Tir
+Passe
+Possession
+Défense
+Discipline
+
+==================================================
+21. STATS DU MATCH
+==================================================
+
+Comparer les équipes.
+
+Exemple :
+
+TEAM NOIR       TEAM BLANC
+
+10    BUTS          7
+23    TIRS         18
+16 TIRS CADRÉS     11
+31 RÉCUPÉRATIONS   27
+11 INTERCEPTIONS    8
+
+Calculer les valeurs depuis les données joueurs lorsque possible.
+
+==================================================
+22. VIDÉO YOUTUBE
+==================================================
+
+Entrer simplement l’URL YouTube depuis l’administration.
+
+Afficher la vidéo sur la feuille du match.
+
+Si timestamps disponibles :
+
+02:14 — But Djo
+05:32 — But Xan
+09:46 — But Steven
+
+Rendre les timestamps cliquables lorsque possible.
+
+==================================================
+23. SYSTÈME D’ÉVÉNEMENTS
+==================================================
+
+Prévoir notamment :
+
+GOAL
+ASSIST
+SHOT
+SHOT_ON_TARGET
+SHOT_BLOCKED
+PASS_ATTEMPT
+PASS_COMPLETED
+LONG_PASS_ATTEMPT
+LONG_PASS_COMPLETED
+CROSS_ATTEMPT
+CROSS_COMPLETED
+KEY_PASS
+TOUCH
+TOUCH_OPPOSITION_BOX
+DRIBBLE_ATTEMPT
+DRIBBLE_COMPLETED
+DUEL
+DUEL_WON
+AERIAL_DUEL
+AERIAL_DUEL_WON
+TACKLE
+INTERCEPTION
+RECOVERY
+CLEARANCE
+BLOCK
+POSSESSION_WON_FINAL_THIRD
+TURNOVER
+FOUL_COMMITTED
+FOUL_WON
+YELLOW_CARD
+RED_CARD
+
+Chaque événement doit pouvoir contenir :
+
+match_id
+player_id
+team_id
+event_type
+timestamp
+related_player_id
+metadata
+
+==================================================
+24. ANALYSE VIDÉO RAPIDE
+==================================================
+
+Créer :
+
+ANALYSER LE MATCH
+
+Vidéo YouTube visible.
+
+Sélection joueur.
+
+Boutons rapides :
+
+BUT
+ASSIST
+TIR
+TIR CADRÉ
+PASSE CLÉ
+DRIBBLE
+DUEL
+RÉCUPÉRATION
+INTERCEPTION
+PERTE
+FAUTE
+
+Enregistrer automatiquement le timestamp.
+
+Prévoir des raccourcis clavier.
+
+==================================================
+25. TROIS NIVEAUX DE STATISTIQUES
+==================================================
+
+NIVEAU 1
+
+- score
+- buts
+- assists
+- MVP
+
+NIVEAU 2
+
+- tirs
+- tirs cadrés
+- dribbles
+- interceptions
+- récupérations
+- duels
+- pertes
+- passes clés
+- fautes
+
+NIVEAU 3
+
+- toutes les passes
+- touches
+- zones
+- xG
+- xA
+- xGOT
+- statistiques avancées
+
+Un match doit fonctionner même avec uniquement le niveau 1.
+
+==================================================
+26. xG / xA / xGOT
+==================================================
+
+Prévoir l’architecture.
+
+Ne pas inventer de faux modèles.
+
+Pour xG :
+
+- position X/Y
+- distance
+- angle
+- partie du corps
+- situation
+- penalty ou non
+
+Idéalement sélectionner la position du tir sur un mini-terrain.
+
+Pour xA :
+
+relier passe
+→ tir
+→ xG
+
+Pour xGOT :
+
+ne pas simplement utiliser le xG des tirs cadrés.
+
+Si la donnée n’est pas suffisamment fiable :
+
+ne pas l’afficher.
+
+==================================================
+27. STATS PAR SAISON TYPE FOTMOB
+==================================================
+
+Créer :
+
+STATS — SAISON 2026/27
+
+Navigation :
+
+GÉNÉRAL
+TIR
+PASSE
+POSSESSION
+DÉFENSE
+DISCIPLINE
+DUOS
+
+Filtres :
+
+TOTAL
+PAR MATCH
+
+TOUS
+5 DERNIERS
+10 DERNIERS
+
+==================================================
+28. CLASSEMENTS
+==================================================
+
+GÉNÉRAL :
+
+- rating moyen
+- MVP
+- victoires
+- taux de victoire
+- ELO
+- G+A
+- matchs
+
+TIR :
+
+- buts
+- buts / match
+- xG
+- buts - xG
+- xGOT
+- tirs
+- tirs cadrés
+- conversion
+
+PASSE :
+
+- assists
+- xA
+- occasions créées
+- passes clés
+- passes %
+- passes longues %
+- centres %
+
+POSSESSION :
+
+- dribbles
+- dribbles %
+- duels
+- duels %
+- touches
+- touches surface
+- pertes
+- fautes subies
+
+DÉFENSE :
+
+- actions défensives
+- tacles
+- interceptions
+- récupérations
+- récupérations hautes
+- blocs
+- dégagements
+- clean sheets
+
+==================================================
+29. DESIGN DES CLASSEMENTS
+==================================================
+
+Ne pas créer un énorme tableau Excel horizontal.
+
+Utiliser des cartes compactes façon FotMob.
+
+Exemple :
+
+BUTS
+
+[PHOTO]
+
+DJO
+
+18
+
+xG : 14,7
+
+2. Xan — 14
+3. Steven — 12
+4. Ulysse — 8
+5. Iandj — 7
+
+Voir tout →
+
+==================================================
+30. FACTS AUTOMATIQUES
+==================================================
+
+Créer un moteur d’insights.
+
+FACTS MATCH :
+
+- meilleur buteur
+- plus d’occasions créées
+- plus de tirs
+- plus de récupérations
+- plus d’interceptions
+- plus de duels
+- plus de dribbles
+- performances remarquables
+
+FACTS PROFIL :
+
+- leader d’une statistique
+- série
+- record
+- forme
+- évolution
+
+FACTS DUOS :
+
+- victoires ensemble
+- taux de victoire
+- assists entre deux joueurs
+- buts combinés
+- matchs ensemble
+
+==================================================
+31. FIABILITÉ DES FACTS
+==================================================
+
+Utiliser des seuils minimum.
+
+Exemples :
+
+duos
+→ 5 matchs minimum
+
+dribbles %
+→ 10 tentatives
+
+duels %
+→ 10 duels
+
+passes %
+→ 30 passes
+
+rating moyen
+→ 5 matchs
+
+Ces seuils doivent être configurables.
+
+==================================================
+32. INTERESTINGNESS SCORE
+==================================================
+
+Attribuer un score interne aux facts selon :
+
+- record
+- rareté
+- classement
+- série
+- écart à la moyenne
+- performance exceptionnelle
+
+Afficher les facts les plus intéressants.
+
+==================================================
+33. RECORDS PERSONNELS
+==================================================
+
+Afficher :
+
+- plus de buts sur un match
+- plus d’assists
+- meilleur rating
+- plus de récupérations
+- plus d’occasions créées
+- plus de dribbles
+
+Chaque record pointe vers le match correspondant.
+
+==================================================
+34. DUOS
+==================================================
+
+Créer notamment :
+
+PLUS DE VICTOIRES ENSEMBLE
+
+MEILLEUR TAUX DE VICTOIRE
+
+PLUS DE BUTS COMBINÉS
+
+PLUS DE MATCHS ENSEMBLE
+
+==================================================
+35. DRAFT
+==================================================
+
+Créer trois modes.
+
+⚖️ ÉQUILIBRÉ
+
+👑 CAPITAINES
+
+🎴 PACK DRAFT
+
+==================================================
+36. DRAFT ÉQUILIBRÉ
+==================================================
+
+Créer deux équipes aussi équilibrées que possible.
+
+Ne PAS utiliser les postes.
+
+Utiliser :
+
+- niveau général
+- finition
+- création
+- passe
+- percussion
+- duels
+- défense
+- ELO si pertinent
+- forme récente si pertinente
+
+Afficher la puissance estimée.
+
+Permettre :
+
+- relancer
+- verrouiller
+- déplacer
+- échanger
+
+==================================================
+37. DRAFT CAPITAINES
+==================================================
+
+Deux capitaines.
+
+Choix manuel ou automatique.
+
+Utiliser un draft serpent :
+
+A
+B
+B
+A
+
+etc.
+
+Prévoir :
+
+MANUEL
+
+et éventuellement :
+
+ASSISTÉ
+
+Créer une animation simple mais fun.
+
+==================================================
+38. PACK DRAFT
+==================================================
+
+Cartes cachées.
+
+Reveal progressif.
+
+Créer une impression de hasard.
+
+Mais utiliser derrière un random pondéré pour conserver des équipes raisonnablement équilibrées.
+
+Exemple :
+
+écart maximal de puissance ≈ 5 %
+
+==================================================
+39. ELO
+==================================================
+
+Créer un système ELO basé principalement sur :
+
+- victoire
+- défaite
+- puissance estimée des équipes
+
+Ne pas favoriser artificiellement les buteurs.
+
+Afficher :
+
+- ELO
+- évolution
+- meilleur ELO historique
+- graphique
+
+==================================================
+40. JOUEUR DE LA SAISON
+==================================================
+
+À la fin de la saison :
+
+JOUEUR DE LA SAISON
+
+Prendre en compte :
+
+- rating
+- régularité
+- MVP
+- impact offensif
+- impact défensif
+- résultats
+- nombre de matchs
+
+L’admin confirme le gagnant final.
+
+Éligibilité configurable.
+
+Exemple :
+
+minimum 30 % des matchs de la saison.
+
+==================================================
+41. RÉCOMPENSE DU JOUEUR DE LA SAISON
+==================================================
+
+Le joueur de la saison gagne une graille de son choix.
+
+Tous les joueurs de la saison participent.
+
+Participation par défaut :
+
+1 € par joueur.
+
+Exemple :
+
+16 joueurs
+→ cagnotte = 16 €
+
+Afficher :
+
+🏆 JOUEUR DE LA SAISON
+
+DJO
+
+Rating : 8,21
+18 buts
+9 assists
+5 MVP
+
+RÉCOMPENSE
+
+16 € de graille
+
+16 joueurs × 1 €
+
+Le montant par joueur doit être configurable.
+
+==================================================
+42. PALMARÈS
+==================================================
+
+Afficher sur le profil :
+
+🏆 Joueur de la saison 2026/27
+
+Puis :
+
+🏆 ×2 Joueur de la saison
+
+si plusieurs titres.
+
+==================================================
+43. BACKEND
+==================================================
+
+Prévoir au minimum :
+
+Players
+Seasons
+Matches
+Teams
+MatchPlayers
+MatchPlayerStats
+MatchEvents
+PlayerAttributes
+EloHistory
+PlayerAwards
+SeasonAwards
+Videos
+
+==================================================
+44. SOURCE UNIQUE DE VÉRITÉ
+==================================================
+
+MatchPlayerStats doit être la source centrale des performances.
+
+Architecture :
+
+Match
+→ MatchPlayerStats
+→ agrégation saison
+→ profil
+→ classement
+→ facts
+→ radar
+→ records
+
+Ne pas stocker manuellement plusieurs copies d’une même statistique.
+
+==================================================
+45. EXCEL / IMPORT / EXPORT
+==================================================
+
+La base SQL reste la source principale.
+
+Excel sert uniquement pour :
+
+- import
+- export
+- backup
+- analyse
+
+Prévoir :
+
+PLAYERS
+SEASONS
+MATCHES
+MATCH_STATS
+PLAYER_ATTRIBUTES
+ELO_HISTORY
+
+==================================================
+46. UX MOBILE
+==================================================
+
+Optimiser particulièrement :
+
+- prochain match
+- calendrier
+- participants
+- draft
+- score
+- buts
+- assists
+- événements
+- stats
+- feuille du match
+
+Limiter au maximum le nombre de clics.
+
+==================================================
+47. DONNÉES MANQUANTES
+==================================================
+
+Différencier :
+
+0 réel
+
+et
+
+statistique indisponible.
+
+Exemple :
+
+Si aucun xG n’a été calculé :
+
+ne PAS afficher :
+
+xG : 0
+
+Afficher :
+
+—
+
+ou masquer la statistique.
+
+==================================================
+48. MÉTHODE DE TRAVAIL
+==================================================
+
+Avant de coder :
+
+1. Inspecte tous les fichiers fournis.
+2. Analyse le moodboard.
+3. Analyse le logo.
+4. Analyse la palette.
+5. Définis le design system selon la règle 60/30/10.
+6. Analyse les fonctionnalités.
+7. Définis l’architecture des pages.
+8. Définis le modèle de données.
+9. Définis les relations.
+10. Identifie les calculs dérivés.
+11. Sépare MVP et fonctionnalités avancées.
+
+Ensuite :
+
+PASSE À L’IMPLÉMENTATION.
+
+Ne passe pas tout le temps disponible à produire un document de stratégie.
+
+Je veux un produit fonctionnel.
+
+==================================================
+49. PRIORITÉS D’IMPLÉMENTATION
+==================================================
+
+PRIORITÉ 1
+
+- architecture
+- database
+- admin auth
+- joueurs
+- saisons
+- matchs
+
+PRIORITÉ 2
+
+- MatchPlayerStats
+- profils
+- feuilles de match
+- stats saison
+
+PRIORITÉ 3
+
+- administration
+- draft
+- calendrier
+- YouTube
+
+PRIORITÉ 4
+
+- ELO
+- radars
+- facts
+- records
+- duos
+
+PRIORITÉ 5
+
+- analyse vidéo avancée
+- xG
+- xA
+- xGOT
+
+==================================================
+50. DONNÉES DE DÉMONSTRATION
+==================================================
+
+Créer des données fictives clairement identifiées comme DEMO pour pouvoir tester :
+
+- joueurs
+- saison
+- matchs
+- ratings
+- buts
+- assists
+- stats
+- ELO
+- facts
+- duos
+
+==================================================
+51. TESTS OBLIGATOIRES
+==================================================
+
+Tester le parcours suivant :
+
+1. Connexion admin.
+2. Ajouter un joueur.
+3. Profil automatiquement créé.
+4. Créer une saison.
+5. Créer un match.
+6. Date / heure / lieu.
+7. Participants.
+8. Choisir un draft.
+9. Générer les équipes.
+10. Valider.
+11. Match visible sur la home.
+12. Bouton calendrier fonctionnel.
+13. Entrer résultat.
+14. Ajouter buts / assists.
+15. Profils mis à jour.
+16. Stats saison mises à jour.
+17. Classements mis à jour.
+18. Facts mis à jour.
+19. ELO recalculé.
+20. Modifier une statistique.
+21. Toutes les dépendances sont corrigées.
+22. Ajouter YouTube.
+23. Vidéo visible.
+24. Créer une nouvelle saison sans toucher au code.
+
+==================================================
+52. CRITÈRES DE RÉUSSITE
+==================================================
+
+Je veux retrouver :
+
+- le plaisir de consultation de FotMob
+- le côté fun d’un jeu de football
+- notre identité graphique
+- une forte dominante noire
+- des textes blancs très lisibles
+- le vert utilisé comme accent fort
+- une administration simple
+- beaucoup de statistiques
+- presque aucune double saisie
+- un historique qui devient plus intéressant au fil du temps
+
+La plateforme doit raconter l’histoire de notre groupe grâce aux données.
+
+Elle ne doit pas simplement stocker des chiffres.
+
+==================================================
+53. CONSIGNE FINALE
+==================================================
+
+Ne me livre pas seulement :
+
+- des wireframes
+- une maquette statique
+- une homepage
+- une démo front sans backend
+
+Construis réellement l’application.
+
+Lorsque des détails mineurs ne sont pas définis :
+
+prends une décision cohérente avec :
+
+- le moodboard
+- le logo
+- la palette
+- le ratio 60 % noir / 30 % blanc / 10 % vert
+- l’univers football
+- la logique FotMob
+
+Ne me demande une clarification que si elle bloque réellement l’implémentation.
+
+Réutilise les composants.
+
+Évite la duplication.
+
+Garde une architecture propre.
+
+Vérifie visuellement le résultat.
+
+Teste réellement les fonctionnalités importantes.
+
+À la fin, fournis un résumé clair de :
+
+- ce qui a été développé
+- architecture utilisée
+- modèle de données
+- fonctionnalités opérationnelles
+- fonctionnalités avancées préparées mais non activées
+- limites techniques restantes
+- instructions pour lancer / déployer le projet

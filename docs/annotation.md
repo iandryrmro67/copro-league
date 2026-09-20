@@ -1,0 +1,15 @@
+# Match annotation
+
+The existing `match_events` table remains the source of truth. New events use `metadata.schemaVersion=2` with sequenceId, outcome, tags, opponentPlayerId, linkedEventId, position, endPosition, scene and createdAt/updatedAt. `relatedPlayerId` remains the teammate relation. No SQL migration or replacement of historical events is required.
+
+`lib/actions.ts` defines the thirteen actions and their contributions. `lib/events.ts` projects both historical and new actions. Tracked families remain tracked after deletions so that removed contributions become zero. A linked goal and assist pass count one assist; a blocked shot and linked block count one defender block. The interception/recovery rule and pitch dimensions are centralized in `annotationRules`.
+
+Scene coordinates use a stable A→B display. Recorded event coordinates are rotated for team B into its own-goal→opponent-goal frame. Surface approximation is x >=85 and y25..75 on a 40×20m pitch. No coordinates are invented for historical Excel events.
+
+YouTube's official iframe API cannot remove age, privacy or embedding restrictions. The UI explains player errors and links to the normal YouTube watch page. Videos must be playable by YouTube in an embed for synchronized playback there. Browser-local File/object URLs provide synchronized playback without uploading (no application size limit, subject to browser/codec/device limits). Object URLs are never saved in the database; selecting the file again is required after a reload. Shared MP4/MOV/WebM uploads use R2, a 90MiB limit, container signatures and range reads. No transcoder is deployed; MOV support depends on browser codecs.
+
+Validation in this change: 32 unit/regression tests, 2 video signature/range tests, 21 authenticated HTTP checks. Browser checks covered a 120:18 annotation, scene persistence, pass receiver selection from the field, undo/redo, MP4 upload progress, playback, seeking, automatic timestamps, match persistence, browser-local playback with blob URL and timeline seek, and mobile width390 without page overflow. YouTube API load/commands were exercised; private/age-restricted playback is governed by YouTube and cannot be guaranteed by the application.
+
+Five-a-side cleanup: boxShots, npxg, yellowCards, redCards and cleanSheets are retired. Existing persisted values are filtered on reads and backup imports; card events are removed and historical carded fouls retain only the foul. Ratings no longer apply card penalties and awards no longer use clean sheets. No destructive SQL migration is needed.
+
+Secondary Assists: new `secondaryAssists` statistic, derived from the two latest successful passes before an assisted goal in one explicitly named continuous sequence. Losses, opponent possession, restarts, unknown timestamps and discontinuous receivers prevent credit. Only the direct passer to the assister is credited; older involvement is excluded. Totals and averages use the existing observed-match aggregation. Historical matches lacking passing evidence remain unknown. The JSON stat store needs no SQL migration.

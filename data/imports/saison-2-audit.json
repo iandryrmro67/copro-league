@@ -1,0 +1,255 @@
+{
+  "source": "Five classement saison 2.xlsx",
+  "sha256": "bd9d07a338723a45f35543424b73659ef2ef29e737f15c3501f31b1804e75274",
+  "players": 22,
+  "matches": 6,
+  "appearances": 60,
+  "goals": 271,
+  "assists": 184,
+  "aliases": {
+    "matisse": "mathis",
+    "iandry": "iandj"
+  },
+  "excluded": [
+    "match 7",
+    "match 8",
+    "match 9",
+    "match 10",
+    "match bonus"
+  ],
+  "summary": {
+    "Alexy": {
+      "matches": 0,
+      "wins": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    "Aro": {
+      "matches": 0,
+      "wins": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    "Clovis": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 0,
+      "assists": 6
+    },
+    "Coco": {
+      "matches": 4,
+      "wins": 1,
+      "goals": 17,
+      "assists": 11
+    },
+    "Djo": {
+      "matches": 5,
+      "wins": 4,
+      "goals": 36,
+      "assists": 14
+    },
+    "Dylan": {
+      "matches": 1,
+      "wins": 0,
+      "goals": 1,
+      "assists": 1
+    },
+    "Etienne": {
+      "matches": 1,
+      "wins": 0,
+      "goals": 2,
+      "assists": 0
+    },
+    "Felix": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 3,
+      "assists": 2
+    },
+    "Iandj": {
+      "matches": 5,
+      "wins": 3,
+      "goals": 11,
+      "assists": 12
+    },
+    "J2": {
+      "matches": 5,
+      "wins": 3,
+      "goals": 30,
+      "assists": 20
+    },
+    "Jerem": {
+      "matches": 3,
+      "wins": 1,
+      "goals": 2,
+      "assists": 8
+    },
+    "Luc": {
+      "matches": 5,
+      "wins": 3,
+      "goals": 8,
+      "assists": 27
+    },
+    "Mathis": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 5,
+      "assists": 3
+    },
+    "Mattia": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 5,
+      "assists": 0
+    },
+    "Paul": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 0,
+      "assists": 0
+    },
+    "Sacha": {
+      "matches": 2,
+      "wins": 0,
+      "goals": 5,
+      "assists": 2
+    },
+    "Sitraka": {
+      "matches": 5,
+      "wins": 2,
+      "goals": 30,
+      "assists": 14
+    },
+    "Steven": {
+      "matches": 2,
+      "wins": 2,
+      "goals": 12,
+      "assists": 17
+    },
+    "Tom": {
+      "matches": 5,
+      "wins": 1,
+      "goals": 12,
+      "assists": 10
+    },
+    "Ulysse": {
+      "matches": 5,
+      "wins": 1,
+      "goals": 28,
+      "assists": 17
+    },
+    "Victor": {
+      "matches": 1,
+      "wins": 1,
+      "goals": 13,
+      "assists": 4
+    },
+    "Xan": {
+      "matches": 6,
+      "wins": 3,
+      "goals": 51,
+      "assists": 16
+    }
+  },
+  "staleMatchCounters": [
+    {
+      "player": "Xan",
+      "cell": "STATS!F2",
+      "excel": 3,
+      "computed": 6
+    },
+    {
+      "player": "Djo",
+      "cell": "STATS!F3",
+      "excel": 3,
+      "computed": 5
+    },
+    {
+      "player": "Sitraka",
+      "cell": "STATS!F4",
+      "excel": 3,
+      "computed": 5
+    },
+    {
+      "player": "J2",
+      "cell": "STATS!F5",
+      "excel": 2,
+      "computed": 5
+    },
+    {
+      "player": "Ulysse",
+      "cell": "STATS!F6",
+      "excel": 2,
+      "computed": 5
+    },
+    {
+      "player": "Coco",
+      "cell": "STATS!F7",
+      "excel": 2,
+      "computed": 4
+    },
+    {
+      "player": "Luc",
+      "cell": "STATS!F8",
+      "excel": 3,
+      "computed": 5
+    },
+    {
+      "player": "Steven",
+      "cell": "STATS!F9",
+      "excel": 1,
+      "computed": 2
+    },
+    {
+      "player": "Iandj",
+      "cell": "STATS!F10",
+      "excel": 3,
+      "computed": 5
+    },
+    {
+      "player": "Tom",
+      "cell": "STATS!F11",
+      "excel": 2,
+      "computed": 5
+    },
+    {
+      "player": "Sacha",
+      "cell": "STATS!F12",
+      "excel": 1,
+      "computed": 2
+    },
+    {
+      "player": "Jerem",
+      "cell": "STATS!F18",
+      "excel": 0,
+      "computed": 3
+    },
+    {
+      "player": "Mathis",
+      "cells": "STATS!C20:D20",
+      "excel": [
+        0,
+        0
+      ],
+      "computed": [
+        5,
+        3
+      ],
+      "reason": "Alias Mathis/Matisse confirmé"
+    },
+    {
+      "player": "Mathis",
+      "cell": "STATS!F20",
+      "excel": 0,
+      "computed": 1
+    }
+  ],
+  "notes": [
+    "Les cellules au format date des timelines représentent des scores auto-convertis par Excel, pas des dates de match.",
+    "Les cellules CLASSEMENT!F2:H20 contiennent des erreurs #NAME?. Sources utilisées : tables A3:E13 de match 1 à match 6, réconciliées avec les timelines 1 à 3.",
+    "Le tableau VICTOIRES ne contient que les matchs 1 à 3. Les compteurs sont reconstruits depuis les six feuilles.",
+    "Mathis/Matisse fusionnés sur confirmation explicite du propriétaire. Iandry/Iandj rapprochés dans la timeline 1 et réconciliés exactement à la feuille de statistiques.",
+    "Les caractéristiques de draft ne sont pas fournies. Valeur neutre 50 uniquement pour estimation de draft, aucune fausse note de performance.",
+    "Le barème historique du classeur est 3 points par victoire + 5 points par tranche entière de 10 G+A. Les PTS mémorisés n’intègrent pas les victoires des matchs 4 à 6."
+  ]
+}

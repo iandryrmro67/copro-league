@@ -1,0 +1,2610 @@
+{
+  "players": [
+    {
+      "id": "s2-alexy",
+      "name": "Alexy",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-aro",
+      "name": "Aro",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-clovis",
+      "name": "Clovis",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-coco",
+      "name": "Coco",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-djo",
+      "name": "Djo",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-dylan",
+      "name": "Dylan",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-etienne",
+      "name": "Etienne",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-felix",
+      "name": "Felix",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-iandj",
+      "name": "Iandj",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-j2",
+      "name": "J2",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-jerem",
+      "name": "Jerem",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-luc",
+      "name": "Luc",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-mathis",
+      "name": "Mathis",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-mattia",
+      "name": "Mattia",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-paul",
+      "name": "Paul",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-sacha",
+      "name": "Sacha",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-sitraka",
+      "name": "Sitraka",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-steven",
+      "name": "Steven",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-tom",
+      "name": "Tom",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-ulysse",
+      "name": "Ulysse",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-victor",
+      "name": "Victor",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    },
+    {
+      "id": "s2-xan",
+      "name": "Xan",
+      "bio": "",
+      "photo": "",
+      "funFacts": "",
+      "archived": false,
+      "demo": false,
+      "attributes": {},
+      "version": 0
+    }
+  ],
+  "seasons": [
+    {
+      "id": "saison-2",
+      "name": "Saison 2",
+      "start": "",
+      "end": "",
+      "status": "active",
+      "demo": false,
+      "contribution": 1,
+      "minParticipation": 0.3,
+      "winnerId": null,
+      "version": 0
+    }
+  ],
+  "matches": [
+    {
+      "id": "s2-match-1",
+      "seasonId": "saison-2",
+      "number": 1,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 21,
+      "scoreB": 20,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-luc",
+          "team": "A",
+          "stats": {
+            "goals": 1,
+            "assists": 6
+          }
+        },
+        {
+          "playerId": "s2-xan",
+          "team": "A",
+          "stats": {
+            "goals": 6,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-felix",
+          "team": "A",
+          "stats": {
+            "goals": 3,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-iandj",
+          "team": "A",
+          "stats": {
+            "goals": 4,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "stats": {
+            "goals": 7,
+            "assists": 5
+          }
+        },
+        {
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "stats": {
+            "goals": 5,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-tom",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-djo",
+          "team": "B",
+          "stats": {
+            "goals": 8,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-coco",
+          "team": "B",
+          "stats": {
+            "goals": 4,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-sacha",
+          "team": "B",
+          "stats": {
+            "goals": 3,
+            "assists": 2
+          }
+        }
+      ],
+      "events": [
+        {
+          "id": "s2-m1-goal-1",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sacha",
+          "metadata": {
+            "sequence": 1,
+            "sourceSheet": "match 1",
+            "sourceRow": 2,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-2",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 2,
+            "sourceSheet": "match 1",
+            "sourceRow": 3,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-3",
+          "playerId": "s2-coco",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 3,
+            "sourceSheet": "match 1",
+            "sourceRow": 4,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-4",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 4,
+            "sourceSheet": "match 1",
+            "sourceRow": 5,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-5",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 5,
+            "sourceSheet": "match 1",
+            "sourceRow": 6,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-6",
+          "playerId": "s2-luc",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 6,
+            "sourceSheet": "match 1",
+            "sourceRow": 7,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-7",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 7,
+            "sourceSheet": "match 1",
+            "sourceRow": 8,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-8",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-coco",
+          "metadata": {
+            "sequence": 8,
+            "sourceSheet": "match 1",
+            "sourceRow": 9,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-9",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 9,
+            "sourceSheet": "match 1",
+            "sourceRow": 10,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-10",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 10,
+            "sourceSheet": "match 1",
+            "sourceRow": 11,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-11",
+          "playerId": "s2-coco",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 11,
+            "sourceSheet": "match 1",
+            "sourceRow": 12,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-12",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sacha",
+          "metadata": {
+            "sequence": 12,
+            "sourceSheet": "match 1",
+            "sourceRow": 13,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-13",
+          "playerId": "s2-coco",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 13,
+            "sourceSheet": "match 1",
+            "sourceRow": 14,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-14",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 14,
+            "sourceSheet": "match 1",
+            "sourceRow": 15,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-15",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 15,
+            "sourceSheet": "match 1",
+            "sourceRow": 16,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-16",
+          "playerId": "s2-sacha",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 16,
+            "sourceSheet": "match 1",
+            "sourceRow": 17,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-17",
+          "playerId": "s2-iandj",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-felix",
+          "metadata": {
+            "sequence": 17,
+            "sourceSheet": "match 1",
+            "sourceRow": 18,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-18",
+          "playerId": "s2-iandj",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 18,
+            "sourceSheet": "match 1",
+            "sourceRow": 19,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-19",
+          "playerId": "s2-iandj",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 19,
+            "sourceSheet": "match 1",
+            "sourceRow": 20,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-20",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 20,
+            "sourceSheet": "match 1",
+            "sourceRow": 21,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-21",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 21,
+            "sourceSheet": "match 1",
+            "sourceRow": 22,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-22",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-coco",
+          "metadata": {
+            "sequence": 22,
+            "sourceSheet": "match 1",
+            "sourceRow": 23,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-23",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-coco",
+          "metadata": {
+            "sequence": 23,
+            "sourceSheet": "match 1",
+            "sourceRow": 24,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-24",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-tom",
+          "metadata": {
+            "sequence": 24,
+            "sourceSheet": "match 1",
+            "sourceRow": 25,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-25",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 25,
+            "sourceSheet": "match 1",
+            "sourceRow": 26,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-26",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 26,
+            "sourceSheet": "match 1",
+            "sourceRow": 27,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-27",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-tom",
+          "metadata": {
+            "sequence": 27,
+            "sourceSheet": "match 1",
+            "sourceRow": 28,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-28",
+          "playerId": "s2-iandj",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-felix",
+          "metadata": {
+            "sequence": 28,
+            "sourceSheet": "match 1",
+            "sourceRow": 29,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-29",
+          "playerId": "s2-felix",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 29,
+            "sourceSheet": "match 1",
+            "sourceRow": 30,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-30",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 30,
+            "sourceSheet": "match 1",
+            "sourceRow": 31,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-31",
+          "playerId": "s2-felix",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 31,
+            "sourceSheet": "match 1",
+            "sourceRow": 32,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-32",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 32,
+            "sourceSheet": "match 1",
+            "sourceRow": 33,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-33",
+          "playerId": "s2-coco",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 33,
+            "sourceSheet": "match 1",
+            "sourceRow": 34,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-34",
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-iandj",
+          "metadata": {
+            "sequence": 34,
+            "sourceSheet": "match 1",
+            "sourceRow": 35,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-35",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 35,
+            "sourceSheet": "match 1",
+            "sourceRow": 36,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-36",
+          "playerId": "s2-sacha",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-coco",
+          "metadata": {
+            "sequence": 36,
+            "sourceSheet": "match 1",
+            "sourceRow": 37,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-37",
+          "playerId": "s2-sacha",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 37,
+            "sourceSheet": "match 1",
+            "sourceRow": 38,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-38",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 38,
+            "sourceSheet": "match 1",
+            "sourceRow": 39,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-39",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 39,
+            "sourceSheet": "match 1",
+            "sourceRow": 40,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-40",
+          "playerId": "s2-djo",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 40,
+            "sourceSheet": "match 1",
+            "sourceRow": 41,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m1-goal-41",
+          "playerId": "s2-felix",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 41,
+            "sourceSheet": "match 1",
+            "sourceRow": 42,
+            "timeUnknown": true
+          }
+        }
+      ],
+      "trackedKeys": [
+        "goals",
+        "assists"
+      ],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 1 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 21–20 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. Ordre des buts conservé, sans timestamps inventés. ",
+      "version": 0
+    },
+    {
+      "id": "s2-match-2",
+      "seasonId": "saison-2",
+      "number": 2,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 33,
+      "scoreB": 9,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-j2",
+          "team": "A",
+          "stats": {
+            "goals": 8,
+            "assists": 5
+          }
+        },
+        {
+          "playerId": "s2-xan",
+          "team": "A",
+          "stats": {
+            "goals": 12,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-djo",
+          "team": "A",
+          "stats": {
+            "goals": 9,
+            "assists": 5
+          }
+        },
+        {
+          "playerId": "s2-steven",
+          "team": "A",
+          "stats": {
+            "goals": 4,
+            "assists": 10
+          }
+        },
+        {
+          "playerId": "s2-paul",
+          "team": "A",
+          "stats": {
+            "goals": 0,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-tom",
+          "team": "B",
+          "stats": {
+            "goals": 2,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "stats": {
+            "goals": 5,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-iandj",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-etienne",
+          "team": "B",
+          "stats": {
+            "goals": 2,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-luc",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 1
+          }
+        }
+      ],
+      "events": [
+        {
+          "id": "s2-m2-goal-1",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 1,
+            "sourceSheet": "match 2",
+            "sourceRow": 2,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-2",
+          "playerId": "s2-etienne",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-tom",
+          "metadata": {
+            "sequence": 2,
+            "sourceSheet": "match 2",
+            "sourceRow": 3,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-3",
+          "playerId": "s2-tom",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 3,
+            "sourceSheet": "match 2",
+            "sourceRow": 4,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-4",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 4,
+            "sourceSheet": "match 2",
+            "sourceRow": 5,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-5",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 5,
+            "sourceSheet": "match 2",
+            "sourceRow": 6,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-6",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 6,
+            "sourceSheet": "match 2",
+            "sourceRow": 7,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-7",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 7,
+            "sourceSheet": "match 2",
+            "sourceRow": 8,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-8",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 8,
+            "sourceSheet": "match 2",
+            "sourceRow": 9,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-9",
+          "playerId": "s2-etienne",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 9,
+            "sourceSheet": "match 2",
+            "sourceRow": 10,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-10",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 10,
+            "sourceSheet": "match 2",
+            "sourceRow": 11,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-11",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 11,
+            "sourceSheet": "match 2",
+            "sourceRow": 12,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-12",
+          "playerId": "s2-steven",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 12,
+            "sourceSheet": "match 2",
+            "sourceRow": 13,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-13",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 13,
+            "sourceSheet": "match 2",
+            "sourceRow": 14,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-14",
+          "playerId": "s2-steven",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 14,
+            "sourceSheet": "match 2",
+            "sourceRow": 15,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-15",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 15,
+            "sourceSheet": "match 2",
+            "sourceRow": 16,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-16",
+          "playerId": "s2-steven",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 16,
+            "sourceSheet": "match 2",
+            "sourceRow": 17,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-17",
+          "playerId": "s2-tom",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 17,
+            "sourceSheet": "match 2",
+            "sourceRow": 18,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-18",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 18,
+            "sourceSheet": "match 2",
+            "sourceRow": 19,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-19",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 19,
+            "sourceSheet": "match 2",
+            "sourceRow": 20,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-20",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 20,
+            "sourceSheet": "match 2",
+            "sourceRow": 21,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-21",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-tom",
+          "metadata": {
+            "sequence": 21,
+            "sourceSheet": "match 2",
+            "sourceRow": 22,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-22",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 22,
+            "sourceSheet": "match 2",
+            "sourceRow": 23,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-23",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 23,
+            "sourceSheet": "match 2",
+            "sourceRow": 24,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-24",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 24,
+            "sourceSheet": "match 2",
+            "sourceRow": 25,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-25",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 25,
+            "sourceSheet": "match 2",
+            "sourceRow": 26,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-26",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 26,
+            "sourceSheet": "match 2",
+            "sourceRow": 27,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-27",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 27,
+            "sourceSheet": "match 2",
+            "sourceRow": 28,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-28",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 28,
+            "sourceSheet": "match 2",
+            "sourceRow": 29,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-29",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 29,
+            "sourceSheet": "match 2",
+            "sourceRow": 30,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-30",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 30,
+            "sourceSheet": "match 2",
+            "sourceRow": 31,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-31",
+          "playerId": "s2-steven",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 31,
+            "sourceSheet": "match 2",
+            "sourceRow": 32,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-32",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 32,
+            "sourceSheet": "match 2",
+            "sourceRow": 33,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-33",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 33,
+            "sourceSheet": "match 2",
+            "sourceRow": 34,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-34",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 34,
+            "sourceSheet": "match 2",
+            "sourceRow": 35,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-35",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-iandj",
+          "metadata": {
+            "sequence": 35,
+            "sourceSheet": "match 2",
+            "sourceRow": 36,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-36",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 36,
+            "sourceSheet": "match 2",
+            "sourceRow": 37,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-37",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 37,
+            "sourceSheet": "match 2",
+            "sourceRow": 38,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-38",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 38,
+            "sourceSheet": "match 2",
+            "sourceRow": 39,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-39",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 39,
+            "sourceSheet": "match 2",
+            "sourceRow": 40,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-40",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-steven",
+          "metadata": {
+            "sequence": 40,
+            "sourceSheet": "match 2",
+            "sourceRow": 41,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-41",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 41,
+            "sourceSheet": "match 2",
+            "sourceRow": 42,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m2-goal-42",
+          "playerId": "s2-j2",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 42,
+            "sourceSheet": "match 2",
+            "sourceRow": 43,
+            "timeUnknown": true
+          }
+        }
+      ],
+      "trackedKeys": [
+        "goals",
+        "assists"
+      ],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 2 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 33–9 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. Ordre des buts conservé, sans timestamps inventés. ",
+      "version": 0
+    },
+    {
+      "id": "s2-match-3",
+      "seasonId": "saison-2",
+      "number": 3,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 21,
+      "scoreB": 20,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-xan",
+          "team": "A",
+          "stats": {
+            "goals": 7,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-coco",
+          "team": "A",
+          "stats": {
+            "goals": 6,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-djo",
+          "team": "A",
+          "stats": {
+            "goals": 3,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-mattia",
+          "team": "A",
+          "stats": {
+            "goals": 5,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-luc",
+          "team": "A",
+          "stats": {
+            "goals": 0,
+            "assists": 7
+          }
+        },
+        {
+          "playerId": "s2-dylan",
+          "team": "B",
+          "stats": {
+            "goals": 1,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-j2",
+          "team": "B",
+          "stats": {
+            "goals": 6,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "stats": {
+            "goals": 6,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "stats": {
+            "goals": 6,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-iandj",
+          "team": "B",
+          "stats": {
+            "goals": 1,
+            "assists": 1
+          }
+        }
+      ],
+      "events": [
+        {
+          "id": "s2-m3-goal-1",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 1,
+            "sourceSheet": "match 3",
+            "sourceRow": 2,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-2",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 2,
+            "sourceSheet": "match 3",
+            "sourceRow": 3,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-3",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 3,
+            "sourceSheet": "match 3",
+            "sourceRow": 4,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-4",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 4,
+            "sourceSheet": "match 3",
+            "sourceRow": 5,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-5",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 5,
+            "sourceSheet": "match 3",
+            "sourceRow": 6,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-6",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 6,
+            "sourceSheet": "match 3",
+            "sourceRow": 7,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-7",
+          "playerId": "s2-dylan",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 7,
+            "sourceSheet": "match 3",
+            "sourceRow": 8,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-8",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 8,
+            "sourceSheet": "match 3",
+            "sourceRow": 9,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-9",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-dylan",
+          "metadata": {
+            "sequence": 9,
+            "sourceSheet": "match 3",
+            "sourceRow": 10,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-10",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 10,
+            "sourceSheet": "match 3",
+            "sourceRow": 11,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-11",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 11,
+            "sourceSheet": "match 3",
+            "sourceRow": 12,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-12",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-coco",
+          "metadata": {
+            "sequence": 12,
+            "sourceSheet": "match 3",
+            "sourceRow": 13,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-13",
+          "playerId": "s2-mattia",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 13,
+            "sourceSheet": "match 3",
+            "sourceRow": 14,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-14",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-sitraka",
+          "metadata": {
+            "sequence": 14,
+            "sourceSheet": "match 3",
+            "sourceRow": 15,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-15",
+          "playerId": "s2-mattia",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 15,
+            "sourceSheet": "match 3",
+            "sourceRow": 16,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-16",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 16,
+            "sourceSheet": "match 3",
+            "sourceRow": 17,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-17",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 17,
+            "sourceSheet": "match 3",
+            "sourceRow": 18,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-18",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 18,
+            "sourceSheet": "match 3",
+            "sourceRow": 19,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-19",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 19,
+            "sourceSheet": "match 3",
+            "sourceRow": 20,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-20",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 20,
+            "sourceSheet": "match 3",
+            "sourceRow": 21,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-21",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 21,
+            "sourceSheet": "match 3",
+            "sourceRow": 22,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-22",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 22,
+            "sourceSheet": "match 3",
+            "sourceRow": 23,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-23",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 23,
+            "sourceSheet": "match 3",
+            "sourceRow": 24,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-24",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 24,
+            "sourceSheet": "match 3",
+            "sourceRow": 25,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-25",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 25,
+            "sourceSheet": "match 3",
+            "sourceRow": 26,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-26",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 26,
+            "sourceSheet": "match 3",
+            "sourceRow": 27,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-27",
+          "playerId": "s2-mattia",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 27,
+            "sourceSheet": "match 3",
+            "sourceRow": 28,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-28",
+          "playerId": "s2-djo",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 28,
+            "sourceSheet": "match 3",
+            "sourceRow": 29,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-29",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 29,
+            "sourceSheet": "match 3",
+            "sourceRow": 30,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-30",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 30,
+            "sourceSheet": "match 3",
+            "sourceRow": 31,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-31",
+          "playerId": "s2-mattia",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 31,
+            "sourceSheet": "match 3",
+            "sourceRow": 32,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-32",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 32,
+            "sourceSheet": "match 3",
+            "sourceRow": 33,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-33",
+          "playerId": "s2-mattia",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-djo",
+          "metadata": {
+            "sequence": 33,
+            "sourceSheet": "match 3",
+            "sourceRow": 34,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-34",
+          "playerId": "s2-j2",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 34,
+            "sourceSheet": "match 3",
+            "sourceRow": 35,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-35",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 35,
+            "sourceSheet": "match 3",
+            "sourceRow": 36,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-36",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-j2",
+          "metadata": {
+            "sequence": 36,
+            "sourceSheet": "match 3",
+            "sourceRow": 37,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-37",
+          "playerId": "s2-coco",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-xan",
+          "metadata": {
+            "sequence": 37,
+            "sourceSheet": "match 3",
+            "sourceRow": 38,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-38",
+          "playerId": "s2-iandj",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-ulysse",
+          "metadata": {
+            "sequence": 38,
+            "sourceSheet": "match 3",
+            "sourceRow": 39,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-39",
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-iandj",
+          "metadata": {
+            "sequence": 39,
+            "sourceSheet": "match 3",
+            "sourceRow": 40,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-40",
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": null,
+          "metadata": {
+            "sequence": 40,
+            "sourceSheet": "match 3",
+            "sourceRow": 41,
+            "timeUnknown": true
+          }
+        },
+        {
+          "id": "s2-m3-goal-41",
+          "playerId": "s2-xan",
+          "team": "A",
+          "type": "GOAL",
+          "timestamp": null,
+          "relatedPlayerId": "s2-luc",
+          "metadata": {
+            "sequence": 41,
+            "sourceSheet": "match 3",
+            "sourceRow": 42,
+            "timeUnknown": true
+          }
+        }
+      ],
+      "trackedKeys": [
+        "goals",
+        "assists"
+      ],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 3 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 21–20 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. Ordre des buts conservé, sans timestamps inventés. ",
+      "version": 0
+    },
+    {
+      "id": "s2-match-4",
+      "seasonId": "saison-2",
+      "number": 4,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 29,
+      "scoreB": 14,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-luc",
+          "team": "A",
+          "stats": {
+            "goals": 7,
+            "assists": 6
+          }
+        },
+        {
+          "playerId": "s2-j2",
+          "team": "A",
+          "stats": {
+            "goals": 2,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-djo",
+          "team": "A",
+          "stats": {
+            "goals": 5,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-victor",
+          "team": "A",
+          "stats": {
+            "goals": 13,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-iandj",
+          "team": "A",
+          "stats": {
+            "goals": 2,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-xan",
+          "team": "B",
+          "stats": {
+            "goals": 3,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-tom",
+          "team": "B",
+          "stats": {
+            "goals": 4,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "stats": {
+            "goals": 5,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-jerem",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-sacha",
+          "team": "B",
+          "stats": {
+            "goals": 2,
+            "assists": 0
+          }
+        }
+      ],
+      "events": [],
+      "trackedKeys": [],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 4 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 29–14 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. ",
+      "version": 0
+    },
+    {
+      "id": "s2-match-5",
+      "seasonId": "saison-2",
+      "number": 5,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 34,
+      "scoreB": 20,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-sitraka",
+          "team": "A",
+          "stats": {
+            "goals": 7,
+            "assists": 5
+          }
+        },
+        {
+          "playerId": "s2-tom",
+          "team": "A",
+          "stats": {
+            "goals": 5,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-djo",
+          "team": "A",
+          "stats": {
+            "goals": 11,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-iandj",
+          "team": "A",
+          "stats": {
+            "goals": 4,
+            "assists": 7
+          }
+        },
+        {
+          "playerId": "s2-ulysse",
+          "team": "A",
+          "stats": {
+            "goals": 7,
+            "assists": 5
+          }
+        },
+        {
+          "playerId": "s2-xan",
+          "team": "B",
+          "stats": {
+            "goals": 14,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-coco",
+          "team": "B",
+          "stats": {
+            "goals": 3,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-jerem",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 2
+          }
+        },
+        {
+          "playerId": "s2-luc",
+          "team": "B",
+          "stats": {
+            "goals": 0,
+            "assists": 7
+          }
+        },
+        {
+          "playerId": "s2-j2",
+          "team": "B",
+          "stats": {
+            "goals": 3,
+            "assists": 6
+          }
+        }
+      ],
+      "events": [],
+      "trackedKeys": [],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 5 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 34–20 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. ",
+      "version": 0
+    },
+    {
+      "id": "s2-match-6",
+      "seasonId": "saison-2",
+      "number": 6,
+      "date": "",
+      "duration": 0,
+      "location": "",
+      "status": "finished",
+      "scoreA": 26,
+      "scoreB": 24,
+      "mvpId": null,
+      "level": 1,
+      "video": "",
+      "participants": [
+        {
+          "playerId": "s2-j2",
+          "team": "A",
+          "stats": {
+            "goals": 11,
+            "assists": 1
+          }
+        },
+        {
+          "playerId": "s2-clovis",
+          "team": "A",
+          "stats": {
+            "goals": 0,
+            "assists": 6
+          }
+        },
+        {
+          "playerId": "s2-mathis",
+          "team": "A",
+          "stats": {
+            "goals": 5,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-jerem",
+          "team": "A",
+          "stats": {
+            "goals": 2,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-steven",
+          "team": "A",
+          "stats": {
+            "goals": 8,
+            "assists": 7
+          }
+        },
+        {
+          "playerId": "s2-sitraka",
+          "team": "B",
+          "stats": {
+            "goals": 5,
+            "assists": 0
+          }
+        },
+        {
+          "playerId": "s2-ulysse",
+          "team": "B",
+          "stats": {
+            "goals": 5,
+            "assists": 4
+          }
+        },
+        {
+          "playerId": "s2-xan",
+          "team": "B",
+          "stats": {
+            "goals": 9,
+            "assists": 6
+          }
+        },
+        {
+          "playerId": "s2-tom",
+          "team": "B",
+          "stats": {
+            "goals": 1,
+            "assists": 3
+          }
+        },
+        {
+          "playerId": "s2-coco",
+          "team": "B",
+          "stats": {
+            "goals": 4,
+            "assists": 3
+          }
+        }
+      ],
+      "events": [],
+      "trackedKeys": [],
+      "notes": "Import « Five classement saison 2.xlsx », feuille « match 6 », A3:E13. Team Noir correspond au groupe supérieur du tableau ; les couleurs historiques ne sont pas renseignées. Score 26–24 obtenu par somme des buts individuels, cohérent avec les victoires indiquées. Date, horaire, durée, lieu précis, MVP et ratings non renseignés. ",
+      "version": 0
+    }
+  ]
+}

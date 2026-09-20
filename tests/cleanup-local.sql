@@ -1,0 +1,14 @@
+DELETE FROM award_votes WHERE award_id LIKE 'qa-%';
+DELETE FROM award_definitions WHERE id LIKE 'qa-%';
+DELETE FROM award_identities WHERE player_id LIKE 'qa-%';
+DELETE FROM match_events WHERE match_id LIKE 'qa-%';
+DELETE FROM match_player_stats WHERE match_id LIKE 'qa-%';
+DELETE FROM match_players WHERE match_id LIKE 'qa-%';
+DELETE FROM teams WHERE match_id LIKE 'qa-%';
+DELETE FROM videos WHERE match_id LIKE 'qa-%';
+DELETE FROM matches WHERE id LIKE 'qa-%';
+DELETE FROM season_awards WHERE season_id LIKE 'qa-%';
+DELETE FROM recognition_seasons WHERE season_id LIKE 'qa-%';
+DELETE FROM seasons WHERE id LIKE 'qa-%';
+DELETE FROM player_attributes WHERE player_id LIKE 'qa-%';
+DELETE FROM players WHERE id LIKE 'qa-%';

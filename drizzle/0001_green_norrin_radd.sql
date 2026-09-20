@@ -1,0 +1,1 @@
+ALTER TABLE `matches` ADD `notes` text DEFAULT '' NOT NULL;
