@@ -50,43 +50,31 @@ Les champs xG/xA/xGOT et métadonnées de tirs sont prêts, mais aucun modèle p
 
 Les radars incomplets montrent les axes disponibles, sans inventer de notes. Les attributs absents utilisent une valeur neutre pour équilibrer le draft uniquement. Le moteur de facts possède une sélection par intérêt et seuils, mais ne constitue pas un modèle statistique de rareté entraîné.
 
-L’import Excel fourni est spécifique à la structure de la saison 2. L’import générique accepte le format JSON de sauvegarde, pas tous les classeurs XLSX. Une restauration importe les enregistrements successivement : en cas d’échec, une partie peut avoir été enregistrée. Les sauvegardes JSON conservent les références des photos, pas les objets R2 ; sauvegardez R2 séparément pour une restauration complète sur un autre hébergement.
+L’import Excel fourni est spécifique à la structure de la saison 2. L’import générique accepte le format JSON de sauvegarde, pas tous les classeurs XLSX. Une restauration importe les enregistrements successivement : en cas d’échec, une partie peut avoir été enregistrée. Les sauvegardes JSON conservent les références des photos, pas les fichiers du stockage objet ; sauvegardez le stockage séparément pour une restauration complète sur un autre hébergement.
 
-## Lancer le projet
+## Lancer et vérifier le projet
 
-Node.js 22.13 ou plus récent est requis (Node 22.18+ recommandé pour les tests TypeScript).
+Node.js 24 est la version de production. Configurer `.env.local` selon [le guide Supabase](docs/vercel-supabase.md), puis :
 
 ```sh
 npm ci
+npm test
 npm run build
-```
-
-Sur une **nouvelle base locale uniquement**, appliquer dans l’ordre les cinq fichiers SQL de `drizzle/` :
-
-```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_young_lenny_balinger.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_green_norrin_radd.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0002_aspiring_annihilus.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0003_productive_tag.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0004_dear_blazing_skull.sql
 npm run dev
 ```
 
-Ne rejouez pas les migrations déjà appliquées. Les données locales résident dans `.wrangler/state` et ne sont pas incluses dans Git.
+L'application locale utilise le port 5174. `npm run db:migrate` applique les migrations PostgreSQL manquantes ; les migrations SQLite historiques de `drizzle/` ne doivent pas être exécutées sur Supabase.
 
-## Vérifier et déployer
+## Déploiement
 
-```sh
-npx tsc --noEmit
-node --experimental-strip-types --test tests/engine.test.ts tests/season2.test.ts
-npm run build
-```
+Site : https://copro-league.vercel.app — projet Vercel `yurr2/copro-league`.
+Base et authentification : Supabase `cifxjpybkszppxtmsuap` (eu-west-1).
 
-`node tests/journey.mjs` exerce le parcours API contre le serveur local et crée des données QA. `node tests/restore.mjs` vérifie une restauration de saison 2 avec versions et récompense. `tests/cleanup-local.sql` supprime uniquement les enregistrements QA de ces tests.
+Les publications se font avec `npx vercel deploy --prod --scope yurr2` depuis le projet lié, après sauvegarde Git et vérification. La connexion GitHub automatique de Vercel n'est pas activée : un push seul ne déclenche pas de publication.
 
-La configuration Sites existante est `.openai/hosting.json` : réutiliser son projet, pousser un commit source, enregistrer cette version puis publier en privé et vérifier le statut. Le déploiement applique les migrations de production ; les données de l’aperçu local ne sont pas transférées automatiquement. Initialiser ensuite l’administrateur et importer la saison 2 depuis le back-office. Aucun secret ne doit être inscrit dans Git.
+Les secrets sont dans `.env.local` et les variables Vercel, exclus de Git et de l'archive de déploiement. Le site Sites précédent reste disponible séparément. Sa configuration D1/R2 et ses anciens tests de parcours sont historiques, et ne décrivent plus le backend actuel.
 
-Les détails du runtime, des bindings D1/R2 et de l’authentification de plateforme sont conservés dans `docs/runtime.md`. Le brief complet, le design et le plan de réalisation figurent dans `docs/`.
+Les données de production ont été copiées depuis le site publié : 22 joueurs, 6 matchs et 124 événements, dont la correction du match 6. La connexion administrateur, les accès privés et les médias signés ont été vérifiés sur Vercel. Voir [le guide de migration](docs/vercel-supabase.md) pour les sauvegardes et le retour à l'ancienne version.
 
 ## Mise à jour du 17 septembre
 

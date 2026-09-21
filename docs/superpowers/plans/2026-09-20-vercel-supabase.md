@@ -31,5 +31,5 @@
 ## Vérification et livraison
 - [x] Passer les tests métier, les tests migration/auth/médias, TypeScript et le build Next.
 - [x] Tester /connexion, les redirections et le refus d’accès HTTP.
-- [ ] Sauvegarder la branche GitHub, configurer Supabase puis Vercel avec les comptes du propriétaire.
-- [ ] Vérifier la production connectée et le chargement des données avant d’annoncer le déploiement.
+- [x] Sauvegarder la branche GitHub, configurer Supabase puis Vercel avec les comptes du propriétaire.
+- [x] Vérifier la production connectée et le chargement des données avant d’annoncer le déploiement.
