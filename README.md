@@ -32,7 +32,7 @@ React 19, TypeScript, Next.js natif sur Vercel, Tailwind et composants Radix. Ba
 
 `db/schema.ts` décrit joueurs, caractéristiques, saisons, matchs, équipes, participations, statistiques individuelles, événements, vidéos, récompenses et administrateurs. `MatchPlayerStats` reste la source centrale. `lib/engine.ts` calcule agrégats, pourcentages, ELO, duos, facts, records et radars à partir des matchs. L’historique ELO est recalculé plutôt que stocké en double. Les champs suivis par événements sont projetés dans les statistiques sans additionner une seconde saisie manuelle.
 
-Les écritures vérifient l’identité, le rôle admin, l’origine, les données et la version modifiée. Une édition concurrente est refusée pour éviter d’écraser une correction. Les uploads contrôlent taille, format et signature du fichier. Le premier déploiement reste privé au propriétaire.
+Les écritures vérifient l’identité, le rôle admin, l’origine, les données et la version modifiée. Une édition concurrente est refusée pour éviter d’écraser une correction. Les uploads contrôlent taille, format et signature du fichier. La consultation est ouverte aux invités. Les modifications et exports restent réservés aux administrateurs ; les vidéos privées nécessitent une connexion.
 
 ## Fonctionnalités
 

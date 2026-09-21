@@ -17,7 +17,7 @@ const ticketResponse=await post('photos/ticket',{name:'qa.png',type:'image/png',
 try{
  const upload=await fetch(ticket.signedUrl,{method:'PUT',headers:{'Content-Type':'image/png'},body:file});assert.ok(upload.ok,'direct signed upload');
  const complete=await post('photos/complete',{id:ticket.id});assert.equal(complete.status,200);const {url}=await complete.json();
- assert.equal((await fetch(origin+url,{redirect:'manual'})).status,401);
+ assert.equal((await fetch(origin+url,{redirect:'manual'})).status,307);
  const read=await fetch(origin+url,{headers:{cookie},redirect:'manual'});assert.equal(read.status,307);
  const image=await fetch(read.headers.get('location'));assert.equal(image.status,200);assert.deepEqual(Buffer.from(await image.arrayBuffer()),file);
  console.log('Supabase live: login, administrator role, 22 players, 6 matches, badges, private tables and signed media verified.');

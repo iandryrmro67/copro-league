@@ -43,7 +43,7 @@ npm start
 node tests/access-http.mjs
 ```
 
-Le test HTTP sans compte vérifie notamment qu’un en-tête ChatGPT forgé ne donne aucun accès. Les tests PostgreSQL utilisent PGlite : transactions, conflits, sauvegardes brutes et import complet de la saison 2 par les vrais repositories. La connexion à une véritable instance Supabase et l’envoi d’un média doivent aussi être vérifiés après provisioning.
+Le test HTTP sans compte vérifie notamment que les invités peuvent consulter les pages et les statistiques, et qu’un en-tête ChatGPT forgé ne donne aucun droit de modification. Les tests PostgreSQL utilisent PGlite : transactions, conflits, sauvegardes brutes et import complet de la saison 2 par les vrais repositories. La connexion à une véritable instance Supabase et l’envoi d’un média doivent aussi être vérifiés après provisioning.
 
 ## Retour à la version précédente
 
@@ -54,3 +54,5 @@ Le snapshot GitHub initial est `d0465a40675afad5020a992015acc9b42c1bcd36`. Il co
 Projet Supabase `cifxjpybkszppxtmsuap`, région eu-west-1. Les deux migrations ont été appliquées. Les 22 joueurs, 6 matchs, 60 participations et 124 événements ont été copiés depuis le site Sites publié, dont la version 3 du match 6. Aucun média R2 référencé ne nécessitait de copie. Le test `tests/supabase-live.mjs` a vérifié la connexion réelle, le rôle administrateur, les données, les badges, le refus de lecture directe anonyme et un cycle complet de photo signée (avec nettoyage).
 
 Déploiement Vercel validé le 21 septembre 2026 : https://copro-league.vercel.app, version applicative `254cc78f66743d784b0ded80ce9e8b769c0ae113`. Les 13 contrôles HTTP sans session et le parcours Supabase complet ont aussi réussi sur cette URL. Le déploiement est piloté par la CLI ; la connexion GitHub automatique reste non activée.
+
+La consultation publique inclut les joueurs, matchs, statistiques, awards et photos. `/admin`, les écritures, les exports et les vidéos privées restent protégés. Le bucket et les tables Supabase ne sont pas rendus publics : les lectures passent par les routes serveur.
