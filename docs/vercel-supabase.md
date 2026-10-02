@@ -82,3 +82,15 @@ Le design global du commit `6074806` était dans un checkout distinct ; la versi
 Vérifications : 106 tests fonctionnels réussis sur le code réuni, compilation locale réussie, compilation et TypeScript du dernier déploiement réussis sur Vercel, contrôles HTTP d’accès réussis sur la version finale. L’accueil, l’administration, la timeline et Vérifier & publier ont été consultés avec une session réelle. Les trois polices publiées correspondent aux fichiers locaux ; l’atelier et le site utilisent Archivo, Big Shoulders Display et JetBrains Mono. Le banc mobile/tablette confirme l’absence de débordement à 390 et 768 px et la timeline placée après la saisie. Aucun résultat ni événement de match n’a été enregistré pour ces contrôles.
 
 Un onglet déjà ouvert a conservé sa feuille de style précédente après un rechargement simple ; un nouvel onglet sur l’URL officielle a confirmé la version finale, notamment les angles droits du bandeau de récupération. Utiliser un rechargement forcé si l’ancien habillage reste visible.
+
+## Saisie précise et hiérarchie verticale — 2 octobre 2026
+
+Version active : https://copro-league.vercel.app, déploiement `dpl_FASCC2eANhcjVzdKmn33aSuej6WC` (https://copro-league-qnk1kk3ge-yurr2.vercel.app), code `e58f191` sur `codex/vercel-supabase`.
+
+Le parcours suit vidéo → joueur ciblé → treize actions → questions propres à l’action → timeline et liste. Le lecteur peut se masquer et se replie en cas d’erreur ; sans source, le temps est manuel. La création s’enregistre au dernier choix utile, avec annulation ; les corrections restent explicites. Les brouillons antérieurs, précisions d’observation et temps historiques inconnus sont conservés. Les nouveaux champs de session sont facultatifs dans le JSON existant : aucune migration supplémentaire n’est nécessaire. Le design global et l’atelier partagent toujours les mêmes tokens et polices.
+
+Vérifications : 124 tests fonctionnels réussis, dont 18 nouveaux tests de saisie précise ; compilation locale et compilation / TypeScript Vercel réussies ; revue du code sans problème matériel restant ; contrôles HTTP d’accès réussis après promotion. Parcours local sur les composants réels : temps figé, pause / reprise, faute subie, correction sans duplication, annuler / refaire, reprise de saisie, coordonnées incomplètes, lecteur illisible et absence de vidéo. Banc mobile / tablette contrôlé à 390 et 768 px.
+
+Un nouvel onglet authentifié a confirmé les treize actions, le bandeau compact sans vidéo et l’ordre vertical sur `/admin?match=s2-match-6`. Le score officiel 26–24, les événements et valeurs manuelles du match n’ont pas été enregistrés ni modifiés pendant ce contrôle ; le brouillon local existant reste présent. Preuve locale ignorée par Git : `outputs/production-precise-timeline.png`.
+
+Retour à l’interface précédente sans restaurer la base : promouvoir `https://copro-league-bemecu8ww-yurr2.vercel.app` (`dpl_6atzX3KCMcdhwTpG8ysBgdfiTpnh`). Le domaine principal a été inspecté après promotion ; sa version Ready correspond à `dpl_FASCC2eANhcjVzdKmn33aSuej6WC`.
