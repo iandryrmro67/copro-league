@@ -63,7 +63,7 @@ Avant de déployer cette version, exécuter `npm run db:migrate` avec la connexi
 
 ## Déploiement de l’interface d’analyse — 2 octobre 2026
 
-Version active : https://copro-league.vercel.app, déploiement Vercel `dpl_HtczwhJvdEaZNhX76HZM59T61J6X` (https://copro-league-25n2m9osu-yurr2.vercel.app). L’interface approuvée est intégrée dans Admin → Match → Analyser, sans le panneau arrondi qui entourait auparavant le composant.
+Premier déploiement de l’atelier : `dpl_HtczwhJvdEaZNhX76HZM59T61J6X` (https://copro-league-25n2m9osu-yurr2.vercel.app). L’interface approuvée est intégrée dans Admin → Match → Analyser, sans le panneau arrondi qui entourait auparavant le composant.
 
 La migration `202610020001_match_analysis.sql` a été appliquée au projet Supabase existant. Une sauvegarde privée antérieure est conservée dans `.vercel/backups/pre-analysis-20261002.json` (ignorée par Git et le déploiement). Les 7 lignes de matchs historiques sont identiques à la sauvegarde, hormis l’ajout nullable de la colonne analysis. Les 23 joueurs et les 7 matchs restent accessibles.
 
@@ -72,3 +72,13 @@ Vérifications : 106 tests Node/PGlite réussis ; compilation et TypeScript réu
 Contrôle complémentaire le 2 octobre : le domaine principal servait de nouveau l’ancien déploiement `dpl_46Dp9WvovW2Gr9HEhNGzRdCNPhDQ`. La cause de cette bascule n’est pas établie. Le déploiement validé `dpl_HtczwhJvdEaZNhX76HZM59T61J6X` a été promu à nouveau. La résolution du domaine, les fichiers publiés et les contrôles HTTP ont été revérifiés. Une session administrateur réelle a confirmé les nouveaux onglets et l’atelier Analyser en mode agrandi sur `/admin?match=s2-match-6`, avec les joueurs à droite et la timeline en dessous. Aucun événement ni résultat du match n’a été enregistré pendant cette vérification.
 
 Retour à la version précédente : promouvoir `https://copro-league-g9kdu7916-yurr2.vercel.app` (`dpl_46Dp9WvovW2Gr9HEhNGzRdCNPhDQ`). La colonne additive peut rester en place pour ce retour ; ne pas restaurer une sauvegarde de données par simple rollback du site.
+
+## Version réunissant le design global et la timeline — 2 octobre 2026
+
+Version active : https://copro-league.vercel.app, déploiement `dpl_6atzX3KCMcdhwTpG8ysBgdfiTpnh` (https://copro-league-bemecu8ww-yurr2.vercel.app), code `82fc8e031f995e68685ead5506d616a76f12d999` sur la branche GitHub `codex/vercel-supabase`.
+
+Le design global du commit `6074806` était dans un checkout distinct ; la version précédente de l’atelier utilisait encore l’ancien habillage global. Le commit `a1591d3` rassemble le design fourni et le workflow d’analyse. `82fc8e0` aligne également la récupération des brouillons et la validation sur les mêmes variables. Les prochaines publications depuis ce checkout incluent les deux interfaces. La publication reste pilotée par la CLI, sans déploiement Git automatique.
+
+Vérifications : 106 tests fonctionnels réussis sur le code réuni, compilation locale réussie, compilation et TypeScript du dernier déploiement réussis sur Vercel, contrôles HTTP d’accès réussis sur la version finale. L’accueil, l’administration, la timeline et Vérifier & publier ont été consultés avec une session réelle. Les trois polices publiées correspondent aux fichiers locaux ; l’atelier et le site utilisent Archivo, Big Shoulders Display et JetBrains Mono. Le banc mobile/tablette confirme l’absence de débordement à 390 et 768 px et la timeline placée après la saisie. Aucun résultat ni événement de match n’a été enregistré pour ces contrôles.
+
+Un onglet déjà ouvert a conservé sa feuille de style précédente après un rechargement simple ; un nouvel onglet sur l’URL officielle a confirmé la version finale, notamment les angles droits du bandeau de récupération. Utiliser un rechargement forcé si l’ancien habillage reste visible.
