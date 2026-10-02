@@ -1,115 +1,825 @@
-'use client';
-import {useEffect,useMemo,useRef,useState} from 'react';
-import type {League,Match,MatchEvent} from '@/lib/model';
-import {analysisCounts,previousPass,beginAnalysis} from '@/lib/match-analysis';
-import {coordinates,projectEvents,zone} from '@/lib/events';
-import {actionDefinitions as definitions,actionLabels,eventLabel,isV2,isGoal,type Point,type Scene} from '@/lib/actions';
-import {CircleDot,Maximize2,Minimize2,Play,RotateCcw,RotateCw,Save,SlidersHorizontal} from 'lucide-react';
-import {AnnotationCapture} from './league-annotation-capture';
-import {VideoPlayer,VideoSource,type VideoPlayerHandle} from './league-video';
-import {EventTimeline} from './league-event-timeline';
-import {annotationMoment,filterActions,recordQuickAction,restoreAnnotation,quickActions,reviewRanges,eventVideoTime,type QuickAction,type ActionFilters,type AnnotationMoment} from '@/lib/annotation-controls';
-const clock=(s:number|null)=>s==null?'':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-export function Analyzer({match:m,data,onChange,onSave,busy}:{match:Match;data:League;onChange:(m:Match)=>void;onSave?:(m:Match)=>void;busy?:boolean}){
-const restored=m.analysis?.session.builder;const [focus,setFocus]=useState(false),[localVideo,setLocalVideo]=useState(''),[localName,setLocalName]=useState(''),[context,setContext]=useState(false),[role,setRole]=useState<'actor'|'mate'|'opponent'>('actor'),[legacy,setLegacy]=useState<boolean>(()=>{const savedEvent=m.events.find(e=>e.id===restored?.editing);return savedEvent?!isV2(savedEvent):!!restored&&!definitions[restored.type]}),[view,setView]=useState(restored?.view??'builder'),[actor,setActor]=useState(restored?.actor??m.participants[0]?.playerId??''),[mate,setMate]=useState(restored?.mate??''),[opponent,setOpponent]=useState(restored?.opponent??''),[type,setType]=useState(restored?.type??'SHOT'),[outcome,setOutcome]=useState(restored?.outcome??'GOAL'),[tags,setTags]=useState<string[]>(restored?.tags??[]),[stamp,setStamp]=useState(restored?.stamp??'00:00'),[manual,setManual]=useState(restored?.manual??false),[editing,setEditing]=useState<string|null>(restored?.editing??null),[sequence,setSequence]=useState(()=>m.analysis?.session.sequenceId??crypto.randomUUID()),[scene,setScene]=useState<Scene>(()=>restored?.scene??([...m.events].reverse().find(e=>e.metadata.scene)?.metadata.scene as Scene)??{players:{},ball:null}),[selected,setSelected]=useState(restored?.actor??m.participants[0]?.playerId??''),[end,setEnd]=useState<Point|null>(restored?.end??null),[linked,setLinked]=useState(restored?.linked??''),[complete,setComplete]=useState(false),[message,setMessage]=useState(''),[positionKnown,setPositionKnown]=useState(restored?.positionKnown??false),[quick,setQuick]=useState(restored?.quick??m.analysis?.mode!=='complete'),[past,setPast]=useState<{match:Match;scene:Scene}[]>([]),[future,setFuture]=useState<{match:Match;scene:Scene}[]>([]);
-const [chain,setChain]=useState(false),[filters,setFilters]=useState<ActionFilters>({}),[playhead,setPlayhead]=useState(m.analysis?.session.videoTime??0);
-const markedMoment=useRef<AnnotationMoment|null>(null);
-const [detailsOpen,setDetailsOpen]=useState(false);
-const [historyVersion,setHistoryVersion]=useState(m.version);if(historyVersion!==m.version){setHistoryVersion(m.version);setPast([]);setFuture([])}
-useEffect(()=>()=>{if(localVideo)URL.revokeObjectURL(localVideo)},[localVideo]);
-const video=useRef<VideoPlayerHandle>(null),root=useRef<HTMLDivElement>(null);const participant=m.participants.find(p=>p.playerId===actor),side=participant?.team??'A',definition=legacy||!definitions[type]?{label:type.replaceAll('_',' '),outcomes:[],tags:[]}:definitions[type];
-const name=(id:string)=>data.players.find(p=>p.id===id)?.name??id;
-// Playback/session updates cannot change the counters; only observations and coverage do.
-// eslint-disable-next-line react-hooks/exhaustive-deps
-const counts=useMemo(()=>analysisCounts(m),[m.events,m.participants,m.analysis?.completeKeys]);
-const score=useMemo(()=>({A:m.events.filter(e=>isGoal(e)&&e.team==='A').length,B:m.events.filter(e=>isGoal(e)&&e.team==='B').length}),[m.events]);const offset=m.analysis?.session.offset??0;
-useEffect(()=>{if(!m.analysis)return;const builder={actor,mate,opponent,type,outcome,tags,stamp,manual,editing,linked,positionKnown,quick,view,scene,end};if(JSON.stringify(builder)!==JSON.stringify(m.analysis.session.builder))onChange({...m,analysis:{...m.analysis,session:{...m.analysis.session,sequenceId:sequence,builder}}})},[actor,mate,opponent,type,outcome,tags,stamp,manual,editing,linked,positionKnown,quick,view,scene,end,sequence,m,onChange]);
-if(!m.participants.some(p=>p.playerId===actor)&&actor!==(m.participants[0]?.playerId??'')){setActor(m.participants[0]?.playerId??'');setSelected(m.participants[0]?.playerId??'')}
-function newSequence(){setChain(false);markedMoment.current=null;const id=crypto.randomUUID();setSequence(id);setEditing(null);setManual(false);setMate('');setLinked('');const next=beginAnalysis(m);onChange({...next,analysis:{...next.analysis!,session:{...next.analysis!.session,sequenceId:id}}})}
-function captureMoment(){return annotationMoment({videoTime:video.current?.time()??0,offset,stamp,useVideo:!manual&&!editing&&!!(localVideo||m.video)})}
-function record(preset:QuickAction,recipientId?:string){if(busy||editing)return;try{const result=recordQuickAction(m,{preset,playerId:actor,recipientId,sequenceId:sequence,moment:captureMoment()});remember(result.match);setActor(result.nextActor);setSelected(result.nextActor);setSequence(result.sequenceId);if(result.sequenceId!==sequence)setChain(false);setContext(false);setManual(false);markedMoment.current=null;setMate('');setOpponent('');setLinked('');setTags([]);setPositionKnown(false);setStamp(clock(result.event.timestamp));setMessage(quickActions[preset].label+' · '+name(result.event.playerId)+(recipientId?' → '+name(recipientId):'')+' · '+clock(result.event.timestamp)+' · ajouté au brouillon.');}catch(error){setMessage((error as Error).message)}}
-function review(events:MatchEvent[]){const ranges=reviewRanges(events,offset,4,3,video.current?.duration()||Infinity);if(!video.current?.review(ranges))setMessage('Ajoutez une vidéo lisible pour revoir cette sélection.')}
-function filterStats(player:string,type:string){setFilters({player,type});setView('timeline');}
-function restoreCarrier(next:Match){const id=next.analysis?.session.builder?.actor??actor;setActor(id);setSelected(id);setMate('');setOpponent('');setLinked('');setContext(false);setManual(false);markedMoment.current=null;}
-const point=scene.players[actor]??scene.ball;const normalized=point?(side==='B'?{x:100-point.x,y:100-point.y}:point):null;
-function remember(next:Match,nextScene=scene){setPast(p=>[...p.slice(-49),{match:structuredClone(m),scene:structuredClone(scene)}]);setFuture([]);setScene(nextScene);onChange(next)}
-function undo(){const prev=past.at(-1);if(!prev)return;setMessage('Dernière action annulée.');setFuture(p=>[...p,{match:structuredClone(m),scene:structuredClone(scene)}]);setPast(p=>p.slice(0,-1));setScene(prev.scene);restoreCarrier(prev.match);onChange(restoreAnnotation(m,prev.match));if(prev.match.analysis)setSequence(prev.match.analysis.session.sequenceId);setEditing(null)}
-function redo(){const next=future.at(-1);if(!next)return;setMessage('Action rétablie.');setPast(p=>[...p,{match:structuredClone(m),scene:structuredClone(scene)}]);setFuture(p=>p.slice(0,-1));setScene(next.scene);restoreCarrier(next.match);onChange(restoreAnnotation(m,next.match));if(next.match.analysis)setSequence(next.match.analysis.session.sequenceId);setEditing(null)}
-function chooseType(v:string){
- if(busy)return;setDetailsOpen(true);setView('builder');
- let time=Number(stamp.split(':')[0])*60+Number(stamp.split(':')[1]??0);
- if(!editing){try{const moment=captureMoment();markedMoment.current=moment;time=moment.timestamp;setStamp(clock(time));setManual(true);}catch(error){setMessage((error as Error).message);return;}}
- setPositionKnown(false);setContext(true);setRole(v==='PASS'?'mate':['DRIBBLE','DUEL','TACKLE','FOUL','SAVE','BLOCK'].includes(v)?'opponent':'actor');setLegacy(false);setType(v);setOutcome(definitions[v]?.outcomes[0]??'');setTags([]);setLinked('');setMate('');setOpponent('');setEnd(null);
- if(v==='SHOT'){const pass=previousPass(m,actor,sequence,time,editing);if(pass){setLinked(pass.id);setMate(pass.playerId);}}
-}
-function chooseActor(id:string){if(!editing){setManual(false);markedMoment.current=null;}setPositionKnown(false);setContext(!!editing);setRole('actor');setActor(id);setSelected(id);setMate('');setOpponent('');setLinked('')}
-function pickPlayer(id:string){const p=m.participants.find(p=>p.playerId===id);if(chain&&!context&&!editing){if(p?.team===side&&id!==actor){record('pass',id);return;}if(p?.team&&p.team!==side)newSequence();chooseActor(id);return;}if(role==='mate'&&p?.team===side&&id!==actor){setMate(id);setRole('actor');setContext(true);return}if(role==='opponent'&&p?.team&&p.team!==side){setOpponent(id);setRole('actor');setContext(true);return}chooseActor(id)}
-function place(p:Point,id=selected){if(busy||!id)return;if(id===actor)setPositionKnown(true);setContext(true);const next=id==='ball'?{...scene,ball:p}:id==='target'?scene:{...scene,players:{...scene.players,[id]:p}};if(id==='target')setEnd(side==='B'?{x:100-p.x,y:100-p.y}:p);else{setPast(a=>[...a.slice(-49),{match:structuredClone(m),scene:structuredClone(scene)}]);setFuture([]);setScene(next)}}
-function remove(id:string){const next=m.events.filter(e=>e.id!==id).map(e=>e.metadata.linkedEventId===id?{...e,metadata:{...e.metadata,linkedEventId:null}}:e);remember(projectEvents({...m,events:next}));if(editing===id)setEditing(null)}
-function submit(){if(busy)return;setMessage('');if(!participant?.team)return setMessage('Sélectionnez un joueur affecté à une équipe.');const effective=!manual&&!editing&&(localVideo||m.video)?clock(Math.max(0,(video.current?.time()??0)-offset)):stamp;if(!/^\d{1,4}:[0-5]\d$/.test(effective))return setMessage('Temps attendu : mm:ss (jusqu’à 120:00 et au-delà).');if(!legacy&&(['DRIBBLE','DUEL','TACKLE','FOUL'].includes(type)||(type==='SHOT'&&outcome==='BLOCKED'))&&!opponent)return setMessage('Sélectionnez l’adversaire.');if(!legacy&&type==='PASS'&&outcome==='COMPLETED'&&!mate)return setMessage('Sélectionnez le receveur.');if(type==='PASS'&&outcome==='FAILED'&&tags.includes('ASSIST'))return setMessage('Une passe ratée ne peut être décisive.');if(!manual&&!editing&&(localVideo||m.video)&&(video.current?.time()??0)<offset)return setMessage('La vidéo est avant le début du match. Ajustez le décalage.');const [min,sec]=effective.split(':').map(Number);const old=m.events.find(e=>e.id===editing);const target=scene.players[mate];const targetPoint=target?(side==='B'?{x:100-target.x,y:100-target.y}:target):end;
-const e:MatchEvent={id:editing??crypto.randomUUID(),playerId:actor,team:participant.team,type,timestamp:min*60+sec,relatedPlayerId:legacy||type==='PASS'||(type==='SHOT'&&outcome==='GOAL')?mate||null:null,metadata:legacy?{...old?.metadata,position:positionKnown?normalized:null,endPosition:end,shotPosition:undefined,zone:undefined}:{schemaVersion:2,atomic:true,sequenceId:sequence,outcome:outcome||null,tags,opponentPlayerId:opponent||null,linkedEventId:linked||null,position:positionKnown?normalized:null,endPosition:type==='PASS'&&positionKnown?targetPoint:null,scene:structuredClone(scene),videoTimestamp:markedMoment.current?.timestamp===min*60+sec?markedMoment.current.videoTimestamp:old?.timestamp===min*60+sec&&typeof old.metadata.videoTimestamp==='number'?old.metadata.videoTimestamp:min*60+sec+offset,createdAt:old?.metadata.createdAt??new Date().toISOString(),updatedAt:new Date().toISOString()}};
-
-let events=editing?m.events.map(x=>x.id===editing?e:x):[...m.events,e];if(old&&!isV2(old)&&!legacy&&!old.metadata.atomic&&old.timestamp!=null){const groups=[['SHOT','SHOT_ON_TARGET','SHOT_OFF_TARGET','SHOT_BLOCKED','GOAL'],['PASS_ATTEMPT','PASS_COMPLETED','PASS_FAILED'],['DRIBBLE_ATTEMPT','DRIBBLE_COMPLETED','DRIBBLE_FAILED'],['DUEL','DUEL_WON','DUEL_LOST']];const group=groups.find(g=>g.includes(old.type));if(group)events=events.filter(x=>x.id===e.id||x.metadata.atomic||x.playerId!==old.playerId||x.timestamp!==old.timestamp||!group.includes(x.type))}events=events.map(x=>{const id=x.metadata.linkedEventId;if(!id)return x;const target=events.find(y=>y.id===id);const valid=target&&(x.type==='SHOT'?target.type==='PASS'&&target.metadata.outcome==='COMPLETED'&&(x.metadata.outcome!=='GOAL'||target.playerId===x.relatedPlayerId)&&target.relatedPlayerId===x.playerId&&target.metadata.sequenceId===x.metadata.sequenceId&&target.timestamp!=null&&x.timestamp!=null&&target.timestamp<=x.timestamp:x.type==='TURNOVER'?target.playerId===x.playerId&&(target.metadata.tags as string[]??[]).includes('POSSESSION_LOST'):['SAVE','BLOCK'].includes(x.type)&&target.type==='SHOT'&&target.playerId===x.metadata.opponentPlayerId&&target.metadata.outcome===(x.type==='SAVE'?'ON_TARGET':'BLOCKED'));return valid?x:{...x,metadata:{...x.metadata,linkedEventId:null}}});remember({...m,events});setPositionKnown(false);if(type==='PASS'&&outcome==='COMPLETED'&&mate){setActor(mate);setSelected(mate);setMate('');setLinked('')}if(tags.includes('POSSESSION_LOST')||['TURNOVER','FOUL','SAVE','CLEARANCE','RECOVERY','INTERCEPTION'].includes(type)||(type==='SHOT'&&outcome==='GOAL')){const id=crypto.randomUUID();setSequence(id);const next=beginAnalysis({...m,events});onChange({...next,analysis:{...next.analysis!,session:{...next.analysis!.session,sequenceId:id}}})}setEditing(null);markedMoment.current=null;if(legacy){setLegacy(false);setType('SHOT');setOutcome('GOAL')}setManual(false);setStamp(effective);setContext(false);setDetailsOpen(false);setMessage(editing?'Action corrigée dans le brouillon.':'Action ajoutée au brouillon.');}
-function edit(e:MatchEvent){setMessage('');setDetailsOpen(true);markedMoment.current=null;setChain(false);setContext(true);const videoTime=eventVideoTime(e,offset);if(videoTime!=null)video.current?.seek(videoTime);setPositionKnown(e.metadata.position!=null);setEditing(e.id);setActor(e.playerId);setSelected(e.playerId);setMate(e.relatedPlayerId??'');setOpponent(String(e.metadata.opponentPlayerId??''));setStamp(clock(e.timestamp));setManual(true);setLinked(String(e.metadata.linkedEventId??''));setSequence(String(e.metadata.sequenceId??sequence));setEnd((e.metadata.endPosition as Point)??null);if(e.metadata.scene)setScene(structuredClone(e.metadata.scene as Scene));else {const p=coordinates(e.metadata);setScene({players:p?{[e.playerId]:e.team==='B'?{x:100-p.x,y:100-p.y}:p}:{},ball:null})}setLegacy(!isV2(e));if(isV2(e)){setType(e.type);setOutcome(String(e.metadata.outcome??''));setTags((e.metadata.tags as string[])??[])}else {setType(e.type);setOutcome('');setTags([]);setMessage('Action historique conservée : corrigez son temps, son joueur ou sa position. La palette permet de choisir une nouvelle action.')}setView('builder')}
-useEffect(()=>{const handler=(e:KeyboardEvent)=>{if(busy||root.current?.closest('[data-state="inactive"]'))return;if(!root.current?.contains(document.activeElement)&&document.activeElement!==document.body)return;const target=e.target as HTMLElement;if(e.defaultPrevented)return;if(e.key==='Enter'&&target.closest('button'))return;if(target.matches('input,textarea,select')||target.isContentEditable)return;if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo();return}if(e.key===' '){e.preventDefault();video.current?.toggle()}else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();video.current?.step((e.key==='ArrowLeft'?-1:1)*(e.shiftKey?5:1))}else if(e.key==='Enter'){e.preventDefault();submit()}else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();if(editing)remove(editing);else if(selected==='ball')setScene({...scene,ball:null});else{const players={...scene.players};delete players[selected];setScene({...scene,players})}}else {const action=Object.keys(definitions).find(k=>definitions[k].shortcut===e.key.toLowerCase());if(action){e.preventDefault();chooseType(action)}}};window.addEventListener('keydown',handler);return()=>window.removeEventListener('keydown',handler)});
-const linkedOptions=m.events.filter(e=>e.id!==editing&&(type==='SHOT'?!m.events.some(shot=>shot.id!==editing&&shot.metadata.linkedEventId===e.id)&&e.type==='PASS'&&(outcome!=='GOAL'||!mate||e.playerId===mate)&&e.relatedPlayerId===actor&&e.metadata.outcome==='COMPLETED'&&e.metadata.sequenceId===sequence&&e.timestamp!=null&&e.timestamp<=(Number(stamp.split(':')[0])*60+Number(stamp.split(':')[1]??0)):['SAVE','BLOCK'].includes(type)?e.type==='SHOT'&&e.playerId===opponent&&e.metadata.outcome===(type==='SAVE'?'ON_TARGET':'BLOCKED'):false));
-function cancelEdit(){setEditing(null);markedMoment.current=null;setManual(false);setContext(false);setLegacy(false);setType('SHOT');setOutcome('GOAL');setDetailsOpen(false);}
-const reviewEvents=filterActions(m.events,filters,name);
-const timelineProps={match:m,data,time:Math.max(0,playhead-offset),selected:editing,filters,onFilters:setFilters,canReview:!!(localVideo||m.video),onSeek:(seconds:number)=>video.current?.seek(seconds+offset),onSelect:edit,onReview:review,onRemove:remove};
-return <div className={'analyzer sequence-workspace '+(focus?'seq-focus':'')} ref={root}>
- <header className="annotation-header">
-  <div className="annotation-title"><h2>Analyse du match</h2><div className="annotation-context"><span>Match {String(m.number).padStart(2,'0')}</span><span>Score officiel <strong>{m.scoreA??'—'} – {m.scoreB??'—'}</strong></span><span>Buts annotés <strong>{score.A} – {score.B}</strong></span></div></div>
- <div className="annotation-navigation">
-  <div className="annotation-modes" role="group" aria-label="Mode d’analyse"><button type="button" aria-pressed={view==='builder'} onClick={()=>setView('builder')}>Annoter</button><button type="button" aria-pressed={view==='timeline'} onClick={()=>setView('timeline')}>Revoir <span>{m.events.length}</span></button></div>
-  <div className="annotation-history"><button type="button" aria-label="Annuler la dernière action" title="Annuler · Ctrl / Cmd Z" disabled={!past.length} onClick={undo}><RotateCcw size={16} aria-hidden="true"/></button><button type="button" aria-label="Refaire la dernière action" title="Refaire · Maj Ctrl / Cmd Z" disabled={!future.length} onClick={redo}><RotateCw size={16} aria-hidden="true"/></button></div>
- </div>
-  <div className="annotation-header-actions"><span className="tag">Brouillon · {m.events.length} action{m.events.length===1?'':'s'}</span><button type="button" className="button" onClick={()=>setFocus(!focus)}>{focus?<Minimize2 size={15} aria-hidden="true"/>:<Maximize2 size={15} aria-hidden="true"/>}{focus?'Réduire':'Agrandir'}</button>{focus&&onSave&&<button type="button" className="button primary" disabled={busy} onClick={()=>onSave(m)}><Save size={15} aria-hidden="true"/>Enregistrer</button>}</div>
- </header>
- <div className="seq-station">
-  <div className="seq-media">
-   <VideoPlayer annotation ref={video} src={localVideo||m.video} initialTime={m.analysis?.session.videoTime??0} onTime={seconds=>{if(!localVideo&&!m.video)return;setPlayhead(seconds);if(!manual&&!editing)setStamp(clock(Math.max(0,seconds-offset)));if(m.analysis&&Math.floor(seconds)!==Math.floor(m.analysis.session.videoTime)&&!busy)onChange({...m,analysis:{...m.analysis,session:{...m.analysis.session,videoTime:seconds}}})}}/>
-
-
-  </div>
-  <div className="seq-capture">
-   {view==='builder'?<>
-    <AnnotationCapture match={m} data={data} actor={actor} chain={chain} editing={!!editing} detailsOpen={detailsOpen||context} busy={busy} time={manual?stamp:clock(Math.max(0,playhead-offset))} onTimeChange={value=>{markedMoment.current=null;setStamp(value);setManual(true)}} onPlayer={pickPlayer} onRecord={record} onNewSequence={newSequence} onCancelEdit={cancelEdit} onDetails={()=>{if(detailsOpen||context){setDetailsOpen(false);setContext(false);setRole('actor');setManual(false);markedMoment.current=null;}else setDetailsOpen(true)}} onChain={()=>{setChain(!chain);setRole('actor');setContext(false);setManual(false);markedMoment.current=null;}}/>
-    {message&&<p role="status" className="capture-status">{message}</p>}
-    <div className="annotation-details" hidden={!(detailsOpen||context||editing)}>
-     <div className="annotation-details-heading"><strong>Précisions de l’action</strong><label className="checklabel"><input type="checkbox" checked={!quick} onChange={e=>{setQuick(!e.target.checked);if(m.analysis)onChange({...m,analysis:{...m.analysis,mode:e.target.checked?'complete':'highlights'}})}}/>Afficher le terrain</label></div>
-<div className="seq-toolbar"><span className="tag">Possession · {m.events.filter(e=>e.metadata.sequenceId===sequence).map(e=>name(e.playerId)).filter((v,i,a)=>i===0||v!==a[i-1]).join(' → ')||'nouvelle possession'}</span><button type="button" className="textbutton" onClick={()=>{const prev=[...m.events].reverse().find(e=>e.metadata.scene);if(prev)setScene(structuredClone(prev.metadata.scene as Scene))}}>Dupliquer la scène précédente</button><button type="button" className="button" onClick={()=>{setSelected('ball');setContext(false)}}>Ballon</button><button type="button" className="textbutton" disabled={!scene.players[actor]} onClick={()=>setScene({...scene,ball:{x:Math.min(100,scene.players[actor].x+3),y:Math.min(100,scene.players[actor].y+4)}})}>Ballon au joueur</button></div>
-<div className="seq-board">
-
-<div className="seq-field-shell"><div className="seq-pitch" hidden={quick} role="application" aria-label="Terrain interactif" onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();place({x:Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),y:Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100))},e.dataTransfer.getData('text/plain'))}} onClick={e=>{const r=e.currentTarget.getBoundingClientRect();place({x:Math.round((e.clientX-r.left)/r.width*100),y:Math.round((e.clientY-r.top)/r.height*100)})}}>
-<button type="button" aria-label="But côté gauche" className="seq-goal left" onClick={e=>{e.stopPropagation();if(side==='B'){chooseType('SHOT');setOutcome('GOAL')}else setMessage('Sélectionnez un joueur de l’équipe B pour marquer dans ce but.')}}/><span className="seq-center"/><button type="button" aria-label="But côté droit" className="seq-goal right" onClick={e=>{e.stopPropagation();if(side==='A'){chooseType('SHOT');setOutcome('GOAL')}else setMessage('Sélectionnez un joueur de l’équipe A pour marquer dans ce but.')}}/><span className="seq-direction">A attaque → · ← B attaque</span>
-{Object.entries(scene.players).map(([id,p])=><button type="button" key={id} aria-label={name(id)+' sur le terrain'} className={'seq-token '+(m.participants.find(p=>p.playerId===id)?.team==='B'?'away ':'')+(actor===id?'selected':'')+((mate===id||opponent===id)?' involved':'')} style={{left:p.x+'%',top:p.y+'%'}} draggable onDragStart={e=>{e.dataTransfer.setData('text/plain',id);setContext(false)}} onClick={e=>{e.stopPropagation();pickPlayer(id)}}>{name(id).slice(0,2)}<small>{name(id)}</small></button>)}
-{scene.ball&&<button type="button" aria-label="Ballon sur le terrain" className="seq-ball" style={{left:scene.ball.x+'%',top:scene.ball.y+'%'}} draggable onDragStart={e=>e.dataTransfer.setData('text/plain','ball')} onClick={e=>{e.stopPropagation();setSelected('ball');setContext(false)}}><CircleDot size={18} aria-hidden="true"/></button>}
-{type==='PASS'&&normalized&&(scene.players[mate]||end)&&<svg className="seq-path" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1={point!.x} y1={point!.y} x2={(scene.players[mate]??(side==='B'?{x:100-end!.x,y:100-end!.y}:end!)).x} y2={(scene.players[mate]??(side==='B'?{x:100-end!.x,y:100-end!.y}:end!)).y} stroke="var(--bone)" strokeWidth=".6" strokeDasharray="2 1"/></svg>}
-{end&&<span className="seq-destination" style={{left:(side==='B'?100-end.x:end.x)+'%',top:(side==='B'?100-end.y:end.y)+'%'}}>×</span>}
-</div>
-<div className="seq-field-dock"><div className="split"><button type="button" className="textbutton" onClick={()=>{setContext(!context);setRole('actor')}}>{name(actor)} · {context?'Réduire':'Créer une action'}</button><time>{stamp}</time></div>
-{context?<label className="studio-action-type">Type d’action<select aria-label="Type d’action détaillée" value={type} onChange={e=>chooseType(e.target.value)}>{legacy&&<option value={type}>{definition.label}</option>}{Object.entries(definitions).filter(([k])=>k!=='TOUCH'||complete).map(([k,d])=><option key={k} value={k}>{d.label}</option>)}</select></label>:<div className="seq-palette" aria-label="Choisir une action détaillée">{Object.entries(definitions).filter(([k])=>k!=='TOUCH'||complete).map(([k,d])=><button type="button" key={k} onClick={()=>chooseType(k)}>{d.label}<kbd>{d.shortcut?.toUpperCase()}</kbd></button>)}</div>}
-
-{context&&<div className="seq-context"><div className="split"><strong>{editing?'Modifier · ':''}{definition.label} · {name(actor)}</strong><button type="button" className="textbutton" onClick={()=>{setRole('actor');setContext(false);if(!editing){setManual(false);markedMoment.current=null;}}}>Fermer</button></div>
-<div className="seq-options">{definition.outcomes.map(o=><button type="button" className={'button '+(outcome===o?'primary':'')} key={o} onClick={()=>{setOutcome(o);if(type==='SHOT'&&o==='BLOCKED')setRole('opponent')}}>{type==='DUEL'?(o==='WON'?name(actor):opponent?name(opponent):'Adversaire'):actionLabels[o]}</button>)}</div>
-<div className="seq-options">{(legacy||type==='PASS'||type==='SHOT'&&outcome==='GOAL')&&<button type="button" className={'button '+(role==='mate'?'primary':'')} onClick={()=>setRole('mate')}>{type==='PASS'?'Receveur':'Passeur'} : {mate?name(mate):type==='PASS'?'cliquer un partenaire':'aucun (facultatif)'}</button>}{(['DRIBBLE','DUEL','TACKLE','INTERCEPTION','BLOCK','FOUL','SAVE'].includes(type)||type==='SHOT'&&outcome==='BLOCKED')&&<button type="button" className={'button '+(role==='opponent'?'primary':'')} onClick={()=>setRole('opponent')}>Adversaire : {opponent?name(opponent):'cliquer un joueur'}</button>}{type==='PASS'&&<button type="button" className="textbutton" onClick={()=>{setSelected('target');setContext(false)}}>Placer l’arrivée ↗</button>}{(mate||opponent)&&<button type="button" className="textbutton" onClick={()=>{setMate('');setOpponent('');setLinked('')}}>Retirer le lien joueur</button>}</div>
-{role!=='actor'&&<div className="seq-options seq-candidates">{m.participants.filter(p=>role==='mate'?p.team===side&&p.playerId!==actor:p.team&&p.team!==side).map(p=><button type="button" className="seq-player" key={p.playerId} onClick={()=>pickPlayer(p.playerId)}>{name(p.playerId)}</button>)}</div>}
-{definition.tags.length>0&&<details><summary>Précisions {tags.length?'· '+tags.length:''}</summary><div className="seq-options">{definition.tags.map(t=><button type="button" key={t} className={'button '+(tags.includes(t)?'primary':'')} onClick={()=>setTags(tags.includes(t)?tags.filter(x=>x!==t):[...tags,t])}>{actionLabels[t]}</button>)}</div></details>}
-<label className="checklabel"><input type="checkbox" disabled={!normalized} checked={positionKnown} onChange={e=>setPositionKnown(e.target.checked)}/>Position de cette action observée {normalized?'':'· placez le joueur sur le terrain'}</label>{linkedOptions.length>0&&<label>Passe / tir lié<select value={linked} onChange={e=>{setLinked(e.target.value);if(type==='SHOT'&&outcome==='GOAL')setMate(m.events.find(x=>x.id===e.target.value)?.playerId??'')}}><option value="">Aucune</option>{linkedOptions.map(e=><option key={e.id} value={e.id}>{clock(e.timestamp)} · {eventLabel(e)} · {name(e.playerId)}</option>)}</select></label>}
-<div className="split"><span className="muted">{positionKnown&&normalized?`${zone(normalized).lane} · ≈ ${zone(normalized).distanceToGoal} m du but`:'Position facultative'}</span><button type="button" className="button primary" onClick={()=>submit()}>{editing?'Modifier l’action':'Valider → action suivante'} ↵</button></div>
-</div>}
-</div></div>
-</div>
-<details><summary>Options d’analyse et raccourcis</summary><label className="checklabel"><input type="checkbox" checked={complete} onChange={e=>setComplete(e.target.checked)}/>Analyse complète · activer les touches</label><label>Début du match dans la vidéo (secondes)<input aria-label="Décalage vidéo / match" type="number" min="0" value={offset} onChange={e=>{if(m.analysis)onChange({...m,analysis:{...m.analysis,session:{...m.analysis.session,offset:Number(e.target.value)||0}}})}}/></label><p>Le temps enregistré est celui du match. Le lecteur utilise le temps vidéo pour retrouver chaque action.</p><p>Espace : lecture · ← / → : 1 s · Maj + flèche : 5 s · P S D U T I R F : action · Entrée : valider · Suppr : sélection · Cmd/Ctrl Z : annuler · Maj Cmd/Ctrl Z : refaire.</p><p>X 0 : son but · X 100 : but adverse · Y 0 : gauche · Y 100 : droite. Surface estimée : les 6 derniers mètres devant le but.</p><button type="button" className="textbutton" onClick={()=>{const players={...scene.players};delete players[actor];setScene({...scene,players,ball:null});setEnd(null)}}>Effacer la position du joueur</button></details>
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  RotateCw,
+  Save,
+  SlidersHorizontal,
+} from "lucide-react";
+import type { League, Match, MatchEvent } from "@/lib/model";
+import { analysisCounts, beginAnalysis } from "@/lib/match-analysis";
+import { actionDefinitions, eventLabel, isV2, isGoal } from "@/lib/actions";
+import { youtubeId } from "@/lib/engine";
+import { AnnotationCapture } from "./league-annotation-capture";
+import {
+  VideoPlayer,
+  VideoSource,
+  type VideoPlayerHandle,
+  type VideoStatus,
+} from "./league-video";
+import { EventTimeline } from "./league-event-timeline";
+import {
+  annotationMoment,
+  restoreAnnotation,
+  reviewRanges,
+  eventVideoTime,
+  type ActionFilters,
+  type AnnotationMoment,
+} from "@/lib/annotation-controls";
+import {
+  captureStep,
+  restoreCaptureDraft,
+  retargetCapture,
+  correctHistoricalAction,
+  recordPreciseAction,
+  reconcileActionLinks,
+  type CaptureDraft,
+} from "@/lib/precise-annotation";
+const clock = (s: number | null) =>
+  s == null
+    ? ""
+    : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const blank = (type: string): CaptureDraft => ({
+  type,
+  outcome: "",
+  mate: "",
+  opponent: "",
+  tags: [],
+  participantChosen: false,
+  detailChosen: false,
+});
+export function Analyzer({
+  match: m,
+  data,
+  onChange,
+  onSave,
+  busy,
+}: {
+  match: Match;
+  data: League;
+  onChange: (m: Match) => void;
+  onSave?: (m: Match) => void;
+  busy?: boolean;
+}) {
+  const saved = m.analysis?.session.builder;
+  const [actor, setActor] = useState(saved?.actor ?? ""),
+    [stamp, setStamp] = useState(saved?.stamp ?? "00:00"),
+    [manual, setManual] = useState(saved?.manual ?? false);
+  const [editing, setEditing] = useState<string | null>(saved?.editing ?? null);
+  const [draft, setDraft] = useState<CaptureDraft | null>(() =>
+    saved ? restoreCaptureDraft(m, saved) : null,
+  );
+  const [sequence, setSequence] = useState(
+      m.analysis?.session.sequenceId ?? crypto.randomUUID(),
+    ),
+    [playhead, setPlayhead] = useState(m.analysis?.session.videoTime ?? 0);
+  const [hidden, setHidden] = useState(saved?.videoHidden ?? false),
+    [status, setStatus] = useState<VideoStatus>("loading"),
+    [videoEpoch, setVideoEpoch] = useState(0);
+  const [localVideo, setLocalVideo] = useState(""),
+    [localName, setLocalName] = useState(""),
+    [focus, setFocus] = useState(false),
+    [filters, setFilters] = useState<ActionFilters>({});
+  const [past, setPast] = useState<Match[]>([]),
+    [future, setFuture] = useState<Match[]>([]),
+    [message, setMessage] = useState(""),
+    [lastId, setLastId] = useState<string | null>(null);
+  const resumePlayback = useRef(false);
+  const video = useRef<VideoPlayerHandle>(null),
+    root = useRef<HTMLDivElement>(null),
+    frozen = useRef<AnnotationMoment | null>(
+      saved?.captureActive &&
+        saved.captureVideoTime != null &&
+        /^\d{1,4}:[0-5]\d$/.test(saved.stamp)
+        ? {
+            timestamp:
+              Number(saved.stamp.split(":")[0]) * 60 +
+              Number(saved.stamp.split(":")[1]),
+            videoTimestamp: saved.captureVideoTime,
+          }
+        : null,
+    ),
+    committed = useRef(false);
+  const offset = m.analysis?.session.offset ?? 0,
+    src = localVideo || m.video,
+    showVideo = !!src && !hidden && status !== "error",
+    useVideo = showVideo && status === "ready" && !manual && !editing && !draft;
+  const edited = m.events.find((e) => e.id === editing) ?? null,
+    name = (id: string) => data.players.find((p) => p.id === id)?.name ?? id;
+  // Only observations and coverage affect the counters.
+  const counts = useMemo(
+    () => analysisCounts(m),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [m.events, m.participants, m.analysis?.completeKeys],
+  );
+  const score = {
+    A: m.events.filter((e) => isGoal(e) && e.team === "A").length,
+    B: m.events.filter((e) => isGoal(e) && e.team === "B").length,
+  };
+  useEffect(
+    () => () => {
+      if (localVideo) URL.revokeObjectURL(localVideo);
+    },
+    [localVideo],
+  );
+  useEffect(() => {
+    if (!m.analysis) return;
+    const builder = {
+      actor,
+      mate: draft?.mate ?? "",
+      opponent: draft?.opponent ?? "",
+      type: draft?.type ?? "SHOT",
+      outcome: draft?.outcome ?? "",
+      tags: draft?.tags ?? [],
+      stamp,
+      manual,
+      editing,
+      linked: draft?.linkedEventId ?? "",
+      automaticLink: draft?.linkedEventId === undefined,
+      positionKnown: !!draft?.position,
+      quick: false,
+      view: "builder",
+      scene: draft?.scene ?? { players: {}, ball: null },
+      capturePosition: draft?.position ?? null,
+      positionInput: draft?.positionInput,
+      end: draft?.endPosition ?? null,
+      captureActive: !!draft,
+      participantChosen: draft?.participantChosen ?? false,
+      detailChosen: draft?.detailChosen ?? false,
+      videoHidden: hidden,
+      captureVideoTime:
+        frozen.current?.timestamp ===
+        Number(stamp.split(":")[0]) * 60 + Number(stamp.split(":")[1])
+          ? frozen.current?.videoTimestamp
+          : undefined,
+    };
+    if (JSON.stringify(builder) !== JSON.stringify(m.analysis.session.builder))
+      onChange({
+        ...m,
+        analysis: {
+          ...m.analysis,
+          session: { ...m.analysis.session, sequenceId: sequence, builder },
+        },
+      });
+  }, [m, onChange, actor, stamp, manual, editing, draft, sequence, hidden]);
+  useEffect(() => {
+    if (draft?.type)
+      root.current
+        ?.querySelector(".precise-question")
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    else if (lastId)
+      root.current
+        ?.querySelector(".precise-action-groups")
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [draft?.type, editing, lastId]);
+  function moment(): AnnotationMoment {
+    const value = annotationMoment({
+      videoTime: video.current?.time() ?? playhead,
+      offset,
+      stamp,
+      useVideo,
+    });
+    if (!useVideo && frozen.current?.timestamp === value.timestamp)
+      return frozen.current;
+    return value;
+  }
+  function remember(next: Match) {
+    setPast((p) => [...p.slice(-49), structuredClone(m)]);
+    setFuture([]);
+    onChange(next);
+  }
+  function cancel() {
+    if (resumePlayback.current && showVideo && !editing) video.current?.play();
+    resumePlayback.current = false;
+    setDraft(null);
+    setEditing(null);
+    setManual(false);
+    frozen.current = null;
+    committed.current = false;
+  }
+  function undo() {
+    const prev = past.at(-1);
+    if (!prev) return;
+    setFuture((f) => [...f, structuredClone(m)]);
+    setPast((p) => p.slice(0, -1));
+    onChange(restoreAnnotation(m, prev));
+    setSequence(prev.analysis?.session.sequenceId ?? sequence);
+    cancel();
+    setLastId(null);
+    setMessage("Dernière modification annulée.");
+  }
+  function redo() {
+    const next = future.at(-1);
+    if (!next) return;
+    setPast((p) => [...p, structuredClone(m)]);
+    setFuture((f) => f.slice(0, -1));
+    onChange(restoreAnnotation(m, next));
+    setSequence(next.analysis?.session.sequenceId ?? sequence);
+    cancel();
+    setMessage("Modification rétablie.");
+  }
+  function commit(value: CaptureDraft, marked?: AnnotationMoment) {
+    if (busy || committed.current) return;
+    try {
+      const result = recordPreciseAction(m, {
+        draft: value,
+        playerId: actor,
+        sequenceId: sequence,
+        moment: marked ?? moment(),
+        editing,
+      });
+      committed.current = true;
+      if (resumePlayback.current && showVideo && !editing)
+        video.current?.play();
+      resumePlayback.current = false;
+      remember(result.match);
+      setSequence(result.sequenceId);
+      setDraft(null);
+      setEditing(null);
+      setManual(false);
+      setStamp(clock(result.event.timestamp));
+      if (!showVideo)
+        setPlayhead(result.event.metadata.videoTimestamp as number);
+      frozen.current = null;
+      setLastId(result.event.id);
+      setMessage(
+        `${clock(result.event.timestamp)} · ${name(actor)} · ${value.type === "FOUL" && value.outcome === "SUFFERED" ? "Faute subie" : eventLabel(result.event)}${value.mate ? " → " + name(value.mate) : ""}${value.opponent ? " · " + name(value.opponent) : ""} · ${editing ? "corrigée" : "ajoutée"} au brouillon.`,
+      );
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+  function start(type: string) {
+    if (busy) return;
+    if (!m.participants.some((p) => p.playerId === actor && p.team)) {
+      setMessage("Choisis d’abord le joueur ciblé.");
+      return;
+    }
+    try {
+      const marked = moment();
+      frozen.current = marked;
+      if (!draft && !editing)
+        resumePlayback.current = showVideo && !!video.current?.isPlaying();
+      video.current?.pause();
+      setStamp(clock(marked.timestamp));
+      setManual(true);
+      committed.current = false;
+      setMessage("");
+      const next = blank(type);
+      setDraft(next);
+      if (!editing && captureStep(next) === "ready") commit(next, marked);
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+  function update(value: CaptureDraft) {
+    setDraft(value);
+    if (!editing && captureStep(value) === "ready") commit(value);
+  }
+  function choosePlayer(id: string) {
+    setActor(id);
+    setMessage("");
+    if (draft && !editing) {
+      cancel();
+    }
+    if (editing && draft) setDraft(retargetCapture(draft));
+    committed.current = false;
+  }
+  function edit(e: MatchEvent) {
+    video.current?.pause();
+    frozen.current = null;
+    const seconds = eventVideoTime(e, offset);
+    if (seconds != null) {
+      video.current?.seek(seconds);
+      frozen.current = { timestamp: e.timestamp!, videoTimestamp: seconds };
+    }
+    setActor(e.playerId);
+    setEditing(e.id);
+    setStamp(clock(e.timestamp));
+    setManual(true);
+    committed.current = false;
+    setMessage("");
+    setDraft(
+      isV2(e)
+        ? {
+            type: e.type,
+            outcome:
+              e.type === "FOUL"
+                ? "COMMITTED"
+                : String(e.metadata.outcome ?? ""),
+            mate: e.relatedPlayerId ?? "",
+            opponent: String(e.metadata.opponentPlayerId ?? ""),
+            tags: (e.metadata.tags as string[]) ?? [],
+            participantChosen: true,
+            detailChosen: true,
+            position: (e.metadata.position as CaptureDraft["position"]) ?? null,
+            endPosition:
+              (e.metadata.endPosition as CaptureDraft["endPosition"]) ?? null,
+            linkedEventId: String(e.metadata.linkedEventId ?? "") || null,
+          }
+        : null,
+    );
+    root.current
+      ?.querySelector(".precise-capture")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function saveEdit() {
+    if (draft) {
+      commit(draft);
+      return;
+    }
+    if (!edited || busy) return;
+    try {
+      const marked = edited.timestamp == null && stamp === "" ? null : moment();
+      remember(
+        correctHistoricalAction(m, {
+          eventId: edited.id,
+          playerId: actor,
+          moment: marked,
+        }),
+      );
+      cancel();
+      setMessage("Action historique corrigée dans le brouillon.");
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+  function remove(id: string) {
+    if (busy) return;
+    remember(
+      beginAnalysis({
+        ...m,
+        events: reconcileActionLinks(m.events.filter((e) => e.id !== id)),
+      }),
+    );
+    if (editing === id) cancel();
+    setMessage("Action supprimée. Tu peux annuler cette modification.");
+  }
+  function review(events: MatchEvent[]) {
+    if (!src || status !== "ready") {
+      setMessage("Ajoute une vidéo lisible pour revoir l’extrait.");
+      return;
+    }
+    setHidden(false);
+    if (
+      !video.current?.review(
+        reviewRanges(
+          events,
+          offset,
+          4,
+          3,
+          video.current?.duration() || Infinity,
+        ),
+      )
+    )
+      setMessage("Cet extrait ne peut pas être lu.");
+    root.current
+      ?.querySelector(".precise-media")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function newSequence() {
+    cancel();
+    const id = crypto.randomUUID();
+    setSequence(id);
+    const next = beginAnalysis(m);
+    onChange({
+      ...next,
+      analysis: {
+        ...next.analysis!,
+        session: { ...next.analysis!.session, sequenceId: id },
+      },
+    });
+    setMessage(
+      "Nouvelle possession. Les prochaines actions ne seront pas liées à la précédente.",
+    );
+  }
+  function hideVideo() {
+    resumePlayback.current = false;
+    video.current?.pause();
+    if (!draft && !editing && !manual)
+      setStamp(
+        clock(Math.max(0, (video.current?.time() ?? playhead) - offset)),
+      );
+    setHidden(true);
+    setManual(false);
+  }
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (
+        busy ||
+        root.current?.closest('[data-state="inactive"]') ||
+        (!root.current?.contains(document.activeElement) &&
+          document.activeElement !== document.body)
+      )
+        return;
+      const target = e.target as HTMLElement;
+      if (
+        e.defaultPrevented ||
+        target.closest("input,textarea,select,button") ||
+        target.isContentEditable
+      )
+        return;
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if (e.key === "Escape") {
+        cancel();
+        return;
+      }
+      if (e.key === " ") {
+        e.preventDefault();
+        if (showVideo) video.current?.toggle();
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        if (showVideo)
+          video.current?.step(
+            (e.key === "ArrowLeft" ? -1 : 1) * (e.shiftKey ? 5 : 1),
+          );
+        return;
+      }
+      const action = Object.keys(actionDefinitions).find(
+        (k) => actionDefinitions[k].shortcut === e.key.toLowerCase(),
+      );
+      if (action) {
+        e.preventDefault();
+        start(action);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+  const youtube = youtubeId(m.video);
+  return (
+    <div
+      ref={root}
+      className={
+        "analyzer sequence-workspace precise-workspace " +
+        (focus ? "seq-focus" : "")
+      }
+    >
+      <header className="annotation-header">
+        <div className="annotation-title">
+          <h2>Analyse du match</h2>
+          <div className="annotation-context">
+            <span>Match {String(m.number).padStart(2, "0")}</span>
+            <span>
+              Score officiel{" "}
+              <strong>
+                {m.scoreA ?? "—"} – {m.scoreB ?? "—"}
+              </strong>
+            </span>
+            <span>
+              Buts annotés{" "}
+              <strong>
+                {score.A} – {score.B}
+              </strong>
+            </span>
+          </div>
+        </div>
+        <div className="annotation-history">
+          <button
+            type="button"
+            aria-label="Annuler la dernière action"
+            disabled={busy || !past.length}
+            onClick={undo}
+          >
+            <RotateCcw size={16} />
+          </button>
+          <button
+            type="button"
+            aria-label="Refaire la dernière action"
+            disabled={busy || !future.length}
+            onClick={redo}
+          >
+            <RotateCw size={16} />
+          </button>
+        </div>
+        <div className="annotation-header-actions">
+          <span className="tag">Brouillon · {m.events.length} actions</span>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setFocus(!focus)}
+          >
+            {focus ? <Minimize2 size={15} /> : <Maximize2 size={15} />}{" "}
+            {focus ? "Réduire" : "Agrandir"}
+          </button>
+          {focus && onSave && (
+            <button
+              type="button"
+              className="button primary"
+              disabled={busy}
+              onClick={() => onSave(m)}
+            >
+              <Save size={15} />
+              Enregistrer
+            </button>
+          )}
+        </div>
+      </header>
+      <section className="precise-media" aria-label="Vidéo du match">
+        <div className="precise-video-heading">
+          <div>
+            <span className="studio-label">VIDÉO</span>
+            <strong>
+              {showVideo
+                ? "Regarder et annoter"
+                : !src
+                  ? "Annoter sans vidéo"
+                  : status === "error"
+                    ? "Vidéo indisponible · saisie manuelle"
+                    : "Vidéo masquée · saisie manuelle"}
+            </strong>
+          </div>
+          {showVideo ? (
+            <button type="button" className="button" onClick={hideVideo}>
+              <EyeOff size={16} />
+              Masquer la vidéo / annoter sans vidéo
+            </button>
+          ) : (
+            src && (
+              <button
+                type="button"
+                className="button"
+                onClick={() => {
+                  setHidden(false);
+                  setManual(false);
+                  if (status === "error") {
+                    setStatus("loading");
+                    setVideoEpoch((v) => v + 1);
+                  }
+                }}
+              >
+                <Eye size={16} />
+                {status === "error"
+                  ? "Réessayer la vidéo"
+                  : "Afficher la vidéo"}
+              </button>
+            )
+          )}
+        </div>
+        {!!src && (
+          <div className="precise-player" hidden={!showVideo}>
+            <VideoPlayer
+              key={src + "-" + videoEpoch}
+              annotation
+              ref={video}
+              src={src}
+              initialTime={m.analysis?.session.videoTime ?? 0}
+              onStatus={setStatus}
+              onTime={(seconds) => {
+                setPlayhead(seconds);
+                if (!manual && !editing && !draft && showVideo)
+                  setStamp(clock(Math.max(0, seconds - offset)));
+                if (
+                  m.analysis &&
+                  !busy &&
+                  Math.floor(seconds) !==
+                    Math.floor(m.analysis.session.videoTime)
+                )
+                  onChange({
+                    ...m,
+                    analysis: {
+                      ...m.analysis,
+                      session: { ...m.analysis.session, videoTime: seconds },
+                    },
+                  });
+              }}
+            />
+          </div>
+        )}
+        {!showVideo && (
+          <p className="precise-video-note">
+            {status === "error"
+              ? "Le lecteur ne fonctionne pas. Tu peux continuer à noter les actions. "
+              : "Choisis le joueur puis l’action ci-dessous. "}
+            Renseigne le temps du match manuellement.
+            {youtube && (
+              <>
+                {" "}
+                <a
+                  href={"https://www.youtube.com/watch?v=" + youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ouvrir sur YouTube ↗
+                </a>
+              </>
+            )}
+          </p>
+        )}
+      </section>
+      <AnnotationCapture
+        match={m}
+        data={data}
+        actor={actor}
+        draft={draft}
+        editing={edited}
+        busy={busy}
+        time={useVideo ? clock(Math.max(0, playhead - offset)) : stamp}
+        manualTime={!useVideo}
+        onTimeChange={(value) => {
+          setStamp(value);
+          setManual(true);
+        }}
+        onPlayer={choosePlayer}
+        onStart={start}
+        onDraft={update}
+        onCancel={cancel}
+        onSaveEdit={saveEdit}
+      />
+      {message && (
+        <div className="precise-feedback" role="status">
+          <span>{message}</span>
+          {past.length > 0 && (
+            <button
+              type="button"
+              className="textbutton"
+              onClick={undo}
+              disabled={busy}
+            >
+              Annuler
+            </button>
+          )}
+          {lastId && m.events.some((e) => e.id === lastId) && (
+            <button
+              type="button"
+              className="textbutton"
+              onClick={() => edit(m.events.find((e) => e.id === lastId)!)}
+            >
+              Modifier / préciser
+            </button>
+          )}
+        </div>
+      )}
+      <EventTimeline
+        match={m}
+        data={data}
+        time={Math.max(0, playhead - offset)}
+        selected={editing}
+        filters={filters}
+        onFilters={setFilters}
+        canReview={!!src && status === "ready"}
+        onSeek={(seconds) => {
+          if (src && status === "ready") video.current?.seek(seconds + offset);
+          else {
+            setStamp(clock(seconds));
+            setManual(true);
+            setPlayhead(seconds + offset);
+          }
+        }}
+        onSelect={edit}
+        onReview={review}
+        onRemove={remove}
+      />
+      <div className="annotation-settings">
+        <details className="seq-video-source">
+          <summary>
+            <SlidersHorizontal size={14} />
+            {src
+              ? "Source vidéo et synchronisation"
+              : "Ajouter une vidéo · facultatif"}
+          </summary>
+          <VideoSource
+            value={m.video}
+            onChange={(video) => {
+              setStatus("loading");
+              setHidden(false);
+              setManual(false);
+              onChange({ ...m, video });
+            }}
+            onLocal={(file) => {
+              setStatus("loading");
+              setHidden(false);
+              setManual(false);
+              setLocalVideo(URL.createObjectURL(file));
+              setLocalName(file.name);
+            }}
+          />
+          {localVideo && (
+            <div className="local-video-status">
+              <span>Fichier local · {localName}</span>
+              <button
+                type="button"
+                className="textbutton"
+                onClick={() => {
+                  setLocalVideo("");
+                  setLocalName("");
+                  setStatus("loading");
+                }}
+              >
+                Utiliser la vidéo enregistrée
+              </button>
+            </div>
+          )}
+          <label>
+            Début du match dans la vidéo (secondes)
+            <input
+              aria-label="Décalage vidéo / match"
+              type="number"
+              value={offset}
+              onChange={(e) => {
+                if (m.analysis)
+                  onChange({
+                    ...m,
+                    analysis: {
+                      ...m.analysis,
+                      session: {
+                        ...m.analysis.session,
+                        offset: Number(e.target.value) || 0,
+                      },
+                    },
+                  });
+              }}
+            />
+          </label>
+          <p className="muted">
+            Sur YouTube dans un autre onglet, le temps est manuel. Avec le
+            lecteur du site, il se fige au clic sur l’action.
+          </p>
+        </details>
+        <details>
+          <summary>Possessions et raccourcis</summary>
+          <button
+            type="button"
+            className="button"
+            onClick={newSequence}
+            disabled={busy}
+          >
+            Nouvelle possession
+          </button>
+          <p className="muted">
+            À utiliser après une interruption ou quand l’équipe change. Les
+            buts, pertes, fautes, arrêts et récupérations terminent aussi la
+            possession.
+          </p>
+          <p className="muted">
+            Espace : lecture / pause · Flèches : ±1 s · Maj + flèche : ±5 s · P
+            S D U T I R F : choisir une action · Échap : annuler la saisie ·
+            Cmd/Ctrl Z : annuler.
+          </p>
+        </details>
+        <details className="draft-counters">
+          <summary>Statistiques des actions saisies</summary>
+          <div className="review-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Joueur</th>
+                  <th>Buts</th>
+                  <th>Passes déc.</th>
+                  <th>Tirs</th>
+                  <th>Passes</th>
+                  <th>Pertes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {counts.participants.map((p) => (
+                  <tr key={p.playerId}>
+                    <td>{name(p.playerId)}</td>
+                    {(
+                      ["GOAL", "ASSIST", "SHOT", "PASS", "TURNOVER"] as const
+                    ).map((kind, i) => (
+                      <td key={kind}>
+                        <button
+                          type="button"
+                          className="stat-jump"
+                          onClick={() =>
+                            setFilters({ player: p.playerId, type: kind })
+                          }
+                        >
+                          {i === 0
+                            ? (p.stats.goals ?? 0)
+                            : i === 1
+                              ? (p.stats.assists ?? 0)
+                              : i === 2
+                                ? (p.stats.shots ?? 0)
+                                : i === 3
+                                  ? `${p.stats.passesCompleted ?? 0} / ${p.stats.passesAttempted ?? 0}`
+                                  : (p.stats.turnovers ?? 0)}
+                        </button>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="muted">
+            Ces compteurs concernent le brouillon. Valide les catégories et
+            publie dans l’onglet Vérifier.
+          </p>
+        </details>
+      </div>
     </div>
-   </>:<><div className="annotation-review-note"><div className="split"><h3>Revoir et corriger</h3><span className="studio-label">{reviewEvents.length} action{reviewEvents.length===1?'':'s'}</span></div><p>Cliquez une action pour la corriger ou sur lecture pour revoir son extrait.</p><div className="annotation-review-actions">{reviewEvents.slice(0,5).map(e=><div key={e.id}><button type="button" className="review-action-select" onClick={()=>edit(e)} aria-label={'Corriger '+name(e.playerId)+' à '+clock(e.timestamp)}><time>{clock(e.timestamp)||'—'}</time><span><strong>{name(e.playerId)}</strong><small>{eventLabel(e)}</small></span></button><button type="button" className="timeline-icon-button" disabled={!(localVideo||m.video)||e.timestamp==null} onClick={()=>review([e])} aria-label={'Lire l’extrait de '+name(e.playerId)+' à '+clock(e.timestamp)}><Play size={16} aria-hidden="true"/></button></div>)}</div>{!reviewEvents.length&&<p>Aucune action dans cette sélection.</p>}{reviewEvents.length>5&&<p>Les autres actions sont dans la liste sous la timeline.</p>}<button type="button" className="textbutton" onClick={()=>setView('builder')}>Reprendre la saisie</button></div>
-<details className="draft-counters"><summary>Statistiques de l’annotation</summary><div className="review-table"><table><thead><tr><th>Joueur</th><th>Buts</th><th>Assists</th><th>Tirs</th><th>Passes</th><th>Pertes</th></tr></thead><tbody>{counts.participants.map(p=><tr key={p.playerId}><td>{name(p.playerId)}</td>{(['GOAL','ASSIST','SHOT','PASS','TURNOVER'] as const).map((kind,i)=><td key={i}><button type="button" className="stat-jump" aria-label={'Revoir '+['les buts','les assists','les tirs','les passes','les pertes de balle'][i]+' de '+name(p.playerId)} onClick={()=>filterStats(p.playerId,kind)}>{i===0?p.stats.goals??0:i===1?p.stats.assists??0:i===2?p.stats.shots??0:i===3?`${p.stats.passesCompleted??0} / ${p.stats.passesAttempted??0}`:p.stats.turnovers??0}</button></td>)}</tr>)}</tbody></table></div><p className="muted">Ces compteurs décrivent les actions saisies. Les catégories seront validées dans l’onglet Vérifier. Secondary Assist : deux passes réussies suivies d’un but dans la même séquence continue.</p></details>
-   </>}
-  </div>
- </div>
- <EventTimeline {...timelineProps} compact={view==='builder'} onExpand={()=>setView('timeline')}/>
- <div className="annotation-settings">
-   <details className="seq-video-source" open={!m.video&&!localVideo}><summary><SlidersHorizontal size={14} aria-hidden="true"/>{m.video||localVideo?'Changer la vidéo':'Ajouter une vidéo'}</summary><VideoSource value={m.video} onChange={video=>onChange({...m,video})} onLocal={file=>{setLocalVideo(URL.createObjectURL(file));setLocalName(file.name)}}/></details>
-   {localVideo&&<div className="local-video-status"><span>Fichier local · {localName}</span><button type="button" className="textbutton" onClick={()=>{setLocalVideo('');setLocalName('')}}>Utiliser la vidéo enregistrée</button></div>}
- </div>
-</div>}
+  );
+}

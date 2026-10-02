@@ -8,12 +8,14 @@ import {reviewProgress,type ReviewRange} from '@/lib/annotation-controls';
 
 type YouTubePlayer={getCurrentTime:()=>number;getDuration:()=>number;getPlayerState:()=>number;seekTo:(seconds:number,allowSeekAhead:boolean)=>void;playVideo:()=>void;pauseVideo:()=>void;setPlaybackRate:(rate:number)=>void;destroy:()=>void};
 type YouTubeAPI={Player:new(element:HTMLElement,options:{videoId:string;host:string;playerVars:Record<string,string|number>;events:{onReady:()=>void;onStateChange:(event:{data:number})=>void;onError:(event:{data:number})=>void}})=>YouTubePlayer};
-export type VideoPlayerHandle={time:()=>number;duration:()=>number;seek:(seconds:number)=>void;toggle:()=>void;play:()=>void;pause:()=>void;step:(seconds:number)=>void;speed:(rate:number)=>void;review:(ranges:ReviewRange[])=>boolean};
+export type VideoStatus='loading'|'ready'|'error';
+export type VideoPlayerHandle={isPlaying:()=>boolean;time:()=>number;duration:()=>number;seek:(seconds:number)=>void;toggle:()=>void;play:()=>void;pause:()=>void;step:(seconds:number)=>void;speed:(rate:number)=>void;review:(ranges:ReviewRange[])=>boolean};
 export function formatVideoTime(seconds:number){const whole=Math.max(0,Math.floor(Number.isFinite(seconds)?seconds:0));return `${String(Math.floor(whole/60)).padStart(2,'0')}:${String(whole%60).padStart(2,'0')}`}
-export const VideoPlayer=forwardRef<VideoPlayerHandle,{src:string;initialTime?:number;className?:string;annotation?:boolean;onTime?:(seconds:number)=>void}>(function VideoPlayer({src,initialTime=0,className,annotation=false,onTime},ref){
+export const VideoPlayer=forwardRef<VideoPlayerHandle,{src:string;initialTime?:number;className?:string;annotation?:boolean;onTime?:(seconds:number)=>void;onStatus?:(status:VideoStatus)=>void}>(function VideoPlayer({src,initialTime=0,className,annotation=false,onTime,onStatus},ref){
  const host=useRef<HTMLDivElement>(null),html=useRef<HTMLVideoElement>(null),yt=useRef<YouTubePlayer|null>(null),timeRef=useRef(0);
  const playlist=useRef<{ranges:ReviewRange[];index:number;awaitingSeek:boolean}|null>(null);
  const [time,setTime]=useState(0),[ready,setReady]=useState(false),[playing,setPlaying]=useState(false),[reviewing,setReviewing]=useState(false),[rate,setRate]=useState(1),[error,setError]=useState('');
+ useEffect(()=>{onStatus?.(error?'error':ready?'ready':'loading')},[error,ready,onStatus]);
  const id=youtubeId(src),local=src.startsWith('blob:')||/^\/api\/videos\/[0-9a-f-]+\.(mp4|mov|webm)$/.test(src);
  const onTimeRef=useRef(onTime);useLayoutEffect(()=>{onTimeRef.current=onTime;},[onTime]);
  function stopReview(){playlist.current=null;setReviewing(false);}
@@ -59,6 +61,7 @@ export const VideoPlayer=forwardRef<VideoPlayerHandle,{src:string;initialTime?:n
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[src]);
  const api:VideoPlayerHandle={
+  isPlaying:()=>id?yt.current?.getPlayerState?.()===1:!!html.current&&!html.current.paused,
   time:()=>id?Number(yt.current?.getCurrentTime?.()??timeRef.current):Number(html.current?.currentTime??timeRef.current),
   duration:()=>Number(id?yt.current?.getDuration?.()??0:html.current?.duration??0)||0,
   seek:(seconds)=>{stopReview();const next=Math.max(0,seconds);seekRaw(next);update(next);},

@@ -13,15 +13,16 @@ npx vite --config tests/browser/annotation-preview/vite.config.mts
 
 Ouvrir `http://127.0.0.1:5190/`. Le banc `http://127.0.0.1:5190/responsive.html` affiche les vrais composants dans deux fenêtres de 390 px et 768 px. La vidéo générée est ignorée par Git. Le terrain schématique sert uniquement de vidéo de test, sans détection automatique.
 
-Parcours vérifié le 2 octobre 2026 :
+Parcours de vérification de la saisie précise :
 
-1. Avancer à 5 s, activer « Passes en chaîne », cliquer Loris, avancer de 1 s, cliquer Xan, avancer de 1 s, cliquer But. Trois actions, un but provisoire, assist Loris, Secondary Assist Mathis ; score officiel et valeurs manuelles conservés.
-2. Annuler deux fois : une passe restante et Loris redevient le porteur. Refaire deux fois : les trois actions reviennent.
-3. Ouvrir « Revoir », puis filtrer Loris + Passes décisives : seul le but de Xan apparaît. Lire la sélection : démarrage à 3 s, arrêt vers 10 s.
-4. Modifier le but en tir non cadré : trois actions, zéro but provisoire. Le filtre des assists devient vide.
-5. Pendant la lecture, cliquer « Autres actions / détails » et choisir Tir. Attendre quelques secondes puis valider : le temps exact du clic initial est conservé.
-6. Contrôler filtres, cartes et lecture à 390 px, sans débordement de page. Sur ordinateur, vérifier plein écran, zoom 2 minutes et navigation de période.
+1. Choisir Mathis, lancer la vidéo et avancer à 5 s. Choisir Passe → Réussie → Xan : une action, temps du clic conservé, Mathis reste ciblé et la vidéo reprend si elle jouait.
+2. Masquer la vidéo, saisir 12:43, choisir Passe → Ratée → Destinataire non identifié. Tester aussi Tir → But → passeur / sans passe décisive, et Faute → Subie → adversaire.
+3. Annuler / refaire, corriger depuis une ligne sans ajouter d’événement, filtrer un joueur impliqué et lire la sélection.
+4. Dans les précisions facultatives d’une correction, saisir uniquement X : aucune position n’est inventée et la sauvegarde attend Y. Tester aussi le clic sur le terrain.
+5. Ouvrir `/?video=none` et `/?video=broken` : aucun grand écran vide ou inutilisable, saisie manuelle possible. Le second cas déclenche une erreur sur un fichier inexistant de cette fixture uniquement.
+6. Ouvrir `/?video=none&persist=1` : le test conserve son propre état dans la clé locale `precise-preview`. Recharger au milieu d’une saisie ou correction et finir sans perdre ses choix. « Réinitialiser le test » réinitialise uniquement cette fixture.
+7. Contrôler l’ordre vidéo → saisie → timeline et l’absence de débordement à 390 / 768 px, y compris un menu de résultat et une liste d’événements. Aucun parcours ne contacte la base de production.
 
-Les tests Node couvrent séparément le retour en arrière avant un tir déjà lié, la temporisation des seeks asynchrones et la conservation des valeurs manuelles à l’annulation. La vidéo synthétique ne valide pas les restrictions ou les conditions réseau de YouTube.
+Les tests Node couvrent validation des participants et résultats, projections atomiques, liens, contreparties des blocages, métadonnées de correction, coordonnées incomplètes, anciennes sessions et temps inconnus. La vidéo synthétique ne valide pas les restrictions ou les conditions réseau de YouTube.
 
-La refonte visuelle utilise le design system HTML fourni le 2 octobre : polices locales via le lien `public/brand`, fonds Void/Carbon, accent Kush, angles droits. Les détails remplacent les actions rapides ; le type devient un sélecteur lors de la correction. Vérifier aussi les contrôles sur 390 px et 768 px.
+Le site et l’atelier utilisent les mêmes polices locales et tokens de `app/design-system.css` : Archivo, Big Shoulders Display, JetBrains Mono, fonds Void / Carbon, accent Kush et angles droits.
