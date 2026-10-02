@@ -5,6 +5,8 @@ outputs
 .sites-runtime
 .openai
 .git
+.vercel
+tests/browser
 node_modules
 .next
 dist

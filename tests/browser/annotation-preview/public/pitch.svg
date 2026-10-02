@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+<rect width="1280" height="720" fill="#121619"/>
+<g fill="none" stroke="#596064" stroke-width="2"><rect x="90" y="100" width="1100" height="520" rx="2"/><path d="M640 100V620M90 230H230V490H90M1190 230H1050V490H1190M90 290H145V430H90M1190 290H1135V430H1190"/><circle cx="640" cy="360" r="75"/><circle cx="300" cy="360" r="3"/><circle cx="980" cy="360" r="3"/></g>
+<g font-family="Arial, sans-serif" font-size="18" font-weight="700" text-anchor="middle">
+<g fill="#fcfcfc"><circle cx="150" cy="360" r="24"/><circle cx="360" cy="220" r="24"/><circle cx="370" cy="480" r="24"/><circle cx="545" cy="330" r="24"/><circle cx="565" cy="545" r="24"/></g>
+<g fill="#121619"><text x="150" y="366">MA</text><text x="360" y="226">LO</text><text x="370" y="486">XA</text><text x="545" y="336">AD</text><text x="565" y="551">SA</text></g>
+<g fill="#202629" stroke="#a4adae" stroke-width="2"><circle cx="1130" cy="360" r="24"/><circle cx="900" cy="220" r="24"/><circle cx="915" cy="480" r="24"/><circle cx="745" cy="300" r="24"/><circle cx="750" cy="540" r="24"/></g>
+<g fill="#fcfcfc"><text x="1130" y="366">AL</text><text x="900" y="226">PA</text><text x="915" y="486">TO</text><text x="745" y="306">HU</text><text x="750" y="546">LE</text></g>
+</g>
+<circle cx="595" cy="368" r="7" fill="#44cf6c"/>
+<g fill="#a4adae" font-family="Arial, sans-serif" font-size="14" letter-spacing="2"><text x="90" y="66">COPRO LEAGUE</text><text x="90" y="669">VIDÉO DE TEST · MATCH FICTIF</text></g>
+</svg>

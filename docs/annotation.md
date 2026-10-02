@@ -1,15 +1,45 @@
-# Match annotation
+# Analyse des matchs
 
-The existing `match_events` table remains the source of truth. New events use `metadata.schemaVersion=2` with sequenceId, outcome, tags, opponentPlayerId, linkedEventId, position, endPosition, scene and createdAt/updatedAt. `relatedPlayerId` remains the teammate relation. No SQL migration or replacement of historical events is required.
+Le parcours est « Préparer → Analyser → Vérifier → Publier ». Le résultat sportif et l’état de l’analyse sont indépendants. Une annotation partielle conserve le score officiel et les statistiques déjà publiées.
 
-`lib/actions.ts` defines the thirteen actions and their contributions. `lib/events.ts` projects both historical and new actions. Tracked families remain tracked after deletions so that removed contributions become zero. A linked goal and assist pass count one assist; a blocked shot and linked block count one defender block. The interception/recovery rule and pitch dimensions are centralized in `annotationRules`.
+## Préparer
 
-Scene coordinates use a stable A→B display. Recorded event coordinates are rotated for team B into its own-goal→opponent-goal frame. Surface approximation is x >=85 and y25..75 on a 40×20m pitch. No coordinates are invented for historical Excel events.
+Renseigner participants, équipes, durée réellement jouée, résultat et MVP. Les valeurs manuelles restent disponibles tant qu’une catégorie n’est pas validée depuis les événements. Vide signifie inconnu ; zéro signifie observé et absent. Le temps de jeu individuel et le rôle (champ, gardien, mixte) sont facultatifs et ne sont jamais déduits.
 
-YouTube's official iframe API cannot remove age, privacy or embedding restrictions. The UI explains player errors and links to the normal YouTube watch page. Videos must be playable by YouTube in an embed for synchronized playback there. Browser-local File/object URLs provide synchronized playback without uploading (no application size limit, subject to browser/codec/device limits). Object URLs are never saved in the database; selecting the file again is required after a reload. Shared MP4/MOV/WebM uploads use R2, a 90MiB limit, container signatures and range reads. No transcoder is deployed; MOV support depends on browser codecs.
+## Analyser
 
-Validation in this change: 32 unit/regression tests, 2 video signature/range tests, 21 authenticated HTTP checks. Browser checks covered a 120:18 annotation, scene persistence, pass receiver selection from the field, undo/redo, MP4 upload progress, playback, seeking, automatic timestamps, match persistence, browser-local playback with blob URL and timeline seek, and mobile width390 without page overflow. YouTube API load/commands were exercised; private/age-restricted playback is governed by YouTube and cannot be guaranteed by the application.
+La référence visuelle actuelle est décrite dans `design-system-annotation.md`, à partir du fichier HTML fourni le 2 octobre 2026.
 
-Five-a-side cleanup: boxShots, npxg, yellowCards, redCards and cleanSheets are retired. Existing persisted values are filtered on reads and backup imports; card events are removed and historical carded fouls retain only the foul. Ratings no longer apply card penalties and awards no longer use clean sheets. No destructive SQL migration is needed.
+Choisir une vidéo ou saisir les temps manuellement. La saisie rapide fonctionne sans terrain. La scène garde les placements entre actions ; chaque position d’action doit être confirmée avant d’alimenter les cartes. Le décalage correspond au début du match dans la vidéo : temps du match = temps vidéo − décalage.
 
-Secondary Assists: new `secondaryAssists` statistic, derived from the two latest successful passes before an assisted goal in one explicitly named continuous sequence. Losses, opponent possession, restarts, unknown timestamps and discontinuous receivers prevent credit. Only the direct passer to the assister is credited; older involvement is excluded. Totals and averages use the existing observed-match aggregation. Historical matches lacking passing evidence remain unknown. The JSON stat store needs no SQL migration.
+L’onglet « Annoter » présente une vidéo dominante et un panneau unique de saisie : temps, joueurs des deux équipes, puis actions. La timeline compacte occupe toute la largeur sous ces deux blocs ; les réglages vidéo viennent ensuite. Sélectionner le joueur, puis cliquer l’action. Les boutons enregistrent immédiatement un but, un tir cadré ou non cadré, une passe ratée, une récupération, une interception, une perte ou un dégagement pour le joueur observé. Le temps vient du lecteur, ou du champ manuel lorsqu’il est renseigné. Aucune position n’est déduite. « Autres actions » remplace les commandes rapides par la saisie détaillée ; choisir une action fige son temps pendant la saisie des détails. La validation revient automatiquement aux commandes rapides.
+
+Activer « Passes en chaîne » pour enregistrer une passe réussie en cliquant sur son destinataire. Chaque passe transfère le porteur. Désactiver ce mode pour simplement sélectionner un joueur. But, récupération, interception, perte et dégagement ouvrent une nouvelle possession. Annuler et refaire rétablissent les observations et le porteur sans restaurer d’anciens scores officiels ou anciennes valeurs manuelles.
+
+L’onglet « Revoir » regroupe les filtres, la liste des actions et la lecture des extraits. La timeline affiche deux pistes d’équipe, un curseur synchronisé et des zooms de 2, 5 et 10 minutes. Cliquer le fond pour se déplacer, ou une action pour la corriger. Les filtres équipe, joueur impliqué, type et recherche s’appliquent aux pistes, aux cartes et à « Lire la sélection ». Cette lecture enchaîne les extraits avec 4 secondes avant et 3 secondes après, fusionne les passages voisins et s’arrête à la fin. Les compteurs provisoires permettent aussi d’ouvrir les actions d’un joueur.
+
+Après une passe réussie, son receveur devient le porteur proposé. Un tir propose la dernière passe compatible de la même séquence, antérieure au tir. Le bouton de rupture ouvre une nouvelle possession. Une passe ratée peut avoir un receveur inconnu. Le tag « possession perdue » incrémente une perte réelle ; une action TURNOVER liée à cette cause ne la recompte pas.
+
+Le but attribue l’assist, et la passe liée au tir produit la passe clé. La Secondary Assist conserve la règle des deux dernières passes réussies avant un but assisté, dans une séquence continue. Les échecs, changements de possession, temps inconnus et ruptures empêchent ce crédit. Les actions historiques restent éditables sans conversion automatique.
+
+L’éditeur reste monté entre les onglets. Le brouillon local sauvegarde actions, séquence, contexte et temps vidéo, avec reprise au retour. Il est associé au compte et au match. Un conflit de version conserve le brouillon téléchargeable et bloque l’écrasement. « Enregistrer le brouillon » persiste le travail sur le serveur et garde l’éditeur ouvert. Les fichiers vidéo locaux doivent être sélectionnés à nouveau après rechargement.
+
+## Vérifier et publier
+
+L’écran compare score officiel, buts annotés et contributions par joueur. Cocher uniquement les catégories suivies pour tous les joueurs sur tout le match, puis renseigner les périodes réellement observées. La couverture doit atteindre toute la durée. Les Secondary Assists et les catégories de zone disposent de validations séparées.
+
+La publication exige un résultat terminé, une couverture complète et des liens cohérents. Si les buts sont publiés, leur total doit correspondre au score officiel. Une passe ne peut pas créer deux tirs liés. Les temps hors durée et liens hors séquence bloquent ; les positions absentes restent acceptables hors catégories de zone et sont exclues des cartes.
+
+Seules les catégories cochées remplacent les valeurs manuelles. Retirer une catégorie précédemment publiée restaure son observation manuelle d’origine. Après une correction, les lecteurs gardent les derniers événements et compteurs validés jusqu’à la nouvelle publication. La couverture, la provenance et la date de validation sont visibles dans la restitution.
+
+## Modèle et compatibilité
+
+Les événements résident toujours dans `match_events`. Leurs métadonnées v2 contiennent sequenceId, outcome, tags, opponentPlayerId, linkedEventId, position, endPosition, scene et videoTimestamp. Les coordonnées enregistrées sont relatives au sens d’attaque de l’équipe ; celles de la scène restent dans le repère A→B. Aucune position ni aucun xG n’est inventé.
+
+La colonne nullable `matches.analysis` conserve session, baseline manuelle et dernier instantané publié. Appliquer `202610020001_match_analysis.sql` avant de déployer le nouveau serveur. Les lectures publiques suppriment session, baseline et événements provisoires. Les exports administrateur conservent les brouillons. Les statistiques historiques sans état d’analyse suivent leur fonctionnement existant.
+
+Le rating reste dynamique. Les volumes sont ramenés à 60 minutes lorsque le temps de jeu est confirmé ; les temps inconnus sont comparés entre eux. Les rôles sont comparés séparément, avec au moins trois observations disponibles par métrique. Les taux de réussite demandent au moins cinq tentatives. Une présence nulle ne produit pas de note automatique. Les données manquantes ne sont pas transformées en zéro et les xG restent manuels avec provenance.
+
+## Vérification du 2 octobre 2026
+
+Les tests Node/PostgreSQL PGlite couvrent projection, publication, lectures publiques, corrections, versions, sauvegardes, historique saison 2, liens, ratings, saisie directe et lecture des extraits. Parcours navigateur sur des fixtures locales sans écriture en base : passes→but, annuler/refaire, correction, filtres, temps figé, lecture des sélections et largeur 390 px sans débordement de page. Le banc reproductible est décrit dans `tests/browser/annotation-preview/README.md`. Le déploiement et la migration de production restent distincts de cette vérification locale.

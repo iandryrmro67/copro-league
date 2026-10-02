@@ -1,0 +1,27 @@
+'use client';
+import {useState} from 'react';
+import type {Match,League} from '@/lib/model';
+import {labels,teamName} from '@/lib/model';
+import {analysisCounts,annotatedScore,coverageFamilies,reviewAnalysis,analysisLabels} from '@/lib/match-analysis';
+import {NumberField,Field} from './league-admin';
+export function MatchReview({match:m,data,onChange,onPublish,busy}:{match:Match;data:League;onChange:(m:Match)=>void;onPublish:(m:Match)=>void;busy:boolean}){
+ const [start,setStart]=useState('0'),[end,setEnd]=useState(String(m.duration||60));const a=m.analysis!;const score=annotatedScore(m),counts=analysisCounts(m);const issues=reviewAnalysis(m),blocking=issues.filter(i=>i.blocking);
+ function update(patch:Partial<typeof a>){onChange({...m,analysis:{...a,...patch,status:'review'}})}
+ return <section className="panel formstack match-review"><div className="split"><div><p className="eyebrow">VÉRIFIER AVANT DE PUBLIER</p><h2>Du brouillon aux stats validées.</h2></div><span className="tag">{analysisLabels[a.status]}</span></div>
+ <p>Le résultat officiel est indépendant de l’annotation. Les catégories ci-dessous remplacent les totaux manuels uniquement après vérification de tout le match.</p>
+ <div className="review-scores"><div><span>Score officiel</span><strong>{m.scoreA??'—'} – {m.scoreB??'—'}</strong></div><div><span>Buts annotés · provisoires</span><strong>{score.A} – {score.B}</strong></div></div>
+ <div className="formgrid"><NumberField label={teamName(m,'A')+' — score officiel'} value={m.scoreA} onChange={v=>onChange({...m,scoreA:v})}/><NumberField label={teamName(m,'B')+' — score officiel'} value={m.scoreB} onChange={v=>onChange({...m,scoreB:v})}/><NumberField label="Durée réellement jouée (minutes)" value={m.duration} max={300} onChange={v=>onChange({...m,duration:v??0})}/></div>
+ <label className="checklabel"><input type="checkbox" checked={m.status==='finished'} onChange={e=>onChange({...m,status:e.target.checked?'finished':'scheduled'})}/>Le match est terminé ; son résultat officiel est connu.</label>
+ <h3>Catégories suivies pour tous les joueurs</h3><p className="muted">Cochez une catégorie uniquement si vous l’avez observée sur l’ensemble du match. Une catégorie non cochée conserve les valeurs de la feuille de match.</p>
+ <div className="coverage-grid">{Object.entries(coverageFamilies).map(([name,keys])=><label className="checklabel" key={name}><input type="checkbox" checked={keys.every(k=>a.completeKeys.includes(k))} onChange={e=>update({completeKeys:e.target.checked?[...new Set([...a.completeKeys,...keys])]:a.completeKeys.filter(k=>!keys.includes(k))})}/>{name}</label>)}</div>
+ <h3>Périodes observées</h3><p className="muted">Temps de match en minutes, sans les pauses de la vidéo. Additionnez les périodes que vous avez réellement revues.</p>
+ <div className="actions"><label>De <input aria-label="Début de période observée" type="number" min="0" step="0.1" value={start} onChange={e=>setStart(e.target.value)}/></label><label>À <input aria-label="Fin de période observée" type="number" min="0" step="0.1" value={end} onChange={e=>setEnd(e.target.value)}/></label><button type="button" className="button" disabled={!Number.isFinite(Number(start))||!Number.isFinite(Number(end))||Number(start)<0||Number(end)<=Number(start)||Number(end)>m.duration} onClick={()=>update({ranges:[...a.ranges,{start:Number(start)*60,end:Number(end)*60}]})}>Ajouter cette période</button><button type="button" className="button" disabled={m.duration<1} onClick={()=>update({ranges:[{start:0,end:m.duration*60}]})}>J’ai observé tout le match</button></div>
+ {a.ranges.map((r,i)=><div className="split" key={i}><span>{r.start/60} → {r.end/60} min</span><button type="button" className="textbutton" onClick={()=>update({ranges:a.ranges.filter((_,j)=>j!==i)})}>Retirer cette période</button></div>)}
+ <Field label="Provenance des valeurs manuelles (et source xG si renseignée)"><input value={a.manualSource??''} maxLength={500} onChange={e=>update({manualSource:e.target.value})}/></Field>
+ <h3>Comparaison par joueur</h3><div className="review-table"><table><thead><tr><th>Joueur</th><th>Buts feuille / annotés</th><th>Assists feuille / annotées</th><th>Positions confirmées</th></tr></thead><tbody>{m.participants.map(p=>{const observed=counts.participants.find(x=>x.playerId===p.playerId)!;return <tr key={p.playerId}><td>{data.players.find(x=>x.id===p.playerId)?.name}</td><td>{p.stats.goals??'—'} / {observed.stats.goals??0}</td><td>{p.stats.assists??'—'} / {observed.stats.assists??0}</td><td>{m.events.filter(e=>e.playerId===p.playerId&&e.metadata.position!=null).length}</td></tr>})}</tbody></table></div>
+ <p className="muted">À publier : {a.completeKeys.map(k=>labels[k]).join(', ')||'aucune catégorie sélectionnée'}.</p>
+ {blocking.length>0&&<div role="alert" className="review-issues"><h3>À corriger</h3>{blocking.map((i,n)=><p key={n}>{i.message}</p>)}</div>}
+ <details><summary>{issues.filter(i=>!i.blocking).length} informations non bloquantes</summary>{issues.filter(i=>!i.blocking).map((i,n)=><p key={n}>{i.message}</p>)}</details>
+ <button type="button" className="button primary" disabled={busy||blocking.length>0} onClick={()=>onPublish({...m,analysis:{...a,status:'validated'}})}>Valider et publier les statistiques</button><p className="muted">Une correction d’action remet l’analyse en cours. Les joueurs continuent de voir la dernière version validée.</p>
+ </section>
+}

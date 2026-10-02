@@ -1,9 +1,16 @@
 export type Stats=Record<string,number|null>;
 export type Player={id:string;name:string;bio:string;photo:string;archived:boolean;demo:boolean;funFacts:string;attributes:Record<string,number>;version:number};
 export type Season={id:string;name:string;start:string;end:string;status:'active'|'inactive'|'finished'|'archived';demo:boolean;contribution:number;winnerId:string|null;minParticipation:number;version:number};
-export type Participant={playerId:string;team:'A'|'B'|null;stats:Stats;auto_rating?:number|null;admin_rating?:number|null;final_rating?:number|null;ratingExplanation?:string[]};
+export type Participant={minutesPlayed?:number|null;role?:'field'|'goalkeeper'|'mixed';playerId:string;team:'A'|'B'|null;stats:Stats;auto_rating?:number|null;admin_rating?:number|null;final_rating?:number|null;ratingExplanation?:string[]};
 export type MatchEvent={id:string;playerId:string;team:'A'|'B';type:string;timestamp:number|null;relatedPlayerId:string|null;metadata:Record<string,unknown>};
-export type Match={id:string;seasonId:string;number:number;date:string;duration:number;location:string;status:'scheduled'|'finished'|'cancelled';scoreA:number|null;scoreB:number|null;mvpId:string|null;level:number;video:string;participants:Participant[];events:MatchEvent[];trackedKeys:string[];notes?:string;teamAName?:string;teamBName?:string;version:number};
+export type AnnotationBuilder={actor:string;mate:string;opponent:string;type:string;outcome:string;tags:string[];stamp:string;manual:boolean;editing:string|null;linked:string;positionKnown:boolean;quick:boolean;view:string;scene:{players:Record<string,{x:number;y:number}>;ball:{x:number;y:number}|null};end:{x:number;y:number}|null};
+export type MatchAnalysis={
+ schemaVersion:1;status:'not_started'|'in_progress'|'review'|'validated';mode:'highlights'|'complete';
+ completeKeys:string[];ranges:{start:number;end:number}[];manualSource?:string;
+ session:{sequenceId:string;videoTime:number;offset:number;builder?:AnnotationBuilder};
+ manualStats?:Record<string,Stats>;publishedEvents?:MatchEvent[];publishedKeys?:string[];publishedRanges?:{start:number;end:number}[];publishedAt?:string;
+};
+export type Match={analysis?:MatchAnalysis;id:string;seasonId:string;number:number;date:string;duration:number;location:string;status:'scheduled'|'finished'|'cancelled';scoreA:number|null;scoreB:number|null;mvpId:string|null;level:number;video:string;participants:Participant[];events:MatchEvent[];trackedKeys:string[];notes?:string;teamAName?:string;teamBName?:string;version:number};
 export type Settings={minRating:number;minRadar:number;minDuo:number;minPasses:number;minAttempts:number;ratingWeights?:Record<string,number>};
 export type League={players:Player[];seasons:Season[];matches:Match[];settings:Settings;admin:boolean;bootstrap:boolean;user:string|null};
 export const defaultSettings:Settings={minRating:5,minRadar:5,minDuo:5,minPasses:30,minAttempts:10};

@@ -1,0 +1,7 @@
+body{background:#0a0c0a}
+.annotation-preview-shell{max-width:1450px;margin:auto;padding:24px}
+.annotation-preview-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;font-family:'Copro JetBrains',monospace;color:#8e978c;font-size:10px;letter-spacing:.05em}
+.annotation-preview-top strong{font-family:'Copro Archivo',sans-serif;font-weight:600;font-size:15px;color:#e9ece6;letter-spacing:.04em}
+.annotation-preview-top .button{border-radius:0;font:10px 'Copro JetBrains',monospace;min-height:44px;padding:8px;border-color:#2a322a;color:#8e978c;background:transparent}
+.annotation-preview-shell>details{font:11px 'Copro JetBrains',monospace;color:#8e978c;margin-top:24px}
+@media(max-width:520px){.annotation-preview-shell{padding:12px}.annotation-preview-top{gap:8px;flex-wrap:wrap;margin-bottom:16px}.annotation-preview-top p{font-size:9px}.annotation-preview-top .button{font-size:9px}}

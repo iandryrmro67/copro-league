@@ -56,3 +56,19 @@ Projet Supabase `cifxjpybkszppxtmsuap`, région eu-west-1. Les deux migrations o
 Déploiement Vercel validé le 21 septembre 2026 : https://copro-league.vercel.app, version applicative `254cc78f66743d784b0ded80ce9e8b769c0ae113`. Les 13 contrôles HTTP sans session et le parcours Supabase complet ont aussi réussi sur cette URL. Le déploiement est piloté par la CLI ; la connexion GitHub automatique reste non activée.
 
 La consultation publique inclut les joueurs, matchs, statistiques, awards et photos. `/admin`, les écritures, les exports et les vidéos privées restent protégés. Le bucket et les tables Supabase ne sont pas rendus publics : les lectures passent par les routes serveur.
+
+## Mise à jour de l’analyse des matchs — 2 octobre 2026
+
+Avant de déployer cette version, exécuter `npm run db:migrate` avec la connexion de l’environnement cible pour ajouter la colonne nullable `matches.analysis`. La migration `202610020001_match_analysis.sql` ne réécrit aucun match existant. Déployer ensuite le serveur et vérifier l’enregistrement d’un brouillon, sa publication et sa lecture publique. Le build ne lance pas les migrations. Le parcours est documenté dans `docs/annotation.md`.
+
+## Déploiement de l’interface d’analyse — 2 octobre 2026
+
+Version active : https://copro-league.vercel.app, déploiement Vercel `dpl_HtczwhJvdEaZNhX76HZM59T61J6X` (https://copro-league-25n2m9osu-yurr2.vercel.app). L’interface approuvée est intégrée dans Admin → Match → Analyser, sans le panneau arrondi qui entourait auparavant le composant.
+
+La migration `202610020001_match_analysis.sql` a été appliquée au projet Supabase existant. Une sauvegarde privée antérieure est conservée dans `.vercel/backups/pre-analysis-20261002.json` (ignorée par Git et le déploiement). Les 7 lignes de matchs historiques sont identiques à la sauvegarde, hormis l’ajout nullable de la colonne analysis. Les 23 joueurs et les 7 matchs restent accessibles.
+
+Vérifications : 106 tests Node/PGlite réussis ; compilation et TypeScript réussis sur Vercel ; contrôles HTTP publics et refus des écritures anonymes réussis avant et après la bascule ; interface présente dans les fichiers JavaScript/CSS publiés ; trois polices identiques aux fichiers locaux (SHA-256). Les parcours d’annotation, de correction et de relecture ont été vérifiés localement. Les fichiers du banc fictif, les sauvegardes et les secrets sont exclus du déploiement.
+
+Contrôle complémentaire le 2 octobre : le domaine principal servait de nouveau l’ancien déploiement `dpl_46Dp9WvovW2Gr9HEhNGzRdCNPhDQ`. La cause de cette bascule n’est pas établie. Le déploiement validé `dpl_HtczwhJvdEaZNhX76HZM59T61J6X` a été promu à nouveau. La résolution du domaine, les fichiers publiés et les contrôles HTTP ont été revérifiés. Une session administrateur réelle a confirmé les nouveaux onglets et l’atelier Analyser en mode agrandi sur `/admin?match=s2-match-6`, avec les joueurs à droite et la timeline en dessous. Aucun événement ni résultat du match n’a été enregistré pendant cette vérification.
+
+Retour à la version précédente : promouvoir `https://copro-league-g9kdu7916-yurr2.vercel.app` (`dpl_46Dp9WvovW2Gr9HEhNGzRdCNPhDQ`). La colonne additive peut rester en place pour ce retour ; ne pas restaurer une sauvegarde de données par simple rollback du site.

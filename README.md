@@ -1,6 +1,6 @@
 # Copro League
 
-Application de football à 5, en français, construite à partir du logo, du moodboard et de la palette fournis : noir #121619, blanc #FCFCFC, vert #44CF6C.
+Application de football à 5, en français, habillée avec le design system KUSH/HUD fourni : noir carbone #0A0C0A, blanc os #E9ECE6, vert #56B947. Titres Big Shoulders Display, données JetBrains Mono et textes Archivo ; polices servies localement. Voir `docs/design-system.md`.
 
 ## Utiliser le site
 
