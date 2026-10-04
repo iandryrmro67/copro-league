@@ -268,7 +268,7 @@ export function AnimationLab() {
                 <HoverButton
                   magnetic={false}
                   disabled={busy}
-                  onClick={() => void previewTransition()}
+                  onClick={() => void previewTransition(reduced)}
                 >
                   Rejouer le rideau sans quitter la démo
                 </HoverButton>

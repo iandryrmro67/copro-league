@@ -12,8 +12,17 @@ export function readDraft(storage:DraftStorage,owner:string,current:Match):{matc
  return {match:parsed.data as Match,savedAt:envelope.savedAt,conflict:parsed.data.version!==current.version};}catch{return null}
 }
 export function removeDraft(storage:DraftStorage,owner:string,id:string){try{storage.removeItem(key(owner,id));return true}catch{return false}}
-export function listDrafts(storage:Storage,owner:string){
+export function listDrafts(storage:DraftStorage & Pick<Storage,'length'|'key'>,owner:string){
  const prefix=`copro:match-draft:v1:${encodeURIComponent(owner)}:`;const drafts:Match[]=[];
  try{for(let i=0;i<storage.length;i++){const k=storage.key(i);if(!k?.startsWith(prefix))continue;const raw=storage.getItem(k);if(!raw)continue;const envelope=JSON.parse(raw);const parsed=draftMatchSchema.safeParse(envelope.match);if(envelope.schemaVersion===1&&parsed.success)drafts.push(parsed.data as Match)}}catch{}
  return drafts;
 }
+
+/** Resolve the browser storage property inside the existing try/catch, including SecurityError getters. */
+export const browserDraftStorage:DraftStorage & Pick<Storage,'length'|'key'>={
+ get length(){return window.localStorage.length;},
+ key:index=>window.localStorage.key(index),
+ getItem:key=>window.localStorage.getItem(key),
+ setItem:(key,value)=>window.localStorage.setItem(key,value),
+ removeItem:key=>window.localStorage.removeItem(key),
+};

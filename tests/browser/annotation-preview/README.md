@@ -26,3 +26,7 @@ Parcours de vérification de la saisie précise :
 Les tests Node couvrent validation des participants et résultats, projections atomiques, liens, contreparties des blocages, métadonnées de correction, coordonnées incomplètes, anciennes sessions et temps inconnus. La vidéo synthétique ne valide pas les restrictions ou les conditions réseau de YouTube.
 
 Le site et l’atelier utilisent les mêmes polices locales et tokens de `app/design-system.css` : Archivo, Big Shoulders Display, JetBrains Mono, fonds Void / Carbon, accent Kush et angles droits.
+
+### Retour arrière et stockage indisponible
+
+Lancer le même serveur avec `--port 5192`, puis ouvrir `http://127.0.0.1:5192/?history=1&video=none`. « Ouvrir l’éditeur local » utilise la stratégie de navigation des pages admin. Activer « Bloquer le stockage local du test », modifier le numéro et utiliser Retour : rester dans le document conserve la modification du vrai MatchEditor. Remettre le numéro à 1 et désactiver le blocage avant de fermer. Les fixtures restent sur cet origin local ; le bouton serveur ne fait aucune requête d’enregistrement.

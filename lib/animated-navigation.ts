@@ -47,3 +47,13 @@ export function saveDraftForNavigation(
   if (JSON.stringify(match) === saved) return true;
   return writeDraft(storage, owner, match).ok;
 }
+
+/** Editor entries and exits must be document history, so Back/Forward use its beforeunload protection too. */
+export function navigationKind(
+  from: string,
+  to: string,
+): "document" | "client" {
+  return from === to || from === "/admin" || to === "/admin"
+    ? "document"
+    : "client";
+}

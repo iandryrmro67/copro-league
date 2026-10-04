@@ -2,16 +2,17 @@
 import { useEffect, useState } from "react";
 import { useMotionValue } from "motion/react";
 import * as m from "motion/react-m";
+import { cursorAllowed } from "@/lib/animation-state";
 import { useAnimations } from "./AnimationProvider";
 /** Progressive enhancement on fine pointers only; native cursor on text and precision surfaces. */
 export function CustomCursor() {
-  const { reduced } = useAnimations(),
+  const { reduced, busy } = useAnimations(),
     x = useMotionValue(-100),
     y = useMotionValue(-100),
     [hover, setHover] = useState(false),
     [visible, setVisible] = useState(false);
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || busy) return;
     const fine = matchMedia("(hover:hover) and (pointer:fine)");
     let frame = 0,
       cx = -100,
@@ -30,14 +31,17 @@ export function CustomCursor() {
     const move = (e: PointerEvent) => {
       const target = e.target as Element,
         interactive = !!target.closest('a,button,summary,[role="button"]'),
-        allowed =
-          fine.matches &&
-          e.pointerType !== "touch" &&
-          !target.closest(
+        allowed = cursorAllowed({
+          fine: fine.matches,
+          touch: e.pointerType === "touch",
+          modal: !!document.querySelector("dialog[open]"),
+          precision: !!target.closest(
             "input,textarea,select,[contenteditable],video,iframe,.precise-workspace",
-          ) &&
-          (interactive || !target.closest("p,h1,h2,h3,span")) &&
-          !target.closest('[disabled],[aria-disabled="true"]');
+          ),
+          interactive,
+          text: !!target.closest("p,h1,h2,h3,span"),
+          disabled: !!target.closest('[disabled],[aria-disabled="true"]'),
+        });
       document.documentElement.classList.toggle("copro-custom-cursor", allowed);
       setVisible(allowed);
       setHover(interactive);
@@ -65,7 +69,7 @@ export function CustomCursor() {
       fine.removeEventListener("change", leave);
       leave();
     };
-  }, [reduced, x, y]);
+  }, [reduced, busy, x, y]);
   if (reduced) return null;
   return (
     <m.div

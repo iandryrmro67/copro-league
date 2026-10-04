@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { animate, useMotionValue } from "motion/react";
 import * as m from "motion/react-m";
 import { ArrowLeft, ArrowRight, Smartphone } from "lucide-react";
-import { snapIndex } from "@/lib/animation-state";
+import { carouselTransition, snapIndex } from "@/lib/animation-state";
 import { eases } from "@/lib/motion";
 import { useAnimations } from "./AnimationProvider";
 type Props<T extends { id: string }> = {
@@ -54,10 +54,11 @@ export function CardCarousel<T extends { id: string }>({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    const controls = animate(x, -index * step - (step - 16) / 2, {
-      duration: reduced ? 0.15 : 0.35,
-      ease: eases.enter,
-    });
+    const controls = animate(
+      x,
+      -index * step - (step - 16) / 2,
+      carouselTransition(reduced),
+    );
     return () => controls.stop();
   }, [index, step, x, reduced]);
   useEffect(() => {
@@ -265,20 +266,22 @@ export function CardCarousel<T extends { id: string }>({
                     animate={{ opacity: pulse > 0 ? 0.2 : 0 }}
                     transition={{ duration: 0.12 }}
                   />
-                  <m.div
-                    className="carousel-grip"
-                    drag={reduced ? false : "y"}
-                    dragConstraints={{ top: 0, bottom: 0 }}
-                    dragElastic={0.12}
-                    dragMomentum={false}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.y < -40) choose();
-                      else if (info.offset.y > 40 && onReturn) choose(true);
-                    }}
-                    aria-hidden="true"
-                  >
-                    ↑ CHOISIR {onReturn ? "· ↓ RETIRER" : ""}
-                  </m.div>
+                  {!reduced && (
+                    <m.div
+                      className="carousel-grip"
+                      drag={reduced ? false : "y"}
+                      dragConstraints={{ top: 0, bottom: 0 }}
+                      dragElastic={0.12}
+                      dragMomentum={false}
+                      onDragEnd={(_, info) => {
+                        if (info.offset.y < -40) choose();
+                        else if (info.offset.y > 40 && onReturn) choose(true);
+                      }}
+                      aria-hidden="true"
+                    >
+                      ↑ CHOISIR {onReturn ? "· ↓ RETIRER" : ""}
+                    </m.div>
+                  )}
                 </>
               )}
             </m.article>

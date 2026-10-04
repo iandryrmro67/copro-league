@@ -11,13 +11,16 @@ import {
 import { LazyMotion, MotionConfig, useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { useRouter, usePathname } from "next/navigation";
-import { shouldAnimateNavigation } from "@/lib/animated-navigation";
+import {
+  navigationKind,
+  shouldAnimateNavigation,
+} from "@/lib/animated-navigation";
 import { CustomCursor } from "./CustomCursor";
 import { eases } from "@/lib/motion";
 const loadFeatures = () =>
   import("./features").then((module) => module.default);
 type Animations = {
-  previewTransition: () => Promise<void>;
+  previewTransition: (reducedOverride?: boolean) => Promise<void>;
   seenUnlocks: Set<string>;
   reduced: boolean;
   sound: boolean;
@@ -45,7 +48,7 @@ export function AnimationPreview({
   children,
 }: {
   reduced: boolean;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   const settings = useAnimations();
   return (
@@ -64,8 +67,10 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
     path = usePathname(),
     reduced = !!useReducedMotion();
   const [sound, setSound] = useState(false),
+    [routeReduced, setRouteReduced] = useState(false),
     [phase, setPhase] = useState<"idle" | "cover" | "reveal">("idle"),
     [layers, setLayers] = useState<string[]>([]);
+  const curtainReduced = reduced || routeReduced;
   const [seenUnlocks] = useState(() => new Set<string>());
   const arrival = useRef<{ path: string; resolve: () => void } | null>(null);
   useEffect(() => {
@@ -148,6 +153,7 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
       });
       if (!window.dispatchEvent(guard)) return false;
       lock.current = true;
+      setRouteReduced(false);
       setPhase("cover");
       play("open");
       const failsafe = setTimeout(() => {
@@ -157,7 +163,9 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
       timers.current.push(failsafe);
       try {
         await pause(reduced ? 75 : 300);
-        if (destination.pathname === location.pathname) {
+        if (
+          navigationKind(location.pathname, destination.pathname) === "document"
+        ) {
           location.assign(href);
           await pause(1200);
         } else {
@@ -179,19 +187,24 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
     },
     [router, pause, reduced, play],
   );
-  const previewTransition = useCallback(async () => {
-    if (lock.current || layers.length) return;
-    lock.current = true;
-    setPhase("cover");
-    try {
-      await pause(reduced ? 75 : 300);
-      setPhase("reveal");
-      await pause(reduced ? 75 : 300);
-    } finally {
-      lock.current = false;
-      setPhase("idle");
-    }
-  }, [layers.length, pause, reduced]);
+  const previewTransition = useCallback(
+    async (reducedOverride = false) => {
+      const previewReduced = reduced || reducedOverride;
+      if (lock.current || layers.length) return;
+      lock.current = true;
+      setRouteReduced(previewReduced);
+      setPhase("cover");
+      try {
+        await pause(previewReduced ? 75 : 300);
+        setPhase("reveal");
+        await pause(previewReduced ? 75 : 300);
+      } finally {
+        lock.current = false;
+        setPhase("idle");
+      }
+    },
+    [layers.length, pause, reduced],
+  );
   useEffect(() => {
     const click = (event: MouseEvent) => {
       if (event.defaultPrevented || path.startsWith("/dev/")) return;
@@ -245,18 +258,18 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
           <CustomCursor />
           {phase !== "idle" && (
             <div className="route-curtain" aria-hidden="true">
-              {Array.from({ length: reduced ? 1 : 5 }, (_, i) => (
+              {Array.from({ length: curtainReduced ? 1 : 5 }, (_, i) => (
                 <m.div
                   key={i}
-                  initial={reduced ? { opacity: 0 } : { y: "100%" }}
+                  initial={curtainReduced ? { opacity: 0 } : { y: "100%" }}
                   animate={
-                    reduced
+                    curtainReduced
                       ? { opacity: phase === "cover" ? 1 : 0 }
                       : { y: phase === "cover" ? 0 : "-100%" }
                   }
                   transition={{
-                    duration: reduced ? 0.075 : 0.14,
-                    delay: reduced ? 0 : i * 0.04,
+                    duration: curtainReduced ? 0.075 : 0.14,
+                    delay: curtainReduced ? 0 : i * 0.04,
                     ease: phase === "cover" ? eases.enter : eases.exit,
                   }}
                 />

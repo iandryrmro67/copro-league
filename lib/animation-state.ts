@@ -60,3 +60,30 @@ export function magneticOffset(
     y: Math.max(-6, Math.min(6, (dy / (height / 2 + 60)) * 6)),
   };
 }
+
+/** A cursor outside the native top layer cannot replace the pointer inside a modal. */
+export function cursorAllowed(state: {
+  fine: boolean;
+  touch: boolean;
+  modal: boolean;
+  precision: boolean;
+  interactive: boolean;
+  text: boolean;
+  disabled: boolean;
+}) {
+  return (
+    state.fine &&
+    !state.touch &&
+    !state.modal &&
+    !state.precision &&
+    !state.disabled &&
+    (state.interactive || !state.text)
+  );
+}
+/** Imperative Motion animations need their own reduced-motion preference. */
+export function carouselTransition(reduced: boolean) {
+  return {
+    duration: reduced ? 0 : 0.35,
+    ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+  };
+}

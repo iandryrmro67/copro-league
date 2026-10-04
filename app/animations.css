@@ -1180,3 +1180,40 @@
   height: 40px;
   overflow: auto;
 }
+/* Native dialogs paint above the decorative cursor; keep their native pointer immediately. */
+.copro-custom-cursor:has(dialog[open]),
+.copro-custom-cursor:has(dialog[open]) :is(button, a, summary) {
+  cursor: auto !important;
+}
+.lab-stage {
+  min-height: 1000px;
+}
+.lab-stage-heading h2 {
+  height: 48px;
+  line-height: 1.1;
+}
+@media (max-width: 700px) {
+  .lab-stage-heading h2 {
+    height: 88px;
+  }
+}
+.refresh-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  background: var(--carbon);
+  padding: 16px;
+  margin: 16px 0;
+  color: var(--ash);
+  font-size: 13px;
+}
+.refresh-warning p {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .refresh-warning {
+    flex-wrap: wrap;
+  }
+}

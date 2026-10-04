@@ -22,3 +22,11 @@ test('intermediate manual corrections survive recovery before counts are reconci
  const m:Match={...match,analysis:{schemaVersion:1,status:'in_progress',mode:'highlights',completeKeys:[],ranges:[],manualStats:{a:{passesCompleted:10,passesAttempted:5}},session:{sequenceId:'s',videoTime:0,offset:0}}};
  writeDraft(storage,'u',m);assert.ok(readDraft(storage,'u',match));
 });
+test('a blocked localStorage property is handled as unavailable storage without throwing',async()=>{
+ const {browserDraftStorage,writeDraft,readDraft,listDrafts}=await import('../lib/match-draft.ts');
+ assert.ok(browserDraftStorage,'browser storage adapter is available');
+ const previous=Object.getOwnPropertyDescriptor(globalThis,'window');
+ const fake=Object.defineProperty({},'localStorage',{get:()=>{throw Error('SecurityError')}});
+ Object.defineProperty(globalThis,'window',{configurable:true,value:fake});
+ try{assert.equal(writeDraft(browserDraftStorage,'u',match).ok,false);assert.equal(readDraft(browserDraftStorage,'u',match),null);assert.deepEqual(listDrafts(browserDraftStorage,'u'),[]);}finally{if(previous)Object.defineProperty(globalThis,'window',previous);else Reflect.deleteProperty(globalThis,'window');}
+});
