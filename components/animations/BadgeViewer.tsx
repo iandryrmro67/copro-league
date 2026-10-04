@@ -129,7 +129,7 @@ export function BadgeViewer({
       >
         {badge.description}
       </m.p>
-      <p className="eyebrow badge-status">{badge.status}</p>
+      <p key={badge.id+"status"} className="eyebrow badge-status">{badge.status}</p>
       <div
         className="badge-criteria"
         aria-hidden={!locked}
@@ -161,7 +161,7 @@ export function BadgeViewer({
           <ArrowLeft size={16} />
         </button>
         <span className="eyebrow" aria-live="polite">
-          {current + 1} / {items.length} · {badge.name}
+          <span key={badge.id}>{current + 1} / {items.length} · {badge.name}</span>
         </span>
         <button
           className="button"
