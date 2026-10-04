@@ -267,3 +267,8 @@ TEST_ORIGIN=https://copro-league.vercel.app node tests/access-http.mjs
 ## Relecture du plan
 
 Les cinq groupes du brief sont couverts par les tâches 2 à 6 ; les fondations et la livraison sont couvertes par 1 et 7. Les cinq points de Review Focus sont associés aux tests et parcours de leurs tâches. La réalisation n’a pas commencé ; le plan est prêt pour validation. Méthode proposée : exécution native dans cette session, avec une revue indépendante finale, afin de limiter les changements concurrents sur la navigation et l’éditeur.
+
+
+## Résultat d’exécution — 4 octobre 2026
+
+Les sept tâches ont été exécutées dans `work/vercel`, puis la source applicative `f88b188` a été poussée et promue sur le domaine officiel. Le journal détaillé, les décisions de revue, les résultats mesurés et leurs limites sont conservés dans `../reports/2026-10-04-game-animations.md`. Les listes ci-dessus décrivent le plan initial ; elles ne constituent pas des attestations de tests matériels supplémentaires.

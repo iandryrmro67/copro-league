@@ -94,3 +94,16 @@ Vérifications : 124 tests fonctionnels réussis, dont 18 nouveaux tests de sais
 Un nouvel onglet authentifié a confirmé les treize actions, le bandeau compact sans vidéo et l’ordre vertical sur `/admin?match=s2-match-6`. Le score officiel 26–24, les événements et valeurs manuelles du match n’ont pas été enregistrés ni modifiés pendant ce contrôle ; le brouillon local existant reste présent. Preuve locale ignorée par Git : `outputs/production-precise-timeline.png`.
 
 Retour à l’interface précédente sans restaurer la base : promouvoir `https://copro-league-bemecu8ww-yurr2.vercel.app` (`dpl_6atzX3KCMcdhwTpG8ysBgdfiTpnh`). Le domaine principal a été inspecté après promotion ; sa version Ready correspond à `dpl_FASCC2eANhcjVzdKmn33aSuej6WC`.
+
+
+## Animations intégrées — 4 octobre 2026
+
+Version active : https://copro-league.vercel.app, code applicatif `f88b188b7f246a75f76c0c82db700e78d1dd277c` sur GitHub `codex/vercel-supabase`. Candidat promu : https://copro-league-18xc8liok-yurr2.vercel.app, id `dpl_8KmWKGQaoxLYaPzoMentB5yKrtEV`.
+
+BootScreen, carousels joueurs/draft, GameMenu, badges/déblocages et interactions Hover/curseur/son sont intégrés au design KUSH/HUD. La démo `/dev/animations` est autonome avec données fictives. L’administration garde vidéo → saisie précise → timeline et ses treize familles d’actions ; l’ouverture du menu conserve le joueur ciblé et le brouillon.
+
+136 tests réussis ; builds production local et Vercel / TypeScript réussis ; contrôles HTTP d’accès réussis après promotion ; revue indépendante corrigée. Trois audits Lighthouse mobiles de la build finale sur la démo : médiane 94/100 en performance, 100/100 en accessibilité, CLS initial environ 0.000631. Contrôles de viewport à 390/768 px, sans débordement. Le lint hérité conserve des erreurs préexistantes ; les nouveaux fichiers d’animation ont zéro erreur. Détails et limites : `docs/superpowers/reports/2026-10-04-game-animations.md`.
+
+L’inspection du domaine officiel, son `/api/version` sans cache partagé et les métadonnées d’un onglet neuf correspondent au SHA applicatif ci-dessus. Le commit documentaire ultérieur n’exige pas de redéployer. Le déploiement Git automatique depuis l’ancienne branche `main` reste désactivé. Aucun match ni événement n’a été enregistré pendant les contrôles ; aucune migration supplémentaire.
+
+Retour à la version avant animations : promouvoir https://copro-league-qnk1kk3ge-yurr2.vercel.app (`dpl_FASCC2eANhcjVzdKmn33aSuej6WC`), sans restaurer la base. La version animée immédiatement précédente est https://copro-league-l1wyd1hse-yurr2.vercel.app (`dpl_8ue9LsuL5Njb5vR9uPqQFc39Qh3Y`). Preuve locale : `outputs/production-game-menu.png`.
