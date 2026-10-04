@@ -1,47 +1,5 @@
 /* Coproleague — supplied KUSH/HUD design system. */
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/archivo-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Big Shoulders Display";
-  src: url("/fonts/big-shoulders-display-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-@font-face {
-  font-family: "JetBrains Mono";
-  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 800;
-  font-display: swap;
-}
 
-:root {
-  color-scheme: dark;
-  --void: #0a0c0a;
-  --carbon: #121512;
-  --graphite: #1c211c;
-  --line: #2a322a;
-  --ash: #8e978c;
-  --bone: #e9ece6;
-  --body: #c9cfc5;
-  --kush: #56b947;
-  --highlight: #8be36b;
-  --indica: #1e4a19;
-  --resin: #12290f;
-  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
-  --font-body: "Archivo", Arial, sans-serif;
-  --green: var(--kush);
-  --bg: var(--void);
-  --panel: var(--carbon);
-  --muted: var(--ash);
-}
 
 
 ::selection { background: var(--kush); color: var(--void); }
@@ -92,7 +50,7 @@ h3 { font-size: 26px; line-height: 1.1; }
 [data-slot="tabs-trigger"] { font-size: 12px!important; letter-spacing: .04em; text-transform: uppercase; }
 input:not([type="checkbox"]):not([type="range"]):not([type="hidden"]), textarea, select { border-radius: 0; background: var(--carbon); border: 1px solid var(--line); border-bottom-color: var(--kush); color: var(--bone); font-family: var(--font-mono); }
 input::placeholder, textarea::placeholder { color: var(--ash); opacity: 1; }
-:is(button, a, input, textarea, select, summary):focus-visible { outline: 2px solid var(--highlight); outline-offset: 4px; }
+:is(button, a, input, textarea, select, summary):focus-visible { outline: 1px solid var(--kush); outline-offset: 2px; }
 .avatar { background: var(--graphite); border-color: var(--line); font-family: var(--font-mono); font-weight: 500; letter-spacing: 0; }
 .avatar img, .videothumb { filter: grayscale(1); }
 .avatarstack .avatar+.avatar { margin-left: -8px; }

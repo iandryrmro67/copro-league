@@ -4,6 +4,7 @@ import {Analyzer} from '../../../components/league-analyzer';
 import {beginAnalysis} from '../../../lib/match-analysis';
 import type {League,Match} from '../../../lib/model';
 import '../../../app/globals.css';
+import '../../../app/tokens.css';
 import '../../../app/design-system.css';
 import './preview.css';
 const names=['Mathis','Loris','Xan','Adam','Sam','Alex','Paul','Tom','Hugo','Leo'];

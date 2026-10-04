@@ -1,0 +1,45 @@
+/* Copro League — canonical design tokens and local fonts. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/archivo-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Big Shoulders Display";
+  src: url("/fonts/big-shoulders-display-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --void: #0a0c0a;
+  --carbon: #121512;
+  --graphite: #1c211c;
+  --line: #2a322a;
+  --ash: #8e978c;
+  --bone: #e9ece6;
+  --body: #c9cfc5;
+  --kush: #56b947;
+  --trichome: #8be36b;
+  --highlight: var(--trichome);
+  --indica: #1e4a19;
+  --resin: #12290f;
+  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-body: "Archivo", Arial, sans-serif;
+  --green: var(--kush);
+  --bg: var(--void);
+  --panel: var(--carbon);
+  --muted: var(--ash);
+}
