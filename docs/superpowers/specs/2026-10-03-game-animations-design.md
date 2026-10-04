@@ -1,6 +1,6 @@
 # Copro League — animations et navigation de jeu
 
-Date : 3 octobre 2026. Statut : proposition à valider, aucune implémentation ni publication effectuée.
+Date : 3 octobre 2026. Statut : proposition validée par la demande d’intégration et de publication du 4 octobre 2026 ; réalisation et publication à effectuer après revue du plan.
 
 ## Objectif et demande de référence
 
