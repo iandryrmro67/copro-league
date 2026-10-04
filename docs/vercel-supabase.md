@@ -107,3 +107,14 @@ BootScreen, carousels joueurs/draft, GameMenu, badges/déblocages et interaction
 L’inspection du domaine officiel, son `/api/version` sans cache partagé et les métadonnées d’un onglet neuf correspondent au SHA applicatif ci-dessus. Le commit documentaire ultérieur n’exige pas de redéployer. Le déploiement Git automatique depuis l’ancienne branche `main` reste désactivé. Aucun match ni événement n’a été enregistré pendant les contrôles ; aucune migration supplémentaire.
 
 Retour à la version avant animations : promouvoir https://copro-league-qnk1kk3ge-yurr2.vercel.app (`dpl_FASCC2eANhcjVzdKmn33aSuej6WC`), sans restaurer la base. La version animée immédiatement précédente est https://copro-league-l1wyd1hse-yurr2.vercel.app (`dpl_8ue9LsuL5Njb5vR9uPqQFc39Qh3Y`). Preuve locale : `outputs/production-game-menu.png`.
+
+
+## Cartes joueurs — 5 octobre 2026
+
+Version active : https://copro-league.vercel.app, source applicative `91776a54df19da5389188babaaa37e3ba56ce0af` sur GitHub `codex/vercel-supabase`. Candidat promu : https://copro-league-lx5aacdad-yurr2.vercel.app, id `dpl_1rjGUpWLaCj3BnjzEQHrwuPBtEWK`.
+
+Le conteneur HoverTile avait remplacé le lien comme élément de grille, laissant `.playercard` en inline. Les bordures se fragmentaient et dépassaient les blocs. Une règle ciblée rétablit display block et height 100% sur les cartes de la grille, en conservant leurs liens et effets de survol. Aucun changement de données, de navigation ou de timeline.
+
+Vérifications : reproduction publiée avant correction (lien inline, bordure commençant 21 px avant son parent) ; build locale, build et TypeScript Vercel réussis ; 136 tests réussis ; CUA local à 1280, 390 et 768 px, recherche Clovis fonctionnelle. Les 23 cartes ont une seule boîte de lien, de même hauteur et position que leur conteneur. Le contrôle CUA publié à 1280 px confirme cette géométrie et l’absence de débordement. Inspection canonique, SHA API no-store et métadonnées de page correspondent à la source ci-dessus ; tests HTTP publics/protégés réussis après promotion. Capture locale : `outputs/production-player-spacing.png`.
+
+Retour avant ce correctif : promouvoir https://copro-league-18xc8liok-yurr2.vercel.app (`dpl_8KmWKGQaoxLYaPzoMentB5yKrtEV`, `f88b188`), sans restauration de base. Le commit documentaire ultérieur ne modifie pas l’application déployée.
