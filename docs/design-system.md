@@ -36,3 +36,11 @@ On 2 October 2026, the implementation from `6074806` was integrated into the
 Vercel/Supabase source alongside the new match analysis workflow and timeline.
 The annotation workspace now consumes the shared palette and font variables;
 deploying this checkout includes both the global design and the analysis UI.
+
+## Animations intégrées — 4 octobre 2026
+
+Les tokens et polices canoniques sont dans `app/tokens.css`. Les effets sont isolés dans `app/animations.css`, avec Motion chargé par `AnimationProvider` dans le layout persistant. Le HUD et GameMenu remplacent la navigation précédente ; les carousels complètent les joueurs, les participants, les capitaines et la révélation Pack. BadgeViewer accompagne les collections et les trophées ; les célébrations comparent uniquement deux réponses réussies d’un même profil pendant la session.
+
+La saisie précise et ses treize actions conservent leurs contrôles fixes. Une navigation interne persiste immédiatement le brouillon local ; un conflit ou un stockage indisponible bloque le départ. Connexion/déconnexion gardent une navigation complète. Les réponses privées ne sont jamais persistées par la couche d’animation.
+
+La route `/dev/animations` permet de rejouer les cinq groupes avec des fixtures locales, un mode réduit et une erreur de chargement. Elle ne demande aucune donnée Supabase. Le son reste désactivé par défaut et l’orientation mobile demande une activation explicite. Les gestes possèdent des boutons équivalents ; le menu fournit focus, flèches et Échap. Le mouvement réduit supprime les déplacements décoratifs.

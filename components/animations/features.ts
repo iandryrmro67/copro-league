@@ -1,1 +1,1 @@
-export {domMax as default} from 'motion/react';
+export { domMax as default } from "motion/react";

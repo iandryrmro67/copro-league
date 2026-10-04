@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 const origin=process.env.TEST_ORIGIN??'http://localhost:5174';
 const forged={'oai-authenticated-user-id':'forged','oai-authenticated-user-email':'imramaro@gmail.com'};
-for(const path of ['/','/awards','/glossaire','/matchs']){
+for(const path of ['/','/awards','/glossaire','/matchs','/joueurs','/stats','/draft','/replays','/dev/animations']){
  const r=await fetch(origin+path,{redirect:'manual'});assert.equal(r.status,200,path);
 }
 const admin=await fetch(origin+'/admin',{redirect:'manual'});assert.equal(admin.status,307);assert.match(admin.headers.get('location'),/\/connexion\?/);
