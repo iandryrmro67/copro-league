@@ -279,8 +279,9 @@ export function AnimationLab() {
                 <BadgeViewer items={badges} />
                 <HoverButton
                   magnetic={false}
-                  disabled={busy}
-                  onClick={() => setUnlock(true)}
+                  onClick={() => {
+                    if (!busy) setUnlock(true);
+                  }}
                 >
                   Simuler un déblocage →
                 </HoverButton>
