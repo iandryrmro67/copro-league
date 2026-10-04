@@ -54,6 +54,8 @@ input::placeholder, textarea::placeholder { color: var(--ash); opacity: 1; }
 .avatar { background: var(--graphite); border-color: var(--line); font-family: var(--font-mono); font-weight: 500; letter-spacing: 0; }
 .avatar img, .videothumb { filter: grayscale(1); }
 .avatarstack .avatar+.avatar { margin-left: -8px; }
+/* Player links remain whole cards when wrapped by the hover animation. */
+.playersgrid .playercard { display: block; height: 100%; }
 .playercard:hover { transform: none; background: var(--graphite); border-color: var(--kush); }
 .playercard h2 { font-size: 40px; }
 .playercard .identity-chips { gap: 8px; }
