@@ -1,10 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {bootProgress, snapIndex, unlockedIds, createSingleFlight} from '../lib/animation-state.ts';
+import {bootProgress, snapIndex, unlockedIds, createSingleFlight, magneticOffset} from '../lib/animation-state.ts';
 test('boot cannot complete before the real league request', () => {
   assert.equal(bootProgress({fonts:false,image:false,data:false}),0);
   assert.equal(bootProgress({fonts:true,image:true,data:false}),40);
   assert.equal(bootProgress({fonts:true,image:true,data:true}),100);
+});
+test('magnetism stops outside the button vicinity and is bounded at the edge',()=>{
+  assert.deepEqual(magneticOffset(111,0,100,40),{x:0,y:0});
+  assert.deepEqual(magneticOffset(110,0,100,40),{x:6,y:0});
+  assert.deepEqual(magneticOffset(0,0,100,40),{x:0,y:0});
+  const diagonal=magneticOffset(70,50,100,40);
+  assert.ok(Math.abs(diagonal.x)<=6&&Math.abs(diagonal.y)<=6);
 });
 test('carousel momentum snaps without escaping the roster', () => {
   assert.equal(snapIndex(0,800,0,300,4),0);

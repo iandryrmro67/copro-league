@@ -15,3 +15,7 @@ export function createSingleFlight<T>(load:()=>Promise<T>){
   let pending:Promise<T>|null=null;
   return ()=>{if(!pending)pending=load().finally(()=>{pending=null});return pending;};
 }
+export function magneticOffset(dx:number,dy:number,width:number,height:number){
+ if(Math.hypot(Math.max(Math.abs(dx)-width/2,0),Math.max(Math.abs(dy)-height/2,0))>60)return {x:0,y:0};
+ return {x:Math.max(-6,Math.min(6,dx/(width/2+60)*6)),y:Math.max(-6,Math.min(6,dy/(height/2+60)*6))};
+}
