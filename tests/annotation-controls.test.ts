@@ -150,3 +150,12 @@ test('defensive stat filters find the attacking observation that credited their 
  assert.equal(filterActions([e],{team:'A',type:'INTERCEPTION'}).length,0);
  assert.equal(filterActions([{...e,metadata:{...e.metadata,counterpartStats:false}}],{type:'INTERCEPTION'}).length,0);
 });
+
+
+test('own goals appear among goals but not shots or assists',()=>{
+ const own:MatchEvent={id:'own',playerId:'a',team:'A',type:'OWN_GOAL',timestamp:10,relatedPlayerId:null,metadata:{schemaVersion:2,sequenceId:'seq',tags:[]}};
+ assert.equal(filterActions([own],{type:'GOAL'}).length,1);
+ assert.equal(filterActions([own],{type:'OWN_GOAL'}).length,1);
+ assert.equal(filterActions([own],{type:'SHOT'}).length,0);
+ assert.equal(filterActions([own],{type:'ASSIST'}).length,0);
+});

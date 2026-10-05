@@ -42,4 +42,11 @@ Lancer le même serveur avec `--port 5192`, puis ouvrir `http://127.0.0.1:5192/?
 
 Choisir Mathis → Passe → Ratée → Alex. Vérifier une ligne « interceptée par Alex », une passe tentée/ratée pour Mathis et une interception/récupération pour Alex dans les compteurs. Cliquer le compteur d’interceptions doit retrouver cette ligne. Modifier l’intercepteur vers Paul et enregistrer : Alex revient à zéro, Paul reçoit les crédits, toujours une seule ligne. Tester « Aucun / intercepteur non identifié », Tir → Cadré → gardien, puis Perte de balle → Dépossédé → récupérateur. Les fixtures peuvent être réinitialisées sans toucher à la production.
 
-Tester +1 s et −1 s, la borne zéro et le passage 00:59 → 01:00. À 390 px, vérifier huit boutons de 44 px de haut sur deux rangées et aucun débordement de page, même avec le tableau des compteurs ouvert.
+Tester +1 s et −1 s, la borne zéro et le passage 00:59 → 01:00. À 390 px, vérifier les deux boutons ±1 s de 44 px de haut dans la barre fixe et aucun débordement de page, même avec le tableau des compteurs ouvert.
+
+
+## Saisie optimisée du 6 octobre 2026
+
+Le choix « Ouvrir ma vidéo » au-dessus du lecteur ouvre directement un fichier local. Tester une vidéo de 2 h et 376 391 Kio sans transfert réseau. Le test de cette version a utilisé un MP4 synthétique de cette durée, complété par un atome `free` jusqu’à 385 424 384 octets ; il valide la taille et la lecture locale, pas tous les codecs d’une vidéo réelle. Après rechargement, le fichier doit être sélectionné à nouveau.
+
+Mathis → Passe → Longue → Réussie → Loris : une seule observation avec précision et Loris devient ciblé. Activer la chaîne des Verts, cliquer Xan → Adam → Mathis : trois passes distinctes et suivi du receveur. Avec une vidéo en lecture, la chaîne ne la met pas en pause. « Passe ratée » ouvre directement les intercepteurs. Tir → Non cadré → Pied gauche → Enregistrer le tir conserve la précision sans rouvrir l’événement. CSC pour Mathis ajoute un but aux Bleus, sans tir ni assist. Vérifier le temps fixe, la correction et le repli des palettes à 390 px, sans débordement de page.

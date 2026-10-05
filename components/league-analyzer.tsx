@@ -11,9 +11,14 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import type { League, Match, MatchEvent } from "@/lib/model";
-import { analysisCounts, beginAnalysis } from "@/lib/match-analysis";
-import { actionDefinitions, eventLabel, isV2, isGoal } from "@/lib/actions";
+import {
+  analysisCounts,
+  beginAnalysis,
+  annotatedScore,
+} from "@/lib/match-analysis";
+import { actionDefinitions, eventLabel, isV2 } from "@/lib/actions";
 import { youtubeId } from "@/lib/engine";
+import { AnnotationTimeControl } from "./annotation-time-control";
 import { parseActionTime } from "@/lib/annotation-time";
 import { AnnotationCapture } from "./league-annotation-capture";
 import {
@@ -37,6 +42,7 @@ import {
   retargetCapture,
   correctHistoricalAction,
   recordPreciseAction,
+  recordCirculationPass,
   reconcileActionLinks,
   type CaptureDraft,
 } from "@/lib/precise-annotation";
@@ -52,6 +58,7 @@ const blank = (type: string): CaptureDraft => ({
   tags: [],
   participantChosen: false,
   detailChosen: false,
+  precisionChosen: false,
 });
 export function Analyzer({
   match: m,
@@ -89,6 +96,7 @@ export function Analyzer({
     [future, setFuture] = useState<Match[]>([]),
     [message, setMessage] = useState(""),
     [lastId, setLastId] = useState<string | null>(null);
+  const [chainTeam, setChainTeam] = useState<"A" | "B" | null>(null);
   const resumePlayback = useRef(false);
   const video = useRef<VideoPlayerHandle>(null),
     root = useRef<HTMLDivElement>(null),
@@ -117,10 +125,7 @@ export function Analyzer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [m.events, m.participants, m.analysis?.completeKeys],
   );
-  const score = {
-    A: m.events.filter((e) => isGoal(e) && e.team === "A").length,
-    B: m.events.filter((e) => isGoal(e) && e.team === "B").length,
-  };
+  const score = annotatedScore(m);
   useEffect(
     () => () => {
       if (localVideo) URL.revokeObjectURL(localVideo);
@@ -151,6 +156,7 @@ export function Analyzer({
       captureActive: !!draft,
       participantChosen: draft?.participantChosen ?? false,
       detailChosen: draft?.detailChosen ?? false,
+      precisionChosen: draft?.precisionChosen,
       videoHidden: hidden,
       captureVideoTime:
         frozen.current?.timestamp ===
@@ -218,6 +224,8 @@ export function Analyzer({
     setPast((p) => p.slice(0, -1));
     onChange(restoreAnnotation(m, prev));
     setSequence(prev.analysis?.session.sequenceId ?? sequence);
+    setActor(prev.analysis?.session.builder?.actor ?? actor);
+    setChainTeam(null);
     cancel();
     setLastId(null);
     setMessage("Dernière modification annulée.");
@@ -229,6 +237,7 @@ export function Analyzer({
     setFuture((f) => f.slice(0, -1));
     onChange(restoreAnnotation(m, next));
     setSequence(next.analysis?.session.sequenceId ?? sequence);
+    setChainTeam(null);
     cancel();
     setMessage("Modification rétablie.");
   }
@@ -248,6 +257,7 @@ export function Analyzer({
       resumePlayback.current = false;
       remember(result.match);
       setSequence(result.sequenceId);
+      if (!editing) setActor(result.nextActor);
       setDraft(null);
       setEditing(null);
       setManual(false);
@@ -263,8 +273,23 @@ export function Analyzer({
       setMessage((error as Error).message);
     }
   }
-  function start(type: string) {
+  function openLocalVideo(file: File) {
+    if (!/\.(mp4|mov|webm)$/i.test(file.name)) {
+      setMessage("Choisis une vidéo MP4, MOV ou WebM.");
+      return;
+    }
+    setStatus("loading");
+    setHidden(false);
+    setManual(false);
+    setLocalVideo(URL.createObjectURL(file));
+    setLocalName(file.name);
+    setMessage(
+      "Vidéo ouverte sur cet appareil. Aucune compression ni envoi nécessaire.",
+    );
+  }
+  function start(type: string, initial: Partial<CaptureDraft> = {}) {
     if (busy) return;
+    setChainTeam(null);
     if (!m.participants.some((p) => p.playerId === actor && p.team)) {
       setMessage("Choisis d’abord le joueur ciblé.");
       return;
@@ -279,7 +304,7 @@ export function Analyzer({
       setManual(true);
       committed.current = false;
       setMessage("");
-      const next = blank(type);
+      const next = { ...blank(type), ...initial };
       setDraft(next);
       if (!editing && captureStep(next) === "ready") commit(next, marked);
     } catch (error) {
@@ -290,7 +315,50 @@ export function Analyzer({
     setDraft(value);
     if (!editing && captureStep(value) === "ready") commit(value);
   }
+  function toggleChain(team: "A" | "B") {
+    if (busy || draft || editing) return;
+    setChainTeam(chainTeam === team ? null : team);
+    if (m.participants.find((p) => p.playerId === actor)?.team !== team)
+      setActor("");
+    committed.current = false;
+  }
   function choosePlayer(id: string) {
+    if (busy) return;
+    if (chainTeam) {
+      const target = m.participants.find((p) => p.playerId === id);
+      if (target?.team !== chainTeam) {
+        setChainTeam(null);
+        setActor(id);
+        return;
+      }
+      if (!actor || actor === id) {
+        setActor(id);
+        return;
+      }
+      try {
+        const result = recordCirculationPass(m, {
+          from: actor,
+          to: id,
+          sequenceId: sequence,
+          moment: moment(),
+        });
+        remember(result.match);
+        setActor(result.nextActor);
+        setSequence(result.sequenceId);
+        setLastId(result.event.id);
+        setStamp(clock(result.event.timestamp));
+        if (!showVideo)
+          setPlayhead(result.event.metadata.videoTimestamp as number);
+        setMessage(
+          `${name(actor)} → ${name(id)} · passe ajoutée. ${name(id)} a le ballon.`,
+        );
+        frozen.current = null;
+        committed.current = false;
+      } catch (e) {
+        setMessage((e as Error).message);
+      }
+      return;
+    }
     setActor(id);
     setMessage("");
     if (draft && !editing) {
@@ -300,6 +368,7 @@ export function Analyzer({
     committed.current = false;
   }
   function edit(e: MatchEvent) {
+    setChainTeam(null);
     video.current?.pause();
     frozen.current = null;
     const seconds = eventVideoTime(e, offset);
@@ -536,119 +605,167 @@ export function Analyzer({
           )}
         </div>
       </header>
-      <section className="precise-media" aria-label="Vidéo du match">
-        <div className="precise-video-heading">
-          <div>
-            <span className="studio-label">VIDÉO</span>
-            <strong>
-              {showVideo
-                ? "Regarder et annoter"
-                : !src
-                  ? "Annoter sans vidéo"
-                  : status === "error"
-                    ? "Vidéo indisponible · saisie manuelle"
-                    : "Vidéo masquée · saisie manuelle"}
-            </strong>
-          </div>
-          {showVideo ? (
-            <button type="button" className="button" onClick={hideVideo}>
-              <EyeOff size={16} />
-              Masquer la vidéo / annoter sans vidéo
-            </button>
-          ) : (
-            src && (
-              <button
-                type="button"
-                className="button"
-                onClick={() => {
-                  setHidden(false);
-                  setManual(false);
-                  if (status === "error") {
-                    setStatus("loading");
-                    setVideoEpoch((v) => v + 1);
-                  }
-                }}
-              >
-                <Eye size={16} />
-                {status === "error"
-                  ? "Réessayer la vidéo"
-                  : "Afficher la vidéo"}
-              </button>
-            )
-          )}
+      <div className="annotation-livebar">
+        <div className="livebar-player">
+          <span className="studio-label">
+            {chainTeam ? "PASSES EN CHAÎNE" : "JOUEUR CIBLÉ"}
+          </span>
+          <strong>
+            {actor ? name(actor) : "Choisis le porteur du ballon"}
+          </strong>
         </div>
-        {!!src && (
-          <div className="precise-player" hidden={!showVideo}>
-            <VideoPlayer
-              key={src + "-" + videoEpoch}
-              annotation
-              ref={video}
-              src={src}
-              initialTime={m.analysis?.session.videoTime ?? 0}
-              onStatus={setStatus}
-              onTime={(seconds) => {
-                setPlayhead(seconds);
-                if (!manual && !editing && !draft && showVideo)
-                  setStamp(clock(Math.max(0, seconds - offset)));
-                if (
-                  m.analysis &&
-                  !busy &&
-                  Math.floor(seconds) !==
-                    Math.floor(m.analysis.session.videoTime)
-                )
-                  onChange({
-                    ...m,
-                    analysis: {
-                      ...m.analysis,
-                      session: { ...m.analysis.session, videoTime: seconds },
-                    },
-                  });
+        <AnnotationTimeControl
+          label={
+            draft || editing
+              ? "Temps figé · action en cours"
+              : useVideo
+                ? "Temps du match · vidéo"
+                : "Temps du match"
+          }
+          value={useVideo ? clock(Math.max(0, playhead - offset)) : stamp}
+          duration={m.duration}
+          disabled={busy}
+          onChange={changeActionTime}
+          onFollowVideo={
+            showVideo && status === "ready" && manual && !draft && !editing
+              ? () => setManual(false)
+              : undefined
+          }
+        />
+      </div>
+      <div className="annotation-desk">
+        <section className="precise-media" aria-label="Vidéo du match">
+          <label className="video-local-primary">
+            <strong>{localName || "Ouvrir ma vidéo"}</strong>
+            <span>
+              Depuis cet ordinateur · sans limite de taille imposée · aucun
+              envoi
+            </span>
+            <input
+              aria-label="Ouvrir une vidéo locale"
+              type="file"
+              accept=".mp4,.mov,.webm"
+              disabled={busy}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) openLocalVideo(file);
+                e.target.value = "";
               }}
             />
-          </div>
-        )}
-        {!showVideo && (
-          <p className="precise-video-note">
-            {status === "error"
-              ? "Le lecteur ne fonctionne pas. Tu peux continuer à noter les actions. "
-              : "Choisis le joueur puis l’action ci-dessous. "}
-            Ajuste le temps avec les boutons ou le curseur ci-dessous.
-            {youtube && (
-              <>
-                {" "}
-                <a
-                  href={"https://www.youtube.com/watch?v=" + youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            <small>
+              Après rechargement, sélectionne le fichier à nouveau. Tes
+              annotations restent sauvegardées.
+            </small>
+          </label>
+
+          <div className="precise-video-heading">
+            <div>
+              <span className="studio-label">VIDÉO</span>
+              <strong>
+                {showVideo
+                  ? "Regarder et annoter"
+                  : !src
+                    ? "Annoter sans vidéo"
+                    : status === "error"
+                      ? "Vidéo indisponible · saisie manuelle"
+                      : "Vidéo masquée · saisie manuelle"}
+              </strong>
+            </div>
+            {showVideo ? (
+              <button type="button" className="button" onClick={hideVideo}>
+                <EyeOff size={16} />
+                Masquer la vidéo / annoter sans vidéo
+              </button>
+            ) : (
+              src && (
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => {
+                    setHidden(false);
+                    setManual(false);
+                    if (status === "error") {
+                      setStatus("loading");
+                      setVideoEpoch((v) => v + 1);
+                    }
+                  }}
                 >
-                  Ouvrir sur YouTube ↗
-                </a>
-              </>
+                  <Eye size={16} />
+                  {status === "error"
+                    ? "Réessayer la vidéo"
+                    : "Afficher la vidéo"}
+                </button>
+              )
             )}
-          </p>
-        )}
-      </section>
-      <AnnotationCapture
-        match={m}
-        data={data}
-        actor={actor}
-        draft={draft}
-        editing={edited}
-        busy={busy}
-        time={useVideo ? clock(Math.max(0, playhead - offset)) : stamp}
-        manualTime={!useVideo}
-        onTimeChange={changeActionTime}
-        onFollowVideo={
-          showVideo && status === "ready" && manual && !draft && !editing
-            ? () => setManual(false)
-            : undefined
-        }
-        onPlayer={choosePlayer}
-        onStart={start}
-        onDraft={update}
-        onCancel={cancel}
-        onSaveEdit={saveEdit}
-      />
+          </div>
+          {!!src && (
+            <div className="precise-player" hidden={!showVideo}>
+              <VideoPlayer
+                key={src + "-" + videoEpoch}
+                annotation
+                ref={video}
+                src={src}
+                initialTime={m.analysis?.session.videoTime ?? 0}
+                onStatus={setStatus}
+                onTime={(seconds) => {
+                  setPlayhead(seconds);
+                  if (!manual && !editing && !draft && showVideo)
+                    setStamp(clock(Math.max(0, seconds - offset)));
+                  if (
+                    m.analysis &&
+                    !busy &&
+                    Math.floor(seconds) !==
+                      Math.floor(m.analysis.session.videoTime)
+                  )
+                    onChange({
+                      ...m,
+                      analysis: {
+                        ...m.analysis,
+                        session: { ...m.analysis.session, videoTime: seconds },
+                      },
+                    });
+                }}
+              />
+            </div>
+          )}
+          {!showVideo && (
+            <p className="precise-video-note">
+              {status === "error"
+                ? "Le lecteur ne fonctionne pas. Tu peux continuer à noter les actions. "
+                : "Choisis le joueur puis l’action ci-dessous. "}
+              Le temps du match reste accessible dans la barre de saisie.
+              {youtube && (
+                <>
+                  {" "}
+                  <a
+                    href={"https://www.youtube.com/watch?v=" + youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ouvrir sur YouTube ↗
+                  </a>
+                </>
+              )}
+            </p>
+          )}
+        </section>
+        <AnnotationCapture
+          match={m}
+          data={data}
+          actor={actor}
+          draft={draft}
+          editing={edited}
+          busy={busy}
+          chainTeam={chainTeam}
+          onChain={toggleChain}
+          onFailedChain={() => start("PASS", { outcome: "FAILED" })}
+          onPlayer={choosePlayer}
+          onStart={start}
+          onDraft={update}
+          onCancel={cancel}
+          onSaveEdit={saveEdit}
+        />
+      </div>
       {message && (
         <div className="precise-feedback" role="status">
           <span>{message}</span>
@@ -706,13 +823,7 @@ export function Analyzer({
               setManual(false);
               onChange({ ...m, video });
             }}
-            onLocal={(file) => {
-              setStatus("loading");
-              setHidden(false);
-              setManual(false);
-              setLocalVideo(URL.createObjectURL(file));
-              setLocalName(file.name);
-            }}
+            onLocal={openLocalVideo}
           />
           {localVideo && (
             <div className="local-video-status">
@@ -789,6 +900,7 @@ export function Analyzer({
                   <th>Tirs</th>
                   <th>Passes</th>
                   <th>Pertes</th>
+                  <th>CSC</th>
                   <th>Interceptions</th>
                   <th>Récupérations</th>
                   <th>Arrêts</th>
@@ -806,6 +918,7 @@ export function Analyzer({
                         ["SHOT", "shots"],
                         ["PASS", "passesAttempted"],
                         ["TURNOVER", "turnovers"],
+                        ["OWN_GOAL", "ownGoals"],
                         ["INTERCEPTION", "interceptions"],
                         ["RECOVERY", "recoveries"],
                         ["SAVE", "saves"],

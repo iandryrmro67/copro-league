@@ -68,13 +68,13 @@ test("the pass flow waits for result and recipient before becoming recordable", 
     /receveur|complét/i,
   );
 });
-test("a precise pass stays atomic and keeps the targeted player", () => {
+test("a precise completed pass stays atomic and follows its recipient", () => {
   const result = recordPreciseAction(
     fixture(),
     input(draft({ outcome: "COMPLETED", mate: "b", participantChosen: true })),
   );
   assert.equal(result.match.events.length, 1);
-  assert.equal(result.nextActor, "a");
+  assert.equal(result.nextActor, "b");
   assert.equal(result.event.relatedPlayerId, "b");
   assert.equal(result.event.metadata.videoTimestamp, 50.8);
   assert.equal(
@@ -609,7 +609,16 @@ test("counterpart observations at the same instant do not double count and corre
       });
       assert.equal(analysisCounts(second.match).participants[2].stats[key], 1);
       const actorStats = analysisCounts(second.match).participants[0].stats;
-      assert.equal(actorStats[key === "interceptions" ? "passesAttempted" : key === "saves" ? "shots" : "turnovers"], 1);
+      assert.equal(
+        actorStats[
+          key === "interceptions"
+            ? "passesAttempted"
+            : key === "saves"
+              ? "shots"
+              : "turnovers"
+        ],
+        1,
+      );
       if (key === "interceptions")
         assert.equal(
           analysisCounts(second.match).participants[2].stats.recoveries,
@@ -678,26 +687,137 @@ test("an automatic recovery cannot imply a high recovery from the passer positio
   );
 });
 
-
 test("publishing credits both players while an unfinished correction preserves the published result", async () => {
-  const {publishAnalysis, publicMatch}=await import("../lib/match-analysis.ts");
-  const result=recordPreciseAction(fixture(), input(draft({outcome:"FAILED",opponent:"c",participantChosen:true})));
-  result.match.analysis!.completeKeys=["passesAttempted","passesCompleted","interceptions","recoveries"];
-  result.match.analysis!.ranges=[{start:0,end:3600}];
-  const published=publishAnalysis(result.match);
-  assert.equal(published.participants[0].stats.passesAttempted,1);
-  assert.equal(published.participants[2].stats.interceptions,1);
-  assert.equal(published.participants[2].stats.recoveries,1);
-  const correction=recordPreciseAction(published,{...input(draft({outcome:"FAILED",participantChosen:true})),editing:result.event.id});
-  assert.equal(analysisCounts(correction.match).participants[2].stats.interceptions ?? 0,0);
-  assert.equal(publicMatch(correction.match).participants[2].stats.interceptions,1);
-  assert.equal(publicMatch(correction.match).events[0].metadata.opponentPlayerId,"c");
+  const { publishAnalysis, publicMatch } =
+    await import("../lib/match-analysis.ts");
+  const result = recordPreciseAction(
+    fixture(),
+    input(draft({ outcome: "FAILED", opponent: "c", participantChosen: true })),
+  );
+  result.match.analysis!.completeKeys = [
+    "passesAttempted",
+    "passesCompleted",
+    "interceptions",
+    "recoveries",
+  ];
+  result.match.analysis!.ranges = [{ start: 0, end: 3600 }];
+  const published = publishAnalysis(result.match);
+  assert.equal(published.participants[0].stats.passesAttempted, 1);
+  assert.equal(published.participants[2].stats.interceptions, 1);
+  assert.equal(published.participants[2].stats.recoveries, 1);
+  const correction = recordPreciseAction(published, {
+    ...input(draft({ outcome: "FAILED", participantChosen: true })),
+    editing: result.event.id,
+  });
+  assert.equal(
+    analysisCounts(correction.match).participants[2].stats.interceptions ?? 0,
+    0,
+  );
+  assert.equal(
+    publicMatch(correction.match).participants[2].stats.interceptions,
+    1,
+  );
+  assert.equal(
+    publicMatch(correction.match).events[0].metadata.opponentPlayerId,
+    "c",
+  );
 });
 
 test("ambiguous reciprocal observations are not silently merged", () => {
-  const pass = input(draft({outcome:"FAILED",opponent:"c",participantChosen:true}));
-  const first = recordPreciseAction(fixture(),pass);
-  const second = recordPreciseAction(first.match,pass);
-  const intercepted = recordPreciseAction(second.match,{...input(draft({type:"INTERCEPTION",opponent:"a",participantChosen:true})),playerId:"c"});
-  assert.equal(analysisCounts(intercepted.match).participants[2].stats.interceptions,3);
+  const pass = input(
+    draft({ outcome: "FAILED", opponent: "c", participantChosen: true }),
+  );
+  const first = recordPreciseAction(fixture(), pass);
+  const second = recordPreciseAction(first.match, pass);
+  const intercepted = recordPreciseAction(second.match, {
+    ...input(
+      draft({ type: "INTERCEPTION", opponent: "a", participantChosen: true }),
+    ),
+    playerId: "c",
+  });
+  assert.equal(
+    analysisCounts(intercepted.match).participants[2].stats.interceptions,
+    3,
+  );
+});
+
+test("own goals count for the other team without a scorer or assist credit", async () => {
+  const { annotatedScore, publishAnalysis } =
+    await import("../lib/match-analysis.ts");
+  const result = recordPreciseAction(
+    fixture(),
+    input(draft({ type: "OWN_GOAL" })),
+  );
+  assert.deepEqual(annotatedScore(result.match), { A: 0, B: 1 });
+  const counts = analysisCounts(result.match).participants;
+  assert.equal(counts[0].stats.ownGoals, 1);
+  assert.equal(counts[0].stats.goals ?? 0, 0);
+  assert.equal(counts[0].stats.shots ?? 0, 0);
+  assert.equal(result.event.relatedPlayerId, null);
+  assert.notEqual(result.sequenceId, "seq");
+  assert.equal(matchSchema.safeParse(result.match).success, true);
+  result.match.scoreA = 0;
+  result.match.scoreB = 1;
+  result.match.analysis!.completeKeys = ["goals", "assists", "ownGoals"];
+  result.match.analysis!.ranges = [{ start: 0, end: 3600 }];
+  assert.equal(publishAnalysis(result.match).participants[0].stats.ownGoals, 1);
+});
+test("immediate shot precisions wait until confirmed, then keep their tags", () => {
+  const d = draft({
+    type: "SHOT",
+    outcome: "OFF_TARGET",
+    precisionChosen: false,
+    tags: ["LEFT_FOOT", "PENALTY"],
+  });
+  assert.equal(captureStep(d), "precision");
+  assert.throws(() => recordPreciseAction(fixture(), input(d)), /complét/i);
+  const result = recordPreciseAction(
+    fixture(),
+    input({ ...d, precisionChosen: true }),
+  );
+  assert.deepEqual(result.event.metadata.tags, ["LEFT_FOOT", "PENALTY"]);
+});
+test("circulation follows recipients and rejects opponents or self passes", async () => {
+  const { recordCirculationPass } =
+    await import("../lib/precise-annotation.ts");
+  const a = recordCirculationPass(fixture(), {
+    from: "a",
+    to: "b",
+    sequenceId: "seq",
+    moment: { timestamp: 10, videoTimestamp: 40 },
+  });
+  const b = recordCirculationPass(a.match, {
+    from: a.nextActor,
+    to: "a",
+    sequenceId: a.sequenceId,
+    moment: { timestamp: 12, videoTimestamp: 42 },
+  });
+  assert.equal(b.match.events.length, 2);
+  assert.equal(b.nextActor, "a");
+  assert.equal(
+    analysisCounts(b.match).participants[0].stats.passesCompleted,
+    1,
+  );
+  assert.equal(
+    analysisCounts(b.match).participants[1].stats.passesCompleted,
+    1,
+  );
+  for (const to of ["a", "c", "missing"])
+    assert.throws(() =>
+      recordCirculationPass(fixture(), {
+        from: "a",
+        to,
+        sequenceId: "seq",
+        moment: { timestamp: 10, videoTimestamp: 40 },
+      }),
+    );
+});
+
+
+test("restoring an unfinished shot keeps immediate precisions pending",async()=>{
+ const {restoreCaptureDraft}=await import("../lib/precise-annotation.ts");
+ const restored=restoreCaptureDraft(fixture(),{actor:"a",mate:"",opponent:"",type:"SHOT",outcome:"OFF_TARGET",tags:["LEFT_FOOT"],stamp:"0:20",manual:true,editing:null,linked:"",positionKnown:false,quick:false,view:"builder",scene:{players:{},ball:null},end:null,captureActive:true,precisionChosen:false});
+ assert.ok(restored);
+ assert.equal(captureStep(restored),"precision");
+ assert.deepEqual(restored.tags,["LEFT_FOOT"]);
 });

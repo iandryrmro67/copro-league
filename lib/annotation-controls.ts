@@ -1,5 +1,5 @@
 import type {Match,MatchEvent} from './model.ts';
-import {isGoal,eventLabel,isV2,canonicalEffects} from './actions.ts';
+import {isGoal,eventLabel,isV2,canonicalEffects,isOwnGoal} from './actions.ts';
 import {beginAnalysis,previousPass} from './match-analysis.ts';
 
 export const quickActions={
@@ -88,7 +88,7 @@ export function filterActions(events:MatchEvent[],filters:ActionFilters,name:(id
   if(type&&type!=='all'&&!credited){
    if(type==='GOAL'){if(!isGoal(e))return false;}
    else if(type==='ASSIST'){if(isGoal(e)){if(!e.relatedPlayerId||filters.player&&filters.player!=='all'&&e.relatedPlayerId!==filters.player)return false;}else if(e.type!=='ASSIST')return false;}
-   else if(type==='SHOT'){if(!isGoal(e)&&!['SHOT','SHOT_ON_TARGET','SHOT_OFF_TARGET','SHOT_BLOCKED'].includes(e.type))return false;}
+   else if(type==='SHOT'){if(isOwnGoal(e)||!isGoal(e)&&!['SHOT','SHOT_ON_TARGET','SHOT_OFF_TARGET','SHOT_BLOCKED'].includes(e.type))return false;}
    else if(type==='PASS'){if(!['PASS','PASS_ATTEMPT','PASS_COMPLETED','PASS_FAILED'].includes(e.type))return false;}
    else if(e.type!==type)return false;
   }

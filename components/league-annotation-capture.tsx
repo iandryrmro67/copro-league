@@ -14,7 +14,7 @@ import {
   Waypoints,
   X,
 } from "lucide-react";
-import { AnnotationTimeControl } from "./annotation-time-control";
+import { useState } from "react";
 import type { League, Match, MatchEvent } from "@/lib/model";
 import { teamName } from "@/lib/model";
 import {
@@ -31,7 +31,7 @@ import {
 const groups = [
   {
     label: "Avec le ballon",
-    types: ["PASS", "SHOT", "DRIBBLE", "TOUCH", "TURNOVER"],
+    types: ["PASS", "SHOT", "DRIBBLE", "TOUCH", "TURNOVER", "OWN_GOAL"],
   },
   {
     label: "Défendre & récupérer",
@@ -40,6 +40,7 @@ const groups = [
   { label: "Fautes & gardien", types: ["FOUL", "SAVE"] },
 ];
 const icons: Record<string, typeof Target> = {
+  OWN_GOAL: CircleDot,
   PASS: MoveRight,
   SHOT: Target,
   DRIBBLE: Footprints,
@@ -78,10 +79,9 @@ type Props = {
   draft: CaptureDraft | null;
   editing: MatchEvent | null;
   busy?: boolean;
-  time: string;
-  manualTime: boolean;
-  onTimeChange: (value: string) => void;
-  onFollowVideo?: () => void;
+  chainTeam: "A" | "B" | null;
+  onChain: (team: "A" | "B") => void;
+  onFailedChain: () => void;
   onPlayer: (id: string) => void;
   onStart: (type: string) => void;
   onDraft: (draft: CaptureDraft) => void;
@@ -95,16 +95,17 @@ export function AnnotationCapture({
   draft: d,
   editing,
   busy,
-  time,
-  manualTime,
-  onTimeChange,
-  onFollowVideo,
+  chainTeam,
+  onChain,
+  onFailedChain,
   onPlayer,
   onStart,
   onDraft,
   onCancel,
   onSaveEdit,
 }: Props) {
+  const [playersOpen, setPlayersOpen] = useState(false),
+    [actionsOpen, setActionsOpen] = useState(false);
   const name = (id: string) =>
     data.players.find((p) => p.id === id)?.name ?? id;
   const side = m.participants.find((p) => p.playerId === actor)?.team;
@@ -192,6 +193,7 @@ export function AnnotationCapture({
       onDraft({
         ...d,
         outcome,
+        precisionChosen: false,
         mate: "",
         opponent: "",
         participantChosen: false,
@@ -208,107 +210,169 @@ export function AnnotationCapture({
           <span className="studio-label">SAISIE PRÉCISE</span>
           <h3>{editing ? "Corriger l’action" : "Noter une action"}</h3>
         </div>
-        <AnnotationTimeControl
-          label={
-            d || editing
-              ? "Temps figé · action en cours"
-              : manualTime
-                ? "Temps du match"
-                : "Temps du match · vidéo"
-          }
-          value={time}
-          duration={m.duration}
-          disabled={busy}
-          onChange={onTimeChange}
-          onFollowVideo={onFollowVideo}
-        />
       </div>
-      <div className="capture-step">
-        <span>1</span>
-        <h4>Choisir le joueur ciblé</h4>
-        {actor && <strong className="capture-selected">{name(actor)}</strong>}
-      </div>
-      <div className="capture-teams">
-        {(["A", "B"] as const).map((team) => (
-          <div key={team} className={"capture-team team-" + team.toLowerCase()}>
-            <div className="capture-team-label">
-              <span>{team}</span>
+      {d && (
+        <div className="capture-compact-actions">
+          <button
+            type="button"
+            className="textbutton"
+            onClick={() => setPlayersOpen((v) => !v)}
+          >
+            Changer le joueur
+          </button>
+          <button
+            type="button"
+            className="textbutton"
+            onClick={() => setActionsOpen((v) => !v)}
+          >
+            Changer d’action
+          </button>
+        </div>
+      )}
+      {!d && !editing && (
+        <div className="chain-switches" aria-label="Passes en chaîne">
+          {(["A", "B"] as const).map((team) => (
+            <button
+              type="button"
+              key={team}
+              className={"button " + (chainTeam === team ? "primary" : "")}
+              aria-pressed={chainTeam === team}
+              disabled={busy}
+              onClick={() => onChain(team)}
+            >
+              {chainTeam === team ? "Terminer la chaîne" : "Passes en chaîne"} ·{" "}
               {teamName(m, team)}
-            </div>
-            <div className="capture-player-grid">
-              {m.participants
-                .filter((p) => p.team === team)
-                .map((p) => {
-                  const player = data.players.find((x) => x.id === p.playerId),
-                    active = actor === p.playerId;
-                  return (
-                    <button
-                      type="button"
-                      key={p.playerId}
-                      aria-label={"Choisir " + name(p.playerId)}
-                      aria-pressed={active}
-                      disabled={busy}
-                      className={
-                        "capture-player-button " + (active ? "active" : "")
-                      }
-                      onClick={() => onPlayer(p.playerId)}
-                    >
-                      <span className="capture-avatar">
-                        {player?.photo ? (
-                          <img
-                            src={player.photo}
-                            width={40}
-                            height={40}
-                            loading="lazy"
-                            alt=""
-                          />
-                        ) : (
-                          name(p.playerId).slice(0, 2).toUpperCase()
-                        )}
-                      </span>
-                      <span>{name(p.playerId)}</span>
-                      {active && <Check size={14} aria-hidden="true" />}
-                    </button>
-                  );
-                })}
-            </div>
+            </button>
+          ))}
+        </div>
+      )}
+      {chainTeam && (
+        <p className="chain-guide">
+          {actor
+            ? `${name(actor)} a le ballon. Clique sur le prochain receveur : une passe réussie est enregistrée.`
+            : "Choisis d’abord le joueur qui a le ballon."}
+          <button
+            type="button"
+            className="button"
+            disabled={!actor || busy}
+            onClick={onFailedChain}
+          >
+            Passe ratée
+          </button>
+        </p>
+      )}
+      {(!d || playersOpen) && (
+        <>
+          <div className="capture-step">
+            <span>1</span>
+            <h4>Choisir le joueur ciblé</h4>
+            {actor && (
+              <strong className="capture-selected">{name(actor)}</strong>
+            )}
           </div>
-        ))}
-      </div>
-      <div className="capture-step">
-        <span>2</span>
-        <h4>Choisir l’action</h4>
-        <small>
-          {actor ? "Pour " + name(actor) : "Sélectionne d’abord un joueur"}
-        </small>
-      </div>
-      <div className="precise-action-groups">
-        {groups.map((group) => (
-          <div className="precise-action-group" key={group.label}>
-            <span className="studio-label">{group.label}</span>
-            <div className="capture-action-grid">
-              {group.types.map((type) => {
-                const Icon = icons[type];
-                return (
-                  <button
-                    type="button"
-                    key={type}
-                    aria-pressed={d?.type === type}
-                    disabled={busy || !side}
-                    className={
-                      "capture-action " + (d?.type === type ? "active" : "")
-                    }
-                    onClick={() => onStart(type)}
-                  >
-                    <Icon size={22} strokeWidth={1.5} aria-hidden="true" />
-                    <span>{definitions[type].label}</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="capture-teams">
+            {(["A", "B"] as const)
+              .filter((team) => !chainTeam || chainTeam === team)
+              .map((team) => (
+                <div
+                  key={team}
+                  className={"capture-team team-" + team.toLowerCase()}
+                >
+                  <div className="capture-team-label">
+                    <span>{team}</span>
+                    {teamName(m, team)}
+                  </div>
+                  <div className="capture-player-grid">
+                    {m.participants
+                      .filter((p) => p.team === team)
+                      .map((p) => {
+                        const player = data.players.find(
+                            (x) => x.id === p.playerId,
+                          ),
+                          active = actor === p.playerId;
+                        return (
+                          <button
+                            type="button"
+                            key={p.playerId}
+                            aria-label={
+                              (chainTeam && actor && actor !== p.playerId
+                                ? "Passe vers "
+                                : "Choisir ") + name(p.playerId)
+                            }
+                            aria-pressed={active}
+                            disabled={busy}
+                            className={
+                              "capture-player-button " +
+                              (active ? "active" : "")
+                            }
+                            onClick={() => onPlayer(p.playerId)}
+                          >
+                            <span className="capture-avatar">
+                              {player?.photo ? (
+                                <img
+                                  src={player.photo}
+                                  width={40}
+                                  height={40}
+                                  loading="lazy"
+                                  alt=""
+                                />
+                              ) : (
+                                name(p.playerId).slice(0, 2).toUpperCase()
+                              )}
+                            </span>
+                            <span>{name(p.playerId)}</span>
+                            {active && <Check size={14} aria-hidden="true" />}
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
+      {(!d || actionsOpen) && (
+        <>
+          <div className="capture-step">
+            <span>2</span>
+            <h4>Choisir l’action</h4>
+            <small>
+              {actor ? "Pour " + name(actor) : "Sélectionne d’abord un joueur"}
+            </small>
+          </div>
+          <div className="precise-action-groups">
+            {groups.map((group) => (
+              <div className="precise-action-group" key={group.label}>
+                <span className="studio-label">{group.label}</span>
+                <div className="capture-action-grid">
+                  {group.types.map((type) => {
+                    const Icon = icons[type];
+                    return (
+                      <button
+                        type="button"
+                        key={type}
+                        aria-pressed={d?.type === type}
+                        disabled={busy || !side}
+                        className={
+                          "capture-action " + (d?.type === type ? "active" : "")
+                        }
+                        onClick={() => {
+                          setActionsOpen(false);
+                          setPlayersOpen(false);
+                          onStart(type);
+                        }}
+                      >
+                        <Icon size={22} strokeWidth={1.5} aria-hidden="true" />
+                        <span>{definitions[type].label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       {(d || legacy) && (
         <div className="precise-question" aria-label="Préciser l’action">
           <div className="precise-question-header">
@@ -346,6 +410,58 @@ export function AnnotationCapture({
               joueur et le temps, ou choisir une action pour la convertir.
             </p>
           )}
+          {d &&
+            (["PASS", "SHOT", "DRIBBLE", "DUEL", "TACKLE"].includes(d.type) ||
+              (editing && definitions[d.type].tags.length > 0)) && (
+              <div className="capture-immediate-tags">
+                <strong>Précisions · facultatives</strong>
+                <div className="precise-choice-buttons">
+                  {definitions[d.type].tags
+                    .filter(
+                      (tag) =>
+                        editing ||
+                        !["KEY_PASS", "ASSIST", "POSSESSION_LOST"].includes(
+                          tag,
+                        ),
+                    )
+                    .map((tag) => (
+                      <button
+                        type="button"
+                        key={tag}
+                        className={
+                          "button " + (d.tags.includes(tag) ? "primary" : "")
+                        }
+                        aria-pressed={d.tags.includes(tag)}
+                        disabled={busy}
+                        onClick={() => {
+                          const exclusive = [
+                            "RIGHT_FOOT",
+                            "LEFT_FOOT",
+                            "HEADER",
+                          ].includes(tag)
+                            ? ["RIGHT_FOOT", "LEFT_FOOT", "HEADER"]
+                            : ["PENALTY", "FREE_KICK"].includes(tag)
+                              ? ["PENALTY", "FREE_KICK"]
+                              : [];
+                          onDraft({
+                            ...d,
+                            tags: d.tags.includes(tag)
+                              ? d.tags.filter((t) => t !== tag)
+                              : [
+                                  ...d.tags.filter(
+                                    (t) => !exclusive.includes(t),
+                                  ),
+                                  tag,
+                                ],
+                          });
+                        }}
+                      >
+                        {actionLabels[tag]}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
           {showOutcome && (
             <div className="precise-choice">
               <strong>{prompts[d!.type]}</strong>
@@ -485,44 +601,33 @@ export function AnnotationCapture({
               </div>
             </div>
           )}
+          {!editing && step === "precision" && d && (
+            <button
+              type="button"
+              className="button primary"
+              disabled={busy}
+              onClick={() => onDraft({ ...d, precisionChosen: true })}
+            >
+              Enregistrer le tir
+            </button>
+          )}
           {!editing && (
             <p className="precise-next">
               {step === "outcome"
                 ? "Choisis le résultat pour continuer."
                 : step === "detail"
                   ? "Choisis une précision pour enregistrer."
-                  : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
-              Le joueur ciblé reste sélectionné.
+                  : step === "precision"
+                    ? "Ajoute les précisions utiles puis enregistre le tir."
+                    : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
+              {d?.type === "PASS" && d.outcome === "COMPLETED"
+                ? "Le receveur sera sélectionné pour la suite."
+                : "Le joueur ciblé reste sélectionné."}
             </p>
           )}
           {editing && d && (
             <details className="precise-extra">
-              <summary>
-                Précisions facultatives · tags, position et action liée
-              </summary>
-              <div className="precise-choice-buttons">
-                {definitions[d.type].tags.map((tag) => (
-                  <button
-                    type="button"
-                    key={tag}
-                    disabled={busy}
-                    aria-pressed={d.tags.includes(tag)}
-                    className={
-                      "button " + (d.tags.includes(tag) ? "primary" : "")
-                    }
-                    onClick={() =>
-                      onDraft({
-                        ...d,
-                        tags: d.tags.includes(tag)
-                          ? d.tags.filter((t) => t !== tag)
-                          : [...d.tags, tag],
-                      })
-                    }
-                  >
-                    {actionLabels[tag]}
-                  </button>
-                ))}
-              </div>
+              <summary>Position et action liée · facultatives</summary>
               <div className="precise-position-board">
                 <div className="split">
                   <strong>Position observée</strong>

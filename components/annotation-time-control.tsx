@@ -14,7 +14,6 @@ type Props = {
 };
 export function AnnotationTimeControl({
   value,
-  duration,
   label,
   disabled,
   onChange,
@@ -23,7 +22,7 @@ export function AnnotationTimeControl({
   const time = parseActionTime(value);
   const minutes = time == null ? "" : Math.floor(time / 60),
     seconds = time == null ? "" : time % 60;
-  const max = Math.min(9999 * 60 + 59, Math.max(60, duration * 60, time ?? 0));
+
   function part(kind: "minutes" | "seconds", value: string) {
     if (value === "") {
       onChange("");
@@ -81,7 +80,7 @@ export function AnnotationTimeControl({
         )}
       </div>
       <div className="action-time-steps" aria-label="Ajuster le temps">
-        {[-60, -30, -5, -1, 1, 5, 30, 60].map((delta) => (
+        {[-1, 1].map((delta) => (
           <button
             key={delta}
             className="button"
@@ -94,27 +93,6 @@ export function AnnotationTimeControl({
             {Math.abs(delta) === 60 ? "1 min" : `${Math.abs(delta)} s`}
           </button>
         ))}
-      </div>
-      <input
-        type="range"
-        min={0}
-        max={max}
-        step={1}
-        value={time ?? 0}
-        aria-label="Régler le temps de l’action"
-        aria-valuetext={
-          time == null ? "Temps non renseigné" : formatActionTime(time)
-        }
-        onChange={(e) => onChange(formatActionTime(Number(e.target.value)))}
-      />
-      <div className="action-time-scale">
-        <span>00:00</span>
-        <span>
-          {time == null
-            ? "Temps non renseigné"
-            : "Ajuste avec les boutons ou le curseur"}
-        </span>
-        <span>{formatActionTime(max)}</span>
       </div>
     </fieldset>
   );

@@ -10,7 +10,7 @@ Depuis le 2 octobre 2026, la référence de cet écran est le fichier fourni par
 
 Les trois fichiers WOFF2 sont extraits des ressources incorporées au document fourni, servis localement dans `public/fonts` avec leurs licences. Le site et l’atelier partagent les mêmes variables de palette et de typographie définies dans `app/design-system.css`. La disposition propre à l’analyse reste limitée à `.sequence-workspace`.
 
-La hiérarchie est identique sur ordinateur et mobile : vidéo → joueur ciblé → grande palette complète → questions adaptées à l’action → timeline et liste → réglages secondaires. Il n’existe plus de séparation rapide / détaillée ni de mode passes en chaîne. Les treize familles d’action restent visibles ; le joueur ciblé reste sélectionné après l’enregistrement.
+La barre fixe associe joueur ciblé et temps du match (champs minutes / secondes, −1 s / +1 s). Sur ordinateur, vidéo à gauche et saisie à droite ; sur mobile, les blocs se suivent. Les palettes se replient pendant les questions pour donner la priorité aux précisions et participants. Quatorze familles incluent le CSC. Une passe réussie sélectionne son receveur ; le mode « Passes en chaîne » enregistre la circulation par un clic sur chaque receveur sans pause vidéo. Le fichier local se choisit directement au-dessus du lecteur, sans compression ni upload.
 
 Le lecteur peut être masqué. Sans source ou en cas d’erreur, un bandeau compact permet la saisie du temps manuellement. Le lecteur reste monté quand il est masqué. Au clic sur une action, le temps est figé ; si la vidéo jouait, elle se met en pause puis reprend après le dernier choix nécessaire. Les corrections demandent une sauvegarde explicite. Le résumé propose annuler et modifier / préciser.
 

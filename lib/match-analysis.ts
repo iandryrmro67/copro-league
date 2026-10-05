@@ -1,10 +1,10 @@
 import type {Match, Stats} from './model.ts';
 import {labels} from './model.ts';
-import {isGoal,isV2,canonicalEffects} from './actions.ts';
+import {isGoal,isV2,canonicalEffects,scoringTeam} from './actions.ts';
 import {observedEvents} from './events.ts';
 
 export const coverageFamilies:Record<string,string[]>={
- 'Buts et assists':['goals','assists'],
+ 'Buts et assists':['goals','assists','ownGoals'],
  'Secondary assists':['secondaryAssists'],
  'Tirs':['shots','shotsOnTarget'],
  'Passes':['passesAttempted','passesCompleted','keyPasses','chancesCreated','longPassesAttempted','longPassesCompleted','crossesAttempted','crossesCompleted'],
@@ -23,7 +23,7 @@ export function beginAnalysis(m:Match):Match {
  publishedEvents:structuredClone(m.events),publishedKeys:[...m.trackedKeys]}};
 }
 export function analysisCounts(m:Match){return observedEvents({...m,trackedKeys:m.analysis?.completeKeys??[],participants:m.participants.map(p=>({...p,stats:{}}))})}
-export function annotatedScore(m:Match){return {A:m.events.filter(e=>isGoal(e)&&e.team==='A').length,B:m.events.filter(e=>isGoal(e)&&e.team==='B').length}}
+export function annotatedScore(m:Match){return {A:m.events.filter(e=>isGoal(e)&&scoringTeam(e)==='A').length,B:m.events.filter(e=>isGoal(e)&&scoringTeam(e)==='B').length}}
 export function coveredSeconds(ranges:{start:number;end:number}[]){
  let end=0,total=0;for(const r of [...ranges].sort((a,b)=>a.start-b.start)){total+=Math.max(0,r.end-Math.max(r.start,end));end=Math.max(end,r.end)}return total;
 }

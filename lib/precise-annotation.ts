@@ -10,6 +10,7 @@ export type CaptureDraft = {
   tags: string[];
   participantChosen: boolean;
   detailChosen: boolean;
+  precisionChosen?: boolean;
   position?: Point | null;
   positionInput?: { x: string; y: string };
   scene?: Scene;
@@ -17,7 +18,7 @@ export type CaptureDraft = {
   linkedEventId?: string | null;
 };
 export type CaptureStep =
-  "action" | "outcome" | "mate" | "opponent" | "detail" | "ready";
+  "action" | "outcome" | "mate" | "opponent" | "detail" | "precision" | "ready";
 export function captureStep(d: CaptureDraft): CaptureStep {
   if (!d.type) return "action";
   const outcomes =
@@ -25,6 +26,12 @@ export function captureStep(d: CaptureDraft): CaptureStep {
       ? ["COMMITTED", "SUFFERED"]
       : (actionDefinitions[d.type]?.outcomes ?? []);
   if (outcomes.length && !d.outcome) return "outcome";
+  if (
+    d.type === "SHOT" &&
+    ["OFF_TARGET", "WOODWORK"].includes(d.outcome) &&
+    d.precisionChosen === false
+  )
+    return "precision";
   if (["RECOVERY", "CLEARANCE", "TURNOVER"].includes(d.type) && !d.detailChosen)
     return "detail";
   if (
@@ -294,6 +301,7 @@ export function recordPreciseAction(
   });
   events = reconcileActionLinks(events);
   const ended =
+    d.type === "OWN_GOAL" ||
     (d.type === "PASS" && d.outcome === "FAILED") ||
     d.tags.includes("POSSESSION_LOST") ||
     [
@@ -319,7 +327,10 @@ export function recordPreciseAction(
       },
     },
     event: events.find((e) => e.id === event.id)!,
-    nextActor: playerId,
+    nextActor:
+      !editing && d.type === "PASS" && d.outcome === "COMPLETED"
+        ? d.mate
+        : playerId,
     sequenceId: nextSequence,
   };
 }
@@ -357,6 +368,7 @@ export function restoreCaptureDraft(
       opponent: builder.opponent,
       tags: builder.tags,
       participantChosen: builder.participantChosen ?? !!builder.editing,
+      precisionChosen: builder.precisionChosen,
       detailChosen: builder.detailChosen ?? !!builder.editing,
       position,
       positionInput: builder.positionInput,
@@ -433,4 +445,31 @@ export function retargetCapture(d: CaptureDraft): CaptureDraft {
     positionInput: undefined,
     endPosition: null,
   };
+}
+
+/** One explicit recipient click creates one observed completed pass. */
+export function recordCirculationPass(
+  match: Match,
+  input: {
+    from: string;
+    to: string;
+    sequenceId: string;
+    moment: AnnotationMoment;
+  },
+) {
+  return recordPreciseAction(match, {
+    playerId: input.from,
+    sequenceId: input.sequenceId,
+    moment: input.moment,
+    draft: {
+      type: "PASS",
+      outcome: "COMPLETED",
+      mate: input.to,
+      opponent: "",
+      tags: [],
+      participantChosen: true,
+      detailChosen: true,
+      precisionChosen: true,
+    },
+  });
 }

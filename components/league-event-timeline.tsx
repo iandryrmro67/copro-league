@@ -3,7 +3,7 @@ import {useMemo,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,CircleDot,Play,Target,Trash2} from 'lucide-react';
 import type {League,Match,MatchEvent} from '@/lib/model';
 import {teamName} from '@/lib/model';
-import {actionDefinitions,eventLabel,isGoal} from '@/lib/actions';
+import {actionDefinitions,eventLabel,isGoal,isOwnGoal,scoringTeam} from '@/lib/actions';
 import {filterActions,timelineWindow,type ActionFilters} from '@/lib/annotation-controls';
 import {formatVideoTime} from './league-video';
 
@@ -17,7 +17,7 @@ export function EventTimeline({match:m,data,time,selected,filters,onFilters,onSe
  const window=timelineWindow(duration,center??time,compact?0:span),width=window.end-window.start;
  const visible=events.filter(e=>e.timestamp!=null&&e.timestamp>=window.start&&e.timestamp<=window.end);
  const update=(key:keyof ActionFilters,value:string)=>{setLimit(80);onFilters({...filters,[key]:value});};
- const label=(e:MatchEvent)=>e.type==='FOUL'&&e.metadata.schemaVersion===2?'Faute commise':eventLabel(e);
+ const label=(e:MatchEvent)=>isOwnGoal(e)?'CSC · but pour '+teamName(m,scoringTeam(e)):e.type==='FOUL'&&e.metadata.schemaVersion===2?'Faute commise':eventLabel(e);
  const eventText=(e:MatchEvent)=>`${formatVideoTime(e.timestamp??0)} · ${name(e.playerId)} · ${label(e)}`;
  const hasFilters=Object.values(filters).some(v=>v&&v!=='all');
  return <section className={'match-timeline '+(compact?'timeline-compact':'timeline-review')} aria-label="Timeline des actions">

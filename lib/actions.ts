@@ -2,6 +2,7 @@ import type {MatchEvent} from './model.ts';
 export type Point={x:number;y:number};
 export type Scene={players:Record<string,Point>;ball:Point|null};
 export const actionDefinitions:Record<string,{label:string;outcomes:string[];tags:string[];shortcut?:string}>={
+OWN_GOAL:{label:'CSC',outcomes:[],tags:[]},
 SHOT:{label:'Tir',outcomes:['GOAL','ON_TARGET','OFF_TARGET','BLOCKED','WOODWORK'],tags:['PENALTY','FREE_KICK','RIGHT_FOOT','LEFT_FOOT','HEADER'],shortcut:'s'},
 PASS:{label:'Passe',outcomes:['COMPLETED','FAILED'],tags:['KEY_PASS','ASSIST','LONG_PASS','CROSS','THROUGH_BALL','POSSESSION_LOST'],shortcut:'p'},
 DRIBBLE:{label:'Dribble',outcomes:['COMPLETED','FAILED'],tags:['FOUL_WON','POSSESSION_LOST'],shortcut:'d'},
@@ -13,7 +14,9 @@ FOUL:{label:'Faute',outcomes:['SIMPLE'],tags:[],shortcut:'f'},TOUCH:{label:'Touc
 export const actionLabels:Record<string,string>={GOAL:'But',ON_TARGET:'Cadré',OFF_TARGET:'Non cadré',BLOCKED:'Bloqué',WOODWORK:'Montant',COMPLETED:'Réussie',FAILED:'Ratée',WON:'Gagné',LOST:'Perdu',FOUL:'Faute',SIMPLE:'Simple',SAVED_HELD:'Capté',SAVED_PARRIED:'Repoussé',PENALTY:'Penalty',FREE_KICK:'Coup franc',RIGHT_FOOT:'Pied droit',LEFT_FOOT:'Pied gauche',HEADER:'Tête',KEY_PASS:'Passe clé',ASSIST:'Décisive',LONG_PASS:'Longue',CROSS:'Centre',THROUGH_BALL:'En profondeur',FOUL_WON:'Faute subie',GROUND:'Au sol',AERIAL:'Aérien',BALL_RECOVERED:'Ballon récupéré',BALL_OUT:'Ballon sorti',OPPONENT_KEEPS_BALL:'Adversaire conserve',LOOSE_BALL:'Ballon libre',OPPONENT_ERROR:'Erreur adverse',AFTER_DUEL:'Après duel',PRESSING:'Pressing',FOOT:'Pied',BAD_PASS:'Mauvaise passe',BAD_TOUCH:'Mauvais contrôle',LOST_DRIBBLE:'Dribble perdu',DISPOSSESSED:'Dépossédé',OUT_OF_PLAY:'Sortie',POSSESSION_LOST:'Possession perdue'};
 export const annotationRules={interceptionIsRecovery:true,boxStart:85,boxLeft:25,boxRight:75,finalThird:200/3,pitchLength:40,pitchWidth:20};
 export const isV2=(e:MatchEvent)=>e.metadata.schemaVersion===2;
-export const isGoal=(e:MatchEvent)=>e.type==='GOAL'||(isV2(e)&&e.type==='SHOT'&&e.metadata.outcome==='GOAL');
+export const isOwnGoal=(e:MatchEvent)=>e.type==='OWN_GOAL';
+export const scoringTeam=(e:MatchEvent)=>isOwnGoal(e)?(e.team==='A'?'B':'A'):e.team;
+export const isGoal=(e:MatchEvent)=>isOwnGoal(e)||e.type==='GOAL'||(isV2(e)&&e.type==='SHOT'&&e.metadata.outcome==='GOAL');
 export function eventLabel(e:MatchEvent){return isV2(e)?`${actionDefinitions[e.type]?.label??e.type}${e.metadata.outcome?' · '+(actionLabels[String(e.metadata.outcome)]??e.metadata.outcome):''}`:e.type.replaceAll('_',' ')}
 export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,string][]{
  const out:[string,string][]=[],a=e.playerId,b=String(e.metadata.opponentPlayerId??''),mate=e.relatedPlayerId,o=e.metadata.outcome,t=(e.metadata.tags??[]) as string[],has=(s:string)=>t.includes(s),add=(k:string,id=a)=>{if(id)out.push([id,k])};
@@ -29,6 +32,7 @@ export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,strin
    x.timestamp===e.timestamp&&x.metadata.outcome===e.metadata.outcome);
  const counterpart=e.metadata.counterpartStats===true;
  switch(e.type){
+ case'OWN_GOAL':add('ownGoals');break;
  case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);if(o==='ON_TARGET'&&counterpart&&!hasCounterpart('SAVE'))add('saves',b);break;
  case'PASS':if(o==='FAILED'&&counterpart&&!hasCounterpart('INTERCEPTION')){add('interceptions',b);if(annotationRules.interceptionIsRecovery)add('recoveries',b)}add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')||events.some(x=>isV2(x)&&x.type==='SHOT'&&x.metadata.linkedEventId===e.id)){add('keyPasses');add('chancesCreated')}break;
  case'DRIBBLE':add('dribblesAttempted');if(o==='COMPLETED'){add('dribblesCompleted');add('dribbledPast',b)}if(has('FOUL_WON')){add('foulsWon');add('fouls',b)}break;
@@ -52,7 +56,7 @@ export function secondaryAssistCredits(events:MatchEvent[]):{goalId:string;playe
  const credits:{goalId:string;playerId:string;passId:string}[]=[];
  for(let i=0;i<ordered.length;i++){
   const goal=ordered[i],seq=goal.metadata.sequenceId;
-  if(!isV2(goal)||!isGoal(goal)||!goal.relatedPlayerId||typeof seq!=='string'||!seq)continue;
+  if(!isV2(goal)||isOwnGoal(goal)||!isGoal(goal)||!goal.relatedPlayerId||typeof seq!=='string'||!seq)continue;
   if(events.some(e=>e.metadata.sequenceId===seq&&e.timestamp==null))continue;
   const passes:MatchEvent[]=[];let holder=goal.playerId;
   for(let j=i-1;j>=0&&passes.length<2;j--){
