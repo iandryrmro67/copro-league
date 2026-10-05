@@ -14,6 +14,7 @@ import type { League, Match, MatchEvent } from "@/lib/model";
 import { analysisCounts, beginAnalysis } from "@/lib/match-analysis";
 import { actionDefinitions, eventLabel, isV2, isGoal } from "@/lib/actions";
 import { youtubeId } from "@/lib/engine";
+import { parseActionTime } from "@/lib/annotation-time";
 import { AnnotationCapture } from "./league-annotation-capture";
 import {
   VideoPlayer,
@@ -176,6 +177,15 @@ export function Analyzer({
         ?.querySelector(".precise-action-groups")
         ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [draft?.type, editing, lastId]);
+  function changeActionTime(value: string) {
+    if (busy) return;
+    setStamp(value);
+    setManual(true);
+    frozen.current = null;
+    const seconds = parseActionTime(value);
+    if (seconds != null && showVideo && status === "ready")
+      video.current?.seek(Math.max(0, seconds + offset));
+  }
   function moment(): AnnotationMoment {
     const value = annotationMoment({
       videoTime: video.current?.time() ?? playhead,
@@ -602,7 +612,7 @@ export function Analyzer({
             {status === "error"
               ? "Le lecteur ne fonctionne pas. Tu peux continuer à noter les actions. "
               : "Choisis le joueur puis l’action ci-dessous. "}
-            Renseigne le temps du match manuellement.
+            Ajuste le temps avec les boutons ou le curseur ci-dessous.
             {youtube && (
               <>
                 {" "}
@@ -627,10 +637,12 @@ export function Analyzer({
         busy={busy}
         time={useVideo ? clock(Math.max(0, playhead - offset)) : stamp}
         manualTime={!useVideo}
-        onTimeChange={(value) => {
-          setStamp(value);
-          setManual(true);
-        }}
+        onTimeChange={changeActionTime}
+        onFollowVideo={
+          showVideo && status === "ready" && manual && !draft && !editing
+            ? () => setManual(false)
+            : undefined
+        }
         onPlayer={choosePlayer}
         onStart={start}
         onDraft={update}
@@ -664,19 +676,16 @@ export function Analyzer({
       <EventTimeline
         match={m}
         data={data}
-        time={Math.max(0, playhead - offset)}
+        time={
+          useVideo
+            ? Math.max(0, playhead - offset)
+            : (parseActionTime(stamp) ?? Math.max(0, playhead - offset))
+        }
         selected={editing}
         filters={filters}
         onFilters={setFilters}
         canReview={!!src && status === "ready"}
-        onSeek={(seconds) => {
-          if (src && status === "ready") video.current?.seek(seconds + offset);
-          else {
-            setStamp(clock(seconds));
-            setManual(true);
-            setPlayhead(seconds + offset);
-          }
-        }}
+        onSeek={(seconds) => changeActionTime(clock(seconds))}
         onSelect={edit}
         onReview={review}
         onRemove={remove}

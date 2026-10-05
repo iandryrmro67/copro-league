@@ -14,6 +14,7 @@ import {
   Waypoints,
   X,
 } from "lucide-react";
+import { AnnotationTimeControl } from "./annotation-time-control";
 import type { League, Match, MatchEvent } from "@/lib/model";
 import { teamName } from "@/lib/model";
 import {
@@ -77,6 +78,7 @@ type Props = {
   time: string;
   manualTime: boolean;
   onTimeChange: (value: string) => void;
+  onFollowVideo?: () => void;
   onPlayer: (id: string) => void;
   onStart: (type: string) => void;
   onDraft: (draft: CaptureDraft) => void;
@@ -93,6 +95,7 @@ export function AnnotationCapture({
   time,
   manualTime,
   onTimeChange,
+  onFollowVideo,
   onPlayer,
   onStart,
   onDraft,
@@ -191,22 +194,20 @@ export function AnnotationCapture({
           <span className="studio-label">SAISIE PRÉCISE</span>
           <h3>{editing ? "Corriger l’action" : "Noter une action"}</h3>
         </div>
-        <label className="capture-time">
-          <span>
-            {d || editing
-              ? "Temps figé"
+        <AnnotationTimeControl
+          label={
+            d || editing
+              ? "Temps figé · action en cours"
               : manualTime
-                ? "Temps du match · manuel"
-                : "Temps du match · vidéo"}
-          </span>
-          <input
-            aria-label="Temps de l’action"
-            placeholder="mm:ss"
-            value={time}
-            onChange={(e) => onTimeChange(e.target.value)}
-            disabled={busy}
-          />
-        </label>
+                ? "Temps du match"
+                : "Temps du match · vidéo"
+          }
+          value={time}
+          duration={m.duration}
+          disabled={busy}
+          onChange={onTimeChange}
+          onFollowVideo={onFollowVideo}
+        />
       </div>
       <div className="capture-step">
         <span>1</span>

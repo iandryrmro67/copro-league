@@ -2,12 +2,15 @@ import React,{useState,useEffect} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MatchEditor} from '../../../components/league-admin';
 import {navigationKind} from '../../../lib/animated-navigation';
+import {Draft} from '../../../components/league-draft';
+import {AnimationPreview} from '../../../components/animations/AnimationProvider';
 import {Analyzer} from '../../../components/league-analyzer';
 import {beginAnalysis} from '../../../lib/match-analysis';
 import type {League,Match} from '../../../lib/model';
 import '../../../app/globals.css';
 import '../../../app/tokens.css';
 import '../../../app/design-system.css';
+import '../../../app/animations.css';
 import './preview.css';
 const names=['Mathis','Loris','Xan','Adam','Sam','Alex','Paul','Tom','Hugo','Leo'];
 const players=names.map((name,i)=>({id:'p'+i,name,bio:'',photo:'',archived:false,demo:false,funFacts:'',attributes:{},version:1}));
@@ -21,4 +24,10 @@ function HistoryPreview(){
  const editor=location.pathname==='/admin';
  return <main className="annotation-preview-shell"><h1>HISTOIRE / MATCH FICTIF LOCAL</h1>{editor?<><label><input type="checkbox" checked={blocked} onChange={e=>setBlocked(e.target.checked)}/> Bloquer le stockage local du test</label><p>Retour arrière doit proposer de rester si le brouillon est modifié.</p><MatchEditor match={match} data={data} busy={false} onSave={async()=>undefined} refresh={async()=>data}/></>:<a className="button" href="/admin?history=1&video=none" onClick={e=>{e.preventDefault();if(navigationKind(location.pathname,'/admin')==='document')location.assign(e.currentTarget.href);else{history.pushState(null,'',e.currentTarget.href);location.reload();}}}>Ouvrir l’éditeur local</a>}</main>;
 }
-createRoot(document.getElementById('root')!).render(params.has('history')?<HistoryPreview/>:<Preview/>);
+function DraftPreview(){
+ const [match,setMatch]=useState<Match>(()=>({...fixture(),status:'scheduled',participants:fixture().participants.slice(0,4)})),[fail,setFail]=useState(false),[saved,setSaved]=useState<Match|null>(null);
+ useEffect(()=>{if(!params.has('draft-api'))return;const original=window.fetch;window.fetch=async(input,init)=>{if(String(input)!=='/api/matches')return original(input,init);if(fail)return new Response(JSON.stringify({error:'Validation HTTP fictive refusée'}),{status:409});const next=JSON.parse(String(init?.body)) as Match;setSaved(next);setMatch({...next,version:next.version+1});return new Response(JSON.stringify({id:next.id}),{status:200});};return()=>{window.fetch=original;};},[fail]);
+ const data:League={players:players.slice(0,4),seasons:[],matches:params.has('draft-api')?[match]:[],settings:{minRating:5,minRadar:5,minDuo:5,minPasses:30,minAttempts:10},admin:true,bootstrap:false,user:'local-fixture'};
+ return <AnimationPreview reduced={true}><main className="annotation-preview-shell"><h1>Draft fictive locale</h1><label><input type="checkbox" checked={fail} onChange={e=>setFail(e.target.checked)}/> Simuler un échec de validation</label><button className="button" onClick={()=>setMatch({...fixture(),id:match.id==='other'?'browser-test':'other',number:2,status:'scheduled',participants:fixture().participants.slice(0,4)})}>Changer de match fictif</button><Draft data={data} refresh={async()=>data} match={params.has('free')||params.has('draft-api')?undefined:match} onApply={params.has('free')||params.has('draft-api')?undefined:(next)=>{if(fail)throw Error('Validation fictive refusée');setSaved(next);setMatch(next);}}/><output aria-label="Équipes enregistrées dans le test">{JSON.stringify(saved?.participants.map(p=>({id:p.playerId,team:p.team}))??[])}</output></main></AnimationPreview>;
+}
+createRoot(document.getElementById('root')!).render(params.has('draft')?<DraftPreview/>:params.has('history')?<HistoryPreview/>:<Preview/>);
