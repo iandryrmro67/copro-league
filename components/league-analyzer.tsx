@@ -178,11 +178,11 @@ export function Analyzer({
       root.current
         ?.querySelector(".precise-question")
         ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    else if (lastId)
+    else if (lastId && !chainTeam)
       root.current
         ?.querySelector(".precise-action-groups")
         ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [draft?.type, editing, lastId]);
+  }, [draft?.type, editing, lastId, chainTeam]);
   function changeActionTime(value: string) {
     if (busy) return;
     setStamp(value);
