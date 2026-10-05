@@ -141,3 +141,12 @@ test('zoom stays inside the match at both ends',()=>{
  assert.deepEqual(timelineWindow(3600,3590,120),{start:3480,end:3600});
  assert.deepEqual(timelineWindow(0,0,0),{start:0,end:60});
 });
+
+test('defensive stat filters find the attacking observation that credited their player',()=>{
+ const e:MatchEvent={id:'failed',playerId:'a',team:'A',type:'PASS',timestamp:10,relatedPlayerId:null,metadata:{schemaVersion:2,sequenceId:'seq',outcome:'FAILED',tags:[],opponentPlayerId:'c',counterpartStats:true}};
+ assert.equal(filterActions([e],{player:'c',team:'B',type:'INTERCEPTION'}).length,1);
+ assert.equal(filterActions([e],{player:'c',type:'RECOVERY'}).length,1);
+ assert.equal(filterActions([e],{player:'a',type:'INTERCEPTION'}).length,0);
+ assert.equal(filterActions([e],{team:'A',type:'INTERCEPTION'}).length,0);
+ assert.equal(filterActions([{...e,metadata:{...e.metadata,counterpartStats:false}}],{type:'INTERCEPTION'}).length,0);
+});

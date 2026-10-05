@@ -16,7 +16,7 @@ Ouvrir `http://127.0.0.1:5190/`. Le banc `http://127.0.0.1:5190/responsive.html`
 Parcours de vérification de la saisie précise :
 
 1. Choisir Mathis, lancer la vidéo et avancer à 5 s. Choisir Passe → Réussie → Xan : une action, temps du clic conservé, Mathis reste ciblé et la vidéo reprend si elle jouait.
-2. Masquer la vidéo, saisir 12:43, choisir Passe → Ratée → Destinataire non identifié. Tester aussi Tir → But → passeur / sans passe décisive, et Faute → Subie → adversaire.
+2. Masquer la vidéo, saisir 12:43, choisir Passe → Ratée → Aucun / intercepteur non identifié. Tester aussi Tir → But → passeur / sans passe décisive, et Faute → Subie → adversaire.
 3. Annuler / refaire, corriger depuis une ligne sans ajouter d’événement, filtrer un joueur impliqué et lire la sélection.
 4. Dans les précisions facultatives d’une correction, saisir uniquement X : aucune position n’est inventée et la sauvegarde attend Y. Tester aussi le clic sur le terrain.
 5. Ouvrir `/?video=none` et `/?video=broken` : aucun grand écran vide ou inutilisable, saisie manuelle possible. Le second cas déclenche une erreur sur un fichier inexistant de cette fixture uniquement.
@@ -36,3 +36,10 @@ Sans vidéo, cliquer +1 min puis +5 s, noter une touche et corriger son temps av
 ### Retour arrière et stockage indisponible
 
 Lancer le même serveur avec `--port 5192`, puis ouvrir `http://127.0.0.1:5192/?history=1&video=none`. « Ouvrir l’éditeur local » utilise la stratégie de navigation des pages admin. Activer « Bloquer le stockage local du test », modifier le numéro et utiliser Retour : rester dans le document conserve la modification du vrai MatchEditor. Remettre le numéro à 1 et désactiver le blocage avant de fermer. Les fixtures restent sur cet origin local ; le bouton serveur ne fait aucune requête d’enregistrement.
+
+
+### Contreparties et seconde précise
+
+Choisir Mathis → Passe → Ratée → Alex. Vérifier une ligne « interceptée par Alex », une passe tentée/ratée pour Mathis et une interception/récupération pour Alex dans les compteurs. Cliquer le compteur d’interceptions doit retrouver cette ligne. Modifier l’intercepteur vers Paul et enregistrer : Alex revient à zéro, Paul reçoit les crédits, toujours une seule ligne. Tester « Aucun / intercepteur non identifié », Tir → Cadré → gardien, puis Perte de balle → Dépossédé → récupérateur. Les fixtures peuvent être réinitialisées sans toucher à la production.
+
+Tester +1 s et −1 s, la borne zéro et le passage 00:59 → 01:00. À 390 px, vérifier huit boutons de 44 px de haut sur deux rangées et aucun débordement de page, même avec le tableau des compteurs ouvert.

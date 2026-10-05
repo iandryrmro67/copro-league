@@ -7,6 +7,9 @@ import {
 } from "../lib/annotation-time.ts";
 import { annotationMoment } from "../lib/annotation-controls.ts";
 test("quick time changes cross minute boundaries and never go below kickoff", () => {
+  assert.equal(shiftActionTime("00:59", 1), "01:00");
+  assert.equal(shiftActionTime("01:00", -1), "00:59");
+  assert.equal(shiftActionTime("00:00", -1), "00:00");
   assert.equal(shiftActionTime("0:58", 5), "01:03");
   assert.equal(shiftActionTime("01:03", -5), "00:58");
   assert.equal(shiftActionTime("00:03", -30), "00:00");

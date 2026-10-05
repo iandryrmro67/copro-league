@@ -81,13 +81,13 @@ export function AnnotationTimeControl({
         )}
       </div>
       <div className="action-time-steps" aria-label="Ajuster le temps">
-        {[-60, -30, -5, 5, 30, 60].map((delta) => (
+        {[-60, -30, -5, -1, 1, 5, 30, 60].map((delta) => (
           <button
             key={delta}
             className="button"
             type="button"
             disabled={disabled || (delta < 0 && time === 0)}
-            aria-label={`${delta < 0 ? "Reculer" : "Avancer"} de ${Math.abs(delta)} secondes`}
+            aria-label={`${delta < 0 ? "Reculer" : "Avancer"} de ${Math.abs(delta)} seconde${Math.abs(delta) === 1 ? "" : "s"}`}
             onClick={() => onChange(shiftActionTime(value, delta))}
           >
             {delta < 0 ? "−" : "+"}

@@ -19,23 +19,30 @@ export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,strin
  const out:[string,string][]=[],a=e.playerId,b=String(e.metadata.opponentPlayerId??''),mate=e.relatedPlayerId,o=e.metadata.outcome,t=(e.metadata.tags??[]) as string[],has=(s:string)=>t.includes(s),add=(k:string,id=a)=>{if(id)out.push([id,k])};
  const linked=events.find(x=>x.id===e.metadata.linkedEventId);const pos=e.metadata.position as Point|undefined;
  const recovery=()=>{add('recoveries');if(pos&&pos.x>=annotationRules.finalThird)add('highRecoveries')};
+ // Defensive rows own their credit when a unique reciprocal observation exists
+ // at the same known instant. A recovery may already have changed possession.
+ const hasCounterpart=(type:string,outcome?:string)=>!!b&&e.timestamp!=null&&events.filter(x=>
+   x.id!==e.id&&isV2(x)&&x.type===type&&x.playerId===b&&x.team!==e.team&&
+   x.metadata.opponentPlayerId===a&&x.timestamp===e.timestamp&&(!outcome||x.metadata.outcome===outcome)
+ ).length===1;
+ const counterpart=e.metadata.counterpartStats===true;
  switch(e.type){
- case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);break;
- case'PASS':add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')||events.some(x=>isV2(x)&&x.type==='SHOT'&&x.metadata.linkedEventId===e.id)){add('keyPasses');add('chancesCreated')}break;
+ case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);if(o==='ON_TARGET'&&counterpart&&!hasCounterpart('SAVE'))add('saves',b);break;
+ case'PASS':if(o==='FAILED'&&counterpart&&!hasCounterpart('INTERCEPTION')){add('interceptions',b);if(annotationRules.interceptionIsRecovery)add('recoveries',b)}add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')||events.some(x=>isV2(x)&&x.type==='SHOT'&&x.metadata.linkedEventId===e.id)){add('keyPasses');add('chancesCreated')}break;
  case'DRIBBLE':add('dribblesAttempted');if(o==='COMPLETED'){add('dribblesCompleted');add('dribbledPast',b)}if(has('FOUL_WON')){add('foulsWon');add('fouls',b)}break;
  case'DUEL':add('duelsAttempted');add('duelsAttempted',b);add('duelsWon',o==='WON'?a:b);if(has('AERIAL')){add('aerialDuelsAttempted');add('aerialDuelsAttempted',b);add('aerialDuelsWon',o==='WON'?a:b)}break;
  case'TACKLE':add('tackles');if(o==='FOUL'){add('fouls');add('foulsWon',b)}if(has('BALL_RECOVERED'))recovery();break;
- case'INTERCEPTION':add('interceptions');if(annotationRules.interceptionIsRecovery)recovery();break;
- case'RECOVERY':recovery();break;
- case'BLOCK':if(!(linked&&isV2(linked)&&linked.type==='SHOT'&&linked.metadata.outcome==='BLOCKED'&&linked.metadata.opponentPlayerId===a))add('blocks');break;
- case'CLEARANCE':add('clearances');break;case'TURNOVER':if(!(linked&&linked.playerId===a&&(linked.metadata.tags as string[]??[]).includes('POSSESSION_LOST')))add('turnovers');break;
+ case'INTERCEPTION':if(counterpart&&!hasCounterpart('PASS','FAILED'))add('passesAttempted',b);add('interceptions');if(annotationRules.interceptionIsRecovery)recovery();break;
+ case'RECOVERY':if(counterpart&&has('OPPONENT_ERROR')&&!hasCounterpart('TURNOVER'))add('turnovers',b);recovery();break;
+ case'BLOCK':if(counterpart&&!hasCounterpart('SHOT','BLOCKED'))add('shots',b);if(!(linked&&isV2(linked)&&linked.type==='SHOT'&&linked.metadata.outcome==='BLOCKED'&&linked.metadata.opponentPlayerId===a))add('blocks');break;
+ case'CLEARANCE':add('clearances');break;case'TURNOVER':if(counterpart&&has('DISPOSSESSED')&&!hasCounterpart('RECOVERY'))add('recoveries',b);if(!(linked&&linked.playerId===a&&(linked.metadata.tags as string[]??[]).includes('POSSESSION_LOST')))add('turnovers');break;
  case'FOUL':add('fouls');add('foulsWon',b);break;
  case'TOUCH':add('touches');if(pos&&pos.x>=85&&pos.y>=25&&pos.y<=75)add('boxTouches');break;
- case'SAVE':add('saves');break;
+ case'SAVE':if(counterpart&&!hasCounterpart('SHOT','ON_TARGET')){add('shots',b);add('shotsOnTarget',b)}add('saves');break;
  }if(has('POSSESSION_LOST'))add('turnovers');return out;
 }
 // Zero-valued result families remain tracked after edits and deletions.
-export function canonicalKeys(e:MatchEvent,events:MatchEvent[]){const keys=canonicalEffects(e,events).map(([,k])=>k);for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes(tag))keys.push(k+'Attempted',k+'Completed');const families:Record<string,string[]>={SHOT:['shots','shotsOnTarget','goals'],PASS:['passesAttempted','passesCompleted'],DRIBBLE:['dribblesAttempted','dribblesCompleted'],DUEL:['duelsAttempted','duelsWon'],RECOVERY:['recoveries',...(e.metadata.position?['highRecoveries']:[])],INTERCEPTION:['interceptions',...(annotationRules.interceptionIsRecovery?['recoveries',...(e.metadata.position?['highRecoveries']:[])]:[])],TOUCH:['touches',...(e.metadata.position?['boxTouches']:[])]};return [...new Set([...keys,...(families[e.type]??[])])]}
+export function canonicalKeys(e:MatchEvent,events:MatchEvent[]){const keys=canonicalEffects(e,events).map(([,k])=>k);for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes(tag))keys.push(k+'Attempted',k+'Completed');const families:Record<string,string[]>={SHOT:['shots','shotsOnTarget','goals'],PASS:['passesAttempted','passesCompleted'],DRIBBLE:['dribblesAttempted','dribblesCompleted'],DUEL:['duelsAttempted','duelsWon'],RECOVERY:['recoveries',...(e.metadata.position?['highRecoveries']:[])],INTERCEPTION:['interceptions',...(annotationRules.interceptionIsRecovery?['recoveries',...(e.metadata.position?['highRecoveries']:[])]:[])],TOUCH:['touches',...(e.metadata.position?['boxTouches']:[])]};return [...new Set([...keys,...(families[e.type]??[]),...(keys.includes('passesAttempted')?families.PASS:[]),...(keys.includes('shots')?families.SHOT:[])])]}
 
 /** Credit only the two most recent passes in an uninterrupted, explicitly named sequence. */
 export function secondaryAssistCredits(events:MatchEvent[]):{goalId:string;playerId:string;passId:string}[]{

@@ -1,5 +1,5 @@
 import type {Match,MatchEvent} from './model.ts';
-import {isGoal,eventLabel} from './actions.ts';
+import {isGoal,eventLabel,isV2,canonicalEffects} from './actions.ts';
 import {beginAnalysis,previousPass} from './match-analysis.ts';
 
 export const quickActions={
@@ -76,11 +76,16 @@ export function reviewRanges(events:MatchEvent[],offset:number,before=4,after=3,
 
 export type ActionFilters={player?:string;team?:string;type?:string;query?:string};
 export function filterActions(events:MatchEvent[],filters:ActionFilters,name:(id:string)=>string=id=>id){
+ const creditKeys:Record<string,string>={SHOT:'shots',PASS:'passesAttempted',INTERCEPTION:'interceptions',RECOVERY:'recoveries',SAVE:'saves',BLOCK:'blocks',TURNOVER:'turnovers'};
  return events.filter(e=>{
-  if(filters.team&&filters.team!=='all'&&e.team!==filters.team)return false;
+  const creditKey=creditKeys[filters.type??''];
+  const credited=isV2(e)&&!!creditKey&&canonicalEffects(e,events).some(([id,key])=>
+    key===creditKey&&(!filters.player||filters.player==='all'||id===filters.player)&&
+    (!filters.team||filters.team==='all'||(id===e.playerId||id===e.relatedPlayerId?e.team:(e.team==='A'?'B':'A'))===filters.team));
+  if(filters.team&&filters.team!=='all'&&e.team!==filters.team&&!credited)return false;
   if(filters.player&&filters.player!=='all'&&![e.playerId,e.relatedPlayerId,e.metadata.opponentPlayerId].includes(filters.player))return false;
   const type=filters.type;
-  if(type&&type!=='all'){
+  if(type&&type!=='all'&&!credited){
    if(type==='GOAL'){if(!isGoal(e))return false;}
    else if(type==='ASSIST'){if(isGoal(e)){if(!e.relatedPlayerId||filters.player&&filters.player!=='all'&&e.relatedPlayerId!==filters.player)return false;}else if(e.type!=='ASSIST')return false;}
    else if(type==='SHOT'){if(!isGoal(e)&&!['SHOT','SHOT_ON_TARGET','SHOT_OFF_TARGET','SHOT_BLOCKED'].includes(e.type))return false;}

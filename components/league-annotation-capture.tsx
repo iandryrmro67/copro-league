@@ -24,6 +24,7 @@ import {
 } from "@/lib/actions";
 import {
   captureStep,
+  captureParticipant,
   participantRequired,
   type CaptureDraft,
 } from "@/lib/precise-annotation";
@@ -63,11 +64,13 @@ const prompts: Record<string, string> = {
   SAVE: "Que fait le gardien après l’arrêt ?",
 };
 const emptyLabel = (d: CaptureDraft) =>
-  d.type === "SHOT"
+  d.type === "SHOT" && d.outcome === "GOAL"
     ? "Sans passe décisive"
-    : d.type === "PASS"
-      ? "Destinataire non identifié"
-      : "Joueur non identifié";
+    : d.type === "PASS" && d.outcome === "FAILED"
+      ? "Aucun / intercepteur non identifié"
+      : d.type === "SHOT" && d.outcome === "ON_TARGET"
+        ? "Gardien non identifié"
+        : "Joueur non identifié";
 type Props = {
   match: Match;
   data: League;
@@ -119,36 +122,47 @@ export function AnnotationCapture({
         : (actionLabels[value] ?? value);
   const showOutcome =
     !!d && outcomes.length > 0 && (step === "outcome" || !!editing);
+  const participant = d ? captureParticipant(d) : null;
   const showMate =
-    !!d &&
-    (step === "mate" ||
-      (!!editing &&
-        (d.type === "PASS" || (d.type === "SHOT" && d.outcome === "GOAL"))));
+    !!d && participant === "mate" && (step === "mate" || !!editing);
   const showOpponent =
-    !!d &&
-    (step === "opponent" ||
-      (!!editing &&
-        ([
-          "DRIBBLE",
-          "DUEL",
-          "TACKLE",
-          "FOUL",
-          "SAVE",
-          "BLOCK",
-          "INTERCEPTION",
-        ].includes(d.type) ||
-          (d.type === "SHOT" && d.outcome === "BLOCKED") ||
-          (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED")))));
+    !!d && participant === "opponent" && (step === "opponent" || !!editing);
   const fieldLabel =
     d?.type === "PASS"
-      ? "À qui la passe était-elle destinée ?"
+      ? d.outcome === "FAILED"
+        ? "Qui intercepte la passe ?"
+        : "À qui la passe était-elle destinée ?"
       : d?.type === "SHOT"
-        ? "Qui a fait la passe décisive ?"
+        ? d.outcome === "GOAL"
+          ? "Qui a fait la passe décisive ?"
+          : d.outcome === "ON_TARGET"
+            ? "Quel gardien arrête le tir ?"
+            : "Qui a bloqué le tir ?"
         : d?.type === "SAVE" || d?.type === "BLOCK"
           ? "Qui a tiré ?"
           : d?.type === "INTERCEPTION"
-            ? "De quel adversaire vient le ballon ?"
-            : "Quel adversaire est impliqué ?";
+            ? "De quel adversaire vient la passe ?"
+            : d?.type === "TURNOVER"
+              ? "Qui récupère le ballon ?"
+              : d?.type === "RECOVERY"
+                ? "Quel adversaire a perdu le ballon ?"
+                : "Quel adversaire est impliqué ?";
+  const counterpartHint =
+    d?.type === "PASS" && d.outcome === "FAILED"
+      ? "Le joueur choisi reçoit une interception et une récupération."
+      : d?.type === "SHOT" && d.outcome === "ON_TARGET"
+        ? "Le gardien choisi reçoit un arrêt."
+        : d?.type === "TURNOVER" && d.tags.includes("DISPOSSESSED")
+          ? "Le joueur choisi reçoit une récupération."
+          : d?.type === "INTERCEPTION"
+            ? "Le passeur choisi reçoit une passe tentée et ratée."
+            : d?.type === "SAVE"
+              ? "Le tireur choisi reçoit un tir cadré."
+              : d?.type === "BLOCK"
+                ? "Le tireur choisi reçoit un tir bloqué."
+                : d?.type === "RECOVERY" && d.tags.includes("OPPONENT_ERROR")
+                  ? "Le joueur choisi reçoit une perte de balle."
+                  : "";
   const incompletePosition =
     !!d?.positionInput &&
     (d.positionInput.x !== "" || d.positionInput.y !== "") &&
@@ -379,6 +393,8 @@ export function AnnotationCapture({
                         onDraft({
                           ...d,
                           tags: [tag],
+                          opponent: "",
+                          linkedEventId: undefined,
                           detailChosen: true,
                           participantChosen: false,
                         })
@@ -395,6 +411,8 @@ export function AnnotationCapture({
                       onDraft({
                         ...d,
                         tags: [],
+                        opponent: "",
+                        linkedEventId: undefined,
                         detailChosen: true,
                         participantChosen: false,
                       })
@@ -408,6 +426,9 @@ export function AnnotationCapture({
           {(showMate || showOpponent) && d && (
             <div className="precise-choice">
               <strong>{fieldLabel}</strong>
+              {counterpartHint && (
+                <p className="capture-help">{counterpartHint}</p>
+              )}
               <p className="capture-help">
                 {showMate ? teamName(m, side ?? "A") : "Équipe adverse"} ·{" "}
                 {participantRequired(d)

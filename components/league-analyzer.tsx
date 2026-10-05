@@ -789,6 +789,10 @@ export function Analyzer({
                   <th>Tirs</th>
                   <th>Passes</th>
                   <th>Pertes</th>
+                  <th>Interceptions</th>
+                  <th>Récupérations</th>
+                  <th>Arrêts</th>
+                  <th>Tirs bloqués</th>
                 </tr>
               </thead>
               <tbody>
@@ -796,8 +800,18 @@ export function Analyzer({
                   <tr key={p.playerId}>
                     <td>{name(p.playerId)}</td>
                     {(
-                      ["GOAL", "ASSIST", "SHOT", "PASS", "TURNOVER"] as const
-                    ).map((kind, i) => (
+                      [
+                        ["GOAL", "goals"],
+                        ["ASSIST", "assists"],
+                        ["SHOT", "shots"],
+                        ["PASS", "passesAttempted"],
+                        ["TURNOVER", "turnovers"],
+                        ["INTERCEPTION", "interceptions"],
+                        ["RECOVERY", "recoveries"],
+                        ["SAVE", "saves"],
+                        ["BLOCK", "blocks"],
+                      ] as const
+                    ).map(([kind, key]) => (
                       <td key={kind}>
                         <button
                           type="button"
@@ -806,15 +820,9 @@ export function Analyzer({
                             setFilters({ player: p.playerId, type: kind })
                           }
                         >
-                          {i === 0
-                            ? (p.stats.goals ?? 0)
-                            : i === 1
-                              ? (p.stats.assists ?? 0)
-                              : i === 2
-                                ? (p.stats.shots ?? 0)
-                                : i === 3
-                                  ? `${p.stats.passesCompleted ?? 0} / ${p.stats.passesAttempted ?? 0}`
-                                  : (p.stats.turnovers ?? 0)}
+                          {kind === "PASS"
+                            ? `${p.stats.passesCompleted ?? 0} / ${p.stats.passesAttempted ?? 0}`
+                            : (p.stats[key] ?? 0)}
                         </button>
                       </td>
                     ))}

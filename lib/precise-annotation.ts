@@ -31,24 +31,35 @@ export function captureStep(d: CaptureDraft): CaptureStep {
     !d.participantChosen ||
     (participantRequired(d) && (d.type === "PASS" ? !d.mate : !d.opponent))
   ) {
-    if (d.type === "PASS" || (d.type === "SHOT" && d.outcome === "GOAL"))
-      return "mate";
-    if (
-      [
-        "DRIBBLE",
-        "DUEL",
-        "TACKLE",
-        "FOUL",
-        "SAVE",
-        "BLOCK",
-        "INTERCEPTION",
-      ].includes(d.type) ||
-      (d.type === "SHOT" && d.outcome === "BLOCKED") ||
-      (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED"))
-    )
-      return "opponent";
+    return captureParticipant(d) ?? "ready";
   }
   return "ready";
+}
+export function captureParticipant(
+  d: CaptureDraft,
+): "mate" | "opponent" | null {
+  if (
+    (d.type === "PASS" && d.outcome === "COMPLETED") ||
+    (d.type === "SHOT" && d.outcome === "GOAL")
+  )
+    return "mate";
+  if (
+    [
+      "DRIBBLE",
+      "DUEL",
+      "TACKLE",
+      "FOUL",
+      "SAVE",
+      "BLOCK",
+      "INTERCEPTION",
+    ].includes(d.type) ||
+    (d.type === "PASS" && d.outcome === "FAILED") ||
+    (d.type === "SHOT" && ["BLOCKED", "ON_TARGET"].includes(d.outcome)) ||
+    (d.type === "RECOVERY" && d.tags.includes("OPPONENT_ERROR")) ||
+    (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED"))
+  )
+    return "opponent";
+  return null;
 }
 export function participantRequired(d: CaptureDraft) {
   return (
@@ -198,6 +209,14 @@ export function recordPreciseAction(
       outcome: d.type === "FOUL" ? "SIMPLE" : d.outcome || null,
       tags: d.tags,
       opponentPlayerId: suffered ? playerId : d.opponent || null,
+      // Opt in only after an explicit new selection; old observations retain their meaning.
+      counterpartStats:
+        !!d.opponent &&
+        ((d.type === "PASS" && d.outcome === "FAILED") ||
+          (d.type === "SHOT" && d.outcome === "ON_TARGET") ||
+          (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED")) ||
+          ["INTERCEPTION", "SAVE", "BLOCK"].includes(d.type) ||
+          (d.type === "RECOVERY" && d.tags.includes("OPPONENT_ERROR"))),
       linkedEventId:
         d.linkedEventId !== undefined
           ? d.linkedEventId
@@ -275,6 +294,7 @@ export function recordPreciseAction(
   });
   events = reconcileActionLinks(events);
   const ended =
+    (d.type === "PASS" && d.outcome === "FAILED") ||
     d.tags.includes("POSSESSION_LOST") ||
     [
       "TURNOVER",

@@ -1,6 +1,6 @@
 import type {Match, Stats} from './model.ts';
 import {labels} from './model.ts';
-import {isGoal,isV2} from './actions.ts';
+import {isGoal,isV2,canonicalEffects} from './actions.ts';
 import {observedEvents} from './events.ts';
 
 export const coverageFamilies:Record<string,string[]>={
@@ -45,6 +45,7 @@ export function reviewAnalysis(m:Match):AnalysisIssue[]{
    if(e.type==='SHOT'){if(used.has(String(linkedId)))add('duplicate','Une même passe est liée à plusieurs tirs.',true,e.id);used.add(String(linkedId));}
   }
   if(isV2(e)&&e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes('ASSIST')&&!m.events.some(g=>isGoal(g)&&g.relatedPlayerId===e.playerId&&g.metadata.sequenceId===e.metadata.sequenceId&&g.timestamp!=null&&e.timestamp!=null&&g.timestamp>=e.timestamp))add('assist','Passe déclarée décisive sans but correspondant.',true,e.id);
+  if(a.completeKeys.includes('highRecoveries')&&canonicalEffects(e,m.events).some(([id,key])=>key==='recoveries'&&id!==e.playerId))add('position','Position du récupérateur inconnue : renseignez une interception ou récupération liée au même instant pour valider les récupérations hautes.',true,e.id);
   if(e.metadata.position==null){const spatial=(a.completeKeys.includes('highRecoveries')&&(['RECOVERY','INTERCEPTION'].includes(e.type)||(e.type==='TACKLE'&&(e.metadata.tags as string[]??[]).includes('BALL_RECOVERED'))))||(a.completeKeys.includes('boxTouches')&&e.type==='TOUCH');add('position',spatial?'Position requise pour valider la catégorie de zone.':'Position inconnue : exclue des cartes.',spatial,e.id);}
  }
  return issues;

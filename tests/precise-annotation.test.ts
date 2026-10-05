@@ -57,7 +57,7 @@ test("the pass flow waits for result and recipient before becoming recordable", 
     ),
     "ready",
   );
-  assert.equal(captureStep(draft({ outcome: "FAILED" })), "mate");
+  assert.equal(captureStep(draft({ outcome: "FAILED" })), "opponent");
   assert.equal(
     captureStep(draft({ outcome: "FAILED", participantChosen: true })),
     "ready",
@@ -503,4 +503,193 @@ test("retargeting an action cannot carry observed coordinates from the old playe
   });
   assert.equal(changed.position, null);
   assert.equal(changed.positionInput, undefined);
+});
+
+test("failed passes credit the selected interceptor without changing historical observations", () => {
+  const result = recordPreciseAction(
+    fixture(),
+    input(draft({ outcome: "FAILED", opponent: "c", participantChosen: true })),
+  );
+  const counts = analysisCounts(result.match).participants;
+  assert.equal(counts[0].stats.passesAttempted, 1);
+  assert.equal(counts[0].stats.passesCompleted ?? 0, 0);
+  assert.equal(counts[2].stats.interceptions, 1);
+  assert.equal(counts[2].stats.recoveries, 1);
+  assert.equal(counts[2].stats.highRecoveries ?? 0, 0);
+  assert.equal(result.match.events.length, 1);
+  assert.notEqual(result.sequenceId, "seq");
+  assert.equal(matchSchema.safeParse(result.match).success, true);
+  const unknown = recordPreciseAction(result.match, {
+    ...input(draft({ outcome: "FAILED", participantChosen: true })),
+    editing: result.event.id,
+  });
+  assert.equal(
+    analysisCounts(unknown.match).participants[2].stats.interceptions ?? 0,
+    0,
+  );
+  const historical = structuredClone(result.match);
+  delete historical.events[0].metadata.counterpartStats;
+  assert.equal(
+    analysisCounts(historical).participants[2].stats.interceptions ?? 0,
+    0,
+  );
+});
+test("a saved shot and dispossession credit only their explicitly selected opponent", () => {
+  assert.equal(
+    captureStep(draft({ type: "SHOT", outcome: "ON_TARGET" })),
+    "opponent",
+  );
+  for (const patch of [
+    { type: "SHOT", outcome: "ON_TARGET", tags: [] },
+    { type: "TURNOVER", outcome: "", tags: ["DISPOSSESSED"] },
+  ]) {
+    const result = recordPreciseAction(
+      fixture(),
+      input(
+        draft({
+          ...patch,
+          opponent: "c",
+          participantChosen: true,
+          detailChosen: true,
+        }),
+      ),
+    );
+    const stats = analysisCounts(result.match).participants[2].stats;
+    assert.equal(stats[patch.type === "SHOT" ? "saves" : "recoveries"], 1);
+    assert.equal(matchSchema.safeParse(result.match).success, true);
+  }
+});
+test("counterpart observations at the same instant do not double count and corrections restore independent credit", () => {
+  for (const [attack, defence, key] of [
+    [
+      { type: "PASS", outcome: "FAILED" },
+      { type: "INTERCEPTION" },
+      "interceptions",
+    ],
+    [
+      { type: "SHOT", outcome: "ON_TARGET" },
+      { type: "SAVE", outcome: "SAVED_HELD" },
+      "saves",
+    ],
+    [
+      { type: "TURNOVER", tags: ["DISPOSSESSED"] },
+      { type: "RECOVERY", tags: ["OPPONENT_ERROR"] },
+      "recoveries",
+    ],
+  ] as const) {
+    const a = input(
+      draft({
+        ...attack,
+        tags: [...("tags" in attack ? attack.tags : [])],
+        opponent: "c",
+        participantChosen: true,
+        detailChosen: true,
+      }),
+    );
+    const b = {
+      ...input(
+        draft({
+          ...defence,
+          tags: [...("tags" in defence ? defence.tags : [])],
+          opponent: "a",
+          participantChosen: true,
+          detailChosen: true,
+        }),
+      ),
+      playerId: "c",
+    };
+    for (const pair of [
+      [a, b],
+      [b, a],
+    ]) {
+      const first = recordPreciseAction(fixture(), pair[0]);
+      const second = recordPreciseAction(first.match, {
+        ...pair[1],
+        sequenceId: first.sequenceId,
+      });
+      assert.equal(analysisCounts(second.match).participants[2].stats[key], 1);
+      const actorStats = analysisCounts(second.match).participants[0].stats;
+      assert.equal(actorStats[key === "interceptions" ? "passesAttempted" : key === "saves" ? "shots" : "turnovers"], 1);
+      if (key === "interceptions")
+        assert.equal(
+          analysisCounts(second.match).participants[2].stats.recoveries,
+          1,
+        );
+      const moved = recordPreciseAction(second.match, {
+        ...pair[1],
+        editing: second.event.id,
+        moment: { timestamp: 21, videoTimestamp: 51 },
+      });
+      assert.equal(analysisCounts(moved.match).participants[2].stats[key], 2);
+      assert.equal(matchSchema.safeParse(second.match).success, true);
+    }
+  }
+});
+
+test("defensive entry also credits the known passer, shooter or dispossessed player", () => {
+  for (const [patch, keys] of [
+    [{ type: "INTERCEPTION" }, ["passesAttempted"]],
+    [{ type: "SAVE", outcome: "SAVED_HELD" }, ["shots", "shotsOnTarget"]],
+    [{ type: "BLOCK" }, ["shots"]],
+    [{ type: "RECOVERY", tags: ["OPPONENT_ERROR"] }, ["turnovers"]],
+  ] as const) {
+    const result = recordPreciseAction(fixture(), {
+      ...input(
+        draft({
+          ...patch,
+          tags: [...("tags" in patch ? patch.tags : [])],
+          opponent: "a",
+          participantChosen: true,
+          detailChosen: true,
+        }),
+      ),
+      playerId: "c",
+    });
+    const stats = analysisCounts(result.match).participants[0].stats;
+    for (const key of keys) assert.equal(stats[key], 1);
+    if (patch.type === "INTERCEPTION") assert.equal(stats.passesCompleted, 0);
+    if (patch.type === "BLOCK") assert.equal(stats.shotsOnTarget, 0);
+    assert.equal(matchSchema.safeParse(result.match).success, true);
+  }
+});
+test("an automatic recovery cannot imply a high recovery from the passer position", async () => {
+  const { reviewAnalysis } = await import("../lib/match-analysis.ts");
+  const result = recordPreciseAction(
+    fixture(),
+    input(
+      draft({
+        outcome: "FAILED",
+        opponent: "c",
+        participantChosen: true,
+        position: { x: 10, y: 50 },
+      }),
+    ),
+  );
+  result.match.analysis!.completeKeys = ["highRecoveries"];
+  assert.equal(
+    analysisCounts(result.match).participants[2].stats.highRecoveries ?? 0,
+    0,
+  );
+  assert.ok(
+    reviewAnalysis(result.match).some(
+      (i) =>
+        i.code === "position" && i.blocking && i.eventId === result.event.id,
+    ),
+  );
+});
+
+
+test("publishing credits both players while an unfinished correction preserves the published result", async () => {
+  const {publishAnalysis, publicMatch}=await import("../lib/match-analysis.ts");
+  const result=recordPreciseAction(fixture(), input(draft({outcome:"FAILED",opponent:"c",participantChosen:true})));
+  result.match.analysis!.completeKeys=["passesAttempted","passesCompleted","interceptions","recoveries"];
+  result.match.analysis!.ranges=[{start:0,end:3600}];
+  const published=publishAnalysis(result.match);
+  assert.equal(published.participants[0].stats.passesAttempted,1);
+  assert.equal(published.participants[2].stats.interceptions,1);
+  assert.equal(published.participants[2].stats.recoveries,1);
+  const correction=recordPreciseAction(published,{...input(draft({outcome:"FAILED",participantChosen:true})),editing:result.event.id});
+  assert.equal(analysisCounts(correction.match).participants[2].stats.interceptions ?? 0,0);
+  assert.equal(publicMatch(correction.match).participants[2].stats.interceptions,1);
+  assert.equal(publicMatch(correction.match).events[0].metadata.opponentPlayerId,"c");
 });
