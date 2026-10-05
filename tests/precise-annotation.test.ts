@@ -693,3 +693,11 @@ test("publishing credits both players while an unfinished correction preserves t
   assert.equal(publicMatch(correction.match).participants[2].stats.interceptions,1);
   assert.equal(publicMatch(correction.match).events[0].metadata.opponentPlayerId,"c");
 });
+
+test("ambiguous reciprocal observations are not silently merged", () => {
+  const pass = input(draft({outcome:"FAILED",opponent:"c",participantChosen:true}));
+  const first = recordPreciseAction(fixture(),pass);
+  const second = recordPreciseAction(first.match,pass);
+  const intercepted = recordPreciseAction(second.match,{...input(draft({type:"INTERCEPTION",opponent:"a",participantChosen:true})),playerId:"c"});
+  assert.equal(analysisCounts(intercepted.match).participants[2].stats.interceptions,3);
+});

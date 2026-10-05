@@ -24,7 +24,9 @@ export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,strin
  const hasCounterpart=(type:string,outcome?:string)=>!!b&&e.timestamp!=null&&events.filter(x=>
    x.id!==e.id&&isV2(x)&&x.type===type&&x.playerId===b&&x.team!==e.team&&
    x.metadata.opponentPlayerId===a&&x.timestamp===e.timestamp&&(!outcome||x.metadata.outcome===outcome)
- ).length===1;
+ ).length===1&&!events.some(x=>x.id!==e.id&&isV2(x)&&x.type===e.type&&
+   x.playerId===a&&x.team===e.team&&x.metadata.opponentPlayerId===b&&
+   x.timestamp===e.timestamp&&x.metadata.outcome===e.metadata.outcome);
  const counterpart=e.metadata.counterpartStats===true;
  switch(e.type){
  case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);if(o==='ON_TARGET'&&counterpart&&!hasCounterpart('SAVE'))add('saves',b);break;
