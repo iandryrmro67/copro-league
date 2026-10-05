@@ -28,6 +28,8 @@ L’éditeur reste monté entre les onglets. Le brouillon local sauvegarde actio
 
 ## Vérifier et publier
 
+Le contrôle du temps propose des boutons −/+ 5 secondes, 30 secondes et 1 minute, un curseur à la seconde et deux champs minutes/secondes. Un ajustement fixe le temps de l’action et déplace aussi le lecteur lorsqu’il est disponible. « Suivre la vidéo » réactive le suivi hors saisie en cours. La timeline suit également les ajustements sans vidéo. Les temps historiques inconnus restent inconnus tant qu’aucun réglage explicite n’est effectué.
+
 L’écran compare score officiel, buts annotés et contributions par joueur. Cocher uniquement les catégories suivies pour tous les joueurs sur tout le match, puis renseigner les périodes réellement observées. La couverture doit atteindre toute la durée. Les Secondary Assists et les catégories de zone disposent de validations séparées.
 
 La publication exige un résultat terminé, une couverture complète et des liens cohérents. Si les buts sont publiés, leur total doit correspondre au score officiel. Une passe ne peut pas créer deux tirs liés. Les temps hors durée et liens hors séquence bloquent ; les positions absentes restent acceptables hors catégories de zone et sont exclues des cartes.

@@ -27,6 +27,12 @@ Les tests Node couvrent validation des participants et résultats, projections a
 
 Le site et l’atelier utilisent les mêmes polices locales et tokens de `app/design-system.css` : Archivo, Big Shoulders Display, JetBrains Mono, fonds Void / Carbon, accent Kush et angles droits.
 
+### Temps rapide et réinitialisation de draft
+
+Sans vidéo, cliquer +1 min puis +5 s, noter une touche et corriger son temps avec −5 s : vérifier une seule action à 1:00. À 390 px, les six boutons passent sur deux rangées ; vérifier le passage de 2:58 à 3:03 et le déplacement de la timeline.
+
+`/?draft=1&video=none` monte le vrai composant Draft avec quatre joueurs fictifs. Générer puis valider doit vider la sélection et les équipes affichées, tout en conservant les quatre affectations dans la sortie de test. « Simuler un échec de validation » doit conserver le tirage. Tester les modes Équilibré, Capitaines, Pack draft ainsi que « Changer de match fictif ». `&free=1` vérifie « Terminer la draft » sans match. `&draft-api=1` exerce la branche API avec une réponse locale simulée (409 ou succès) : aucune requête de sauvegarde ne quitte la fixture.
+
 ### Retour arrière et stockage indisponible
 
 Lancer le même serveur avec `--port 5192`, puis ouvrir `http://127.0.0.1:5192/?history=1&video=none`. « Ouvrir l’éditeur local » utilise la stratégie de navigation des pages admin. Activer « Bloquer le stockage local du test », modifier le numéro et utiliser Retour : rester dans le document conserve la modification du vrai MatchEditor. Remettre le numéro à 1 et désactiver le blocage avant de fermer. Les fixtures restent sur cet origin local ; le bouton serveur ne fait aucune requête d’enregistrement.
