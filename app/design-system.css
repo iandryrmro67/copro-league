@@ -291,3 +291,28 @@ input::placeholder, textarea::placeholder { color: var(--ash); opacity: 1; }
   .annotation-livebar .action-time-fields input { width: 48px; }
   .precise-workspace .precise-player video,.precise-workspace .precise-player .youtube { max-height: 260px; }
 }
+
+/* Video navigation stays separate from the frozen action clock. */
+.annotation-video .video-seek { padding: 12px 16px; border-top: 1px solid var(--line); background: var(--carbon); }
+.annotation-video .video-seek label { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font: 11px var(--font-studio-data); color: var(--bone); }
+.annotation-video .video-seek input { flex-basis: 100%; width: 100%; min-height: 44px; padding: 0; accent-color: var(--indica); cursor: pointer; }
+.sequence-workspace .annotation-video .video-transport { gap: 8px; padding: 12px; }
+.sequence-workspace .annotation-video .video-speed { display: flex; align-items: center; gap: 8px; color: var(--bone); font-size: 12px; }
+.sequence-workspace .annotation-video .video-speed select { width: 76px; min-height: 44px; padding: 8px; border: 1px solid var(--ash); background: var(--graphite); color: var(--bone); font: 12px var(--font-studio-data); appearance: auto; }
+.sequence-workspace .annotation-video .video-speed option { background: var(--carbon); color: var(--bone); }
+.precise-workspace.has-video .precise-player { max-width: none; }
+@media(min-width:1100px) {
+  .precise-workspace.has-video .annotation-desk { grid-template-columns: minmax(0, 3fr) minmax(440px, 2fr); }
+  .precise-workspace.has-video .precise-player video,.precise-workspace.has-video .precise-player .youtube { max-height: 560px; }
+}
+.precise-workspace.video-theatre .annotation-desk { grid-template-columns: minmax(0,1fr); }
+.precise-workspace.video-theatre .precise-media { position: static; }
+.precise-workspace.video-theatre .precise-player video,.precise-workspace.video-theatre .precise-player .youtube { width: 100%; max-height: min(75vh,800px); }
+.annotation-video:fullscreen { display: flex; flex-direction: column; justify-content: center; width: 100vw; height: 100vh; padding: 0; background: var(--void); overflow: auto; }
+.precise-workspace .annotation-video:fullscreen video,.precise-workspace .annotation-video:fullscreen .youtube { width: 100%; max-height: calc(100vh - 200px); flex: 1; min-height: 0; object-fit: contain; }
+.annotation-video:fullscreen .video-seek,.annotation-video:fullscreen .video-transport { flex-shrink: 0; width: 100%; }
+@media(max-width:520px) {
+  .precise-workspace.has-video .precise-player video,.precise-workspace.has-video .precise-player .youtube { max-height: 360px; }
+  .sequence-workspace .annotation-video .video-transport strong { margin-left: 0; }
+  .sequence-workspace .annotation-video .video-transport { gap: 8px; }
+}

@@ -91,6 +91,7 @@ export function Analyzer({
   const [localVideo, setLocalVideo] = useState(""),
     [localName, setLocalName] = useState(""),
     [focus, setFocus] = useState(false),
+    [theatre, setTheatre] = useState(false),
     [filters, setFilters] = useState<ActionFilters>({});
   const [past, setPast] = useState<Match[]>([]),
     [future, setFuture] = useState<Match[]>([]),
@@ -542,7 +543,9 @@ export function Analyzer({
       ref={root}
       className={
         "analyzer sequence-workspace precise-workspace " +
-        (focus ? "seq-focus" : "")
+        (focus ? "seq-focus " : "") +
+        (showVideo ? "has-video " : "") +
+        (theatre && showVideo ? "video-theatre" : "")
       }
     >
       <header className="annotation-header">
@@ -703,6 +706,8 @@ export function Analyzer({
               <VideoPlayer
                 key={src + "-" + videoEpoch}
                 annotation
+                theatre={theatre}
+                onTheatre={() => setTheatre((value) => !value)}
                 ref={video}
                 src={src}
                 initialTime={m.analysis?.session.videoTime ?? 0}
