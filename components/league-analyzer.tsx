@@ -16,7 +16,7 @@ import {
   beginAnalysis,
   annotatedScore,
 } from "@/lib/match-analysis";
-import { actionDefinitions, eventLabel, isV2 } from "@/lib/actions";
+import { actionDefinitions, eventLabel } from "@/lib/actions";
 import { youtubeId } from "@/lib/engine";
 import { AnnotationTimeControl } from "./annotation-time-control";
 import { parseActionTime } from "@/lib/annotation-time";
@@ -43,6 +43,7 @@ import {
   correctHistoricalAction,
   recordPreciseAction,
   recordCirculationPass,
+  prepareActionCorrection,
   reconcileActionLinks,
   type CaptureDraft,
 } from "@/lib/precise-annotation";
@@ -91,6 +92,8 @@ export function Analyzer({
   const [localVideo, setLocalVideo] = useState(""),
     [localName, setLocalName] = useState(""),
     [focus, setFocus] = useState(false),
+    [fullscreen, setFullscreen] = useState(false),
+    [fullscreenExpanded, setFullscreenExpanded] = useState(false),
     [theatre, setTheatre] = useState(false),
     [filters, setFilters] = useState<ActionFilters>({});
   const [past, setPast] = useState<Match[]>([]),
@@ -114,6 +117,25 @@ export function Analyzer({
         : null,
     ),
     committed = useRef(false);
+  const fullWorkspace = fullscreen || fullscreenExpanded;
+  useEffect(() => {
+    const sync = () => setFullscreen(document.fullscreenElement === document.documentElement);
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  async function toggleWorkspaceFullscreen() {
+    if (fullWorkspace) {
+      setFullscreenExpanded(false);
+      if (document.fullscreenElement) await document.exitFullscreen();
+      return;
+    }
+    setFullscreenExpanded(true);
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch {
+      /* The full-window editor remains usable when native fullscreen is unavailable. */
+    }
+  }
   const offset = m.analysis?.session.offset ?? 0,
     src = localVideo || m.video,
     showVideo = !!src && !hidden && status !== "error",
@@ -377,32 +399,18 @@ export function Analyzer({
       video.current?.seek(seconds);
       frozen.current = { timestamp: e.timestamp!, videoTimestamp: seconds };
     }
-    setActor(e.playerId);
+    const correction = prepareActionCorrection(m, e, actor);
+    setActor(correction.actor);
     setEditing(e.id);
     setStamp(clock(e.timestamp));
     setManual(true);
     committed.current = false;
-    setMessage("");
-    setDraft(
-      isV2(e)
-        ? {
-            type: e.type,
-            outcome:
-              e.type === "FOUL"
-                ? "COMMITTED"
-                : String(e.metadata.outcome ?? ""),
-            mate: e.relatedPlayerId ?? "",
-            opponent: String(e.metadata.opponentPlayerId ?? ""),
-            tags: (e.metadata.tags as string[]) ?? [],
-            participantChosen: true,
-            detailChosen: true,
-            position: (e.metadata.position as CaptureDraft["position"]) ?? null,
-            endPosition:
-              (e.metadata.endPosition as CaptureDraft["endPosition"]) ?? null,
-            linkedEventId: String(e.metadata.linkedEventId ?? "") || null,
-          }
-        : null,
+    setMessage(
+      correction.actor === e.playerId
+        ? ""
+        : `Correction pour ${name(correction.actor)} · auteur précédent : ${name(e.playerId)}. Choisis à nouveau les joueurs impliqués avant de sauvegarder.`,
     );
+    setDraft(correction.draft);
     root.current
       ?.querySelector(".precise-capture")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -496,6 +504,10 @@ export function Analyzer({
           document.activeElement !== document.body)
       )
         return;
+      if (e.key === "Escape" && fullWorkspace && !document.fullscreenElement) {
+        setFullscreenExpanded(false);
+        return;
+      }
       const target = e.target as HTMLElement;
       if (
         e.defaultPrevented ||
@@ -544,6 +556,7 @@ export function Analyzer({
       className={
         "analyzer sequence-workspace precise-workspace " +
         (focus ? "seq-focus " : "") +
+        (fullWorkspace ? "workspace-fullscreen " : "") +
         (showVideo ? "has-video " : "") +
         (theatre && showVideo ? "video-theatre" : "")
       }
@@ -590,12 +603,24 @@ export function Analyzer({
           <button
             type="button"
             className="button"
-            onClick={() => setFocus(!focus)}
+            onClick={() =>
+              fullWorkspace
+                ? void toggleWorkspaceFullscreen()
+                : setFocus(!focus)
+            }
           >
-            {focus ? <Minimize2 size={15} /> : <Maximize2 size={15} />}{" "}
-            {focus ? "Réduire" : "Agrandir"}
+            {focus || fullWorkspace ? (
+              <Minimize2 size={15} />
+            ) : (
+              <Maximize2 size={15} />
+            )}{" "}
+            {fullWorkspace
+              ? "Quitter le plein écran"
+              : focus
+                ? "Réduire"
+                : "Agrandir"}
           </button>
-          {focus && onSave && (
+          {(focus || fullWorkspace) && onSave && (
             <button
               type="button"
               className="button primary"
@@ -706,6 +731,8 @@ export function Analyzer({
               <VideoPlayer
                 key={src + "-" + videoEpoch}
                 annotation
+                onFullscreen={() => void toggleWorkspaceFullscreen()}
+                fullscreenActive={fullWorkspace}
                 theatre={theatre}
                 onTheatre={() => setTheatre((value) => !value)}
                 ref={video}

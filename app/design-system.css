@@ -316,3 +316,15 @@ input::placeholder, textarea::placeholder { color: var(--ash); opacity: 1; }
   .sequence-workspace .annotation-video .video-transport strong { margin-left: 0; }
   .sequence-workspace .annotation-video .video-transport { gap: 8px; }
 }
+
+/* Fullscreen analysis includes editing, timeline and save controls. */
+.precise-workspace.workspace-fullscreen { position: fixed; inset: 0; z-index: 110; display: grid; width: 100vw; height: 100vh; padding: 16px; overflow: auto; background: var(--void); }
+.precise-workspace.workspace-fullscreen .annotation-livebar { top: 0; }
+.precise-workspace.workspace-fullscreen .precise-media { top: 126px; }
+.precise-workspace.workspace-fullscreen .annotation-header { grid-column: 1/-1; }
+.precise-workspace.workspace-fullscreen .precise-question { scroll-margin-top: 150px; }
+.precise-workspace.workspace-fullscreen .precise-player video,.precise-workspace.workspace-fullscreen .precise-player .youtube { max-height: 48vh; }
+@media(max-width:1099px) {
+  .precise-workspace.workspace-fullscreen { padding: 12px; }
+  .precise-workspace.workspace-fullscreen .precise-player video,.precise-workspace.workspace-fullscreen .precise-player .youtube { max-height: 38vh; }
+}

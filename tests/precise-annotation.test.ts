@@ -150,7 +150,7 @@ test("a suffered foul attributes the offence to the opponent and keeps the victi
       }),
     ),
   );
-  assert.equal(result.nextActor, "a");
+  assert.equal(result.nextActor, "c");
   assert.equal(result.event.playerId, "c");
   assert.equal(result.event.team, "B");
   assert.equal(result.event.metadata.opponentPlayerId, "a");
@@ -813,11 +813,107 @@ test("circulation follows recipients and rejects opponents or self passes", asyn
     );
 });
 
+test("restoring an unfinished shot keeps immediate precisions pending", async () => {
+  const { restoreCaptureDraft } = await import("../lib/precise-annotation.ts");
+  const restored = restoreCaptureDraft(fixture(), {
+    actor: "a",
+    mate: "",
+    opponent: "",
+    type: "SHOT",
+    outcome: "OFF_TARGET",
+    tags: ["LEFT_FOOT"],
+    stamp: "0:20",
+    manual: true,
+    editing: null,
+    linked: "",
+    positionKnown: false,
+    quick: false,
+    view: "builder",
+    scene: { players: {}, ball: null },
+    end: null,
+    captureActive: true,
+    precisionChosen: false,
+  });
+  assert.ok(restored);
+  assert.equal(captureStep(restored), "precision");
+  assert.deepEqual(restored.tags, ["LEFT_FOOT"]);
+});
 
-test("restoring an unfinished shot keeps immediate precisions pending",async()=>{
- const {restoreCaptureDraft}=await import("../lib/precise-annotation.ts");
- const restored=restoreCaptureDraft(fixture(),{actor:"a",mate:"",opponent:"",type:"SHOT",outcome:"OFF_TARGET",tags:["LEFT_FOOT"],stamp:"0:20",manual:true,editing:null,linked:"",positionKnown:false,quick:false,view:"builder",scene:{players:{},ball:null},end:null,captureActive:true,precisionChosen:false});
- assert.ok(restored);
- assert.equal(captureStep(restored),"precision");
- assert.deepEqual(restored.tags,["LEFT_FOOT"]);
+test("every new action follows its explicitly selected second player, corrections retain their author", () => {
+  for (const value of [
+    draft({ outcome: "FAILED", opponent: "c", participantChosen: true }),
+    draft({
+      type: "SHOT",
+      outcome: "ON_TARGET",
+      opponent: "c",
+      participantChosen: true,
+    }),
+    draft({
+      type: "SHOT",
+      outcome: "GOAL",
+      mate: "b",
+      participantChosen: true,
+    }),
+    draft({
+      type: "DUEL",
+      outcome: "WON",
+      opponent: "c",
+      participantChosen: true,
+    }),
+    draft({
+      type: "SAVE",
+      outcome: "SAVED_HELD",
+      opponent: "c",
+      participantChosen: true,
+    }),
+    draft({
+      type: "FOUL",
+      outcome: "SUFFERED",
+      opponent: "c",
+      participantChosen: true,
+    }),
+  ]) {
+    const result = recordPreciseAction(fixture(), input(value));
+    assert.equal(result.nextActor, value.mate || value.opponent);
+    const correction = recordPreciseAction(result.match, {
+      ...input(value),
+      editing: result.event.id,
+    });
+    assert.equal(correction.nextActor, "a");
+  }
+});
+
+test("correction starts with the last selected player and clears incompatible observations", async () => {
+  const { prepareActionCorrection } =
+    await import("../lib/precise-annotation.ts");
+  const original = recordPreciseAction(
+    fixture(),
+    input(
+      draft({
+        outcome: "COMPLETED",
+        mate: "b",
+        tags: ["KEY_PASS"],
+        participantChosen: true,
+        position: { x: 30, y: 20 },
+      }),
+    ),
+  );
+  const prepared = prepareActionCorrection(original.match, original.event, "b");
+  assert.equal(prepared.actor, "b");
+  assert.equal(prepared.draft?.mate, "");
+  assert.equal(prepared.draft?.position, null);
+  assert.deepEqual(prepared.draft?.tags, ["KEY_PASS"]);
+  assert.equal(original.event.playerId, "a");
+  assert.equal(original.event.relatedPlayerId, "b");
+  const unchanged = prepareActionCorrection(
+    original.match,
+    original.event,
+    "a",
+  );
+  assert.equal(unchanged.draft?.mate, "b");
+  assert.deepEqual(unchanged.draft?.position, { x: 30, y: 20 });
+  assert.equal(
+    prepareActionCorrection(original.match, original.event, "missing").actor,
+    "a",
+  );
 });

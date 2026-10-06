@@ -193,6 +193,10 @@ export function AnnotationCapture({
       onDraft({
         ...d,
         outcome,
+        tags:
+          outcome === "FAILED"
+            ? d.tags.filter((tag) => tag !== "ASSIST")
+            : d.tags,
         precisionChosen: false,
         mate: "",
         opponent: "",
@@ -416,49 +420,43 @@ export function AnnotationCapture({
               <div className="capture-immediate-tags">
                 <strong>Précisions · facultatives</strong>
                 <div className="precise-choice-buttons">
-                  {definitions[d.type].tags
-                    .filter(
-                      (tag) =>
-                        editing ||
-                        !["KEY_PASS", "ASSIST", "POSSESSION_LOST"].includes(
-                          tag,
-                        ),
-                    )
-                    .map((tag) => (
-                      <button
-                        type="button"
-                        key={tag}
-                        className={
-                          "button " + (d.tags.includes(tag) ? "primary" : "")
-                        }
-                        aria-pressed={d.tags.includes(tag)}
-                        disabled={busy}
-                        onClick={() => {
-                          const exclusive = [
-                            "RIGHT_FOOT",
-                            "LEFT_FOOT",
-                            "HEADER",
-                          ].includes(tag)
-                            ? ["RIGHT_FOOT", "LEFT_FOOT", "HEADER"]
-                            : ["PENALTY", "FREE_KICK"].includes(tag)
-                              ? ["PENALTY", "FREE_KICK"]
+                  {definitions[d.type].tags.map((tag) => (
+                    <button
+                      type="button"
+                      key={tag}
+                      className={
+                        "button " + (d.tags.includes(tag) ? "primary" : "")
+                      }
+                      aria-pressed={d.tags.includes(tag)}
+                      disabled={
+                        busy || (tag === "ASSIST" && d.outcome === "FAILED")
+                      }
+                      onClick={() => {
+                        const exclusive = [
+                          "RIGHT_FOOT",
+                          "LEFT_FOOT",
+                          "HEADER",
+                        ].includes(tag)
+                          ? ["RIGHT_FOOT", "LEFT_FOOT", "HEADER"]
+                          : ["PENALTY", "FREE_KICK"].includes(tag)
+                            ? ["PENALTY", "FREE_KICK"]
+                            : ["GROUND", "AERIAL"].includes(tag)
+                              ? ["GROUND", "AERIAL"]
                               : [];
-                          onDraft({
-                            ...d,
-                            tags: d.tags.includes(tag)
-                              ? d.tags.filter((t) => t !== tag)
-                              : [
-                                  ...d.tags.filter(
-                                    (t) => !exclusive.includes(t),
-                                  ),
-                                  tag,
-                                ],
-                          });
-                        }}
-                      >
-                        {actionLabels[tag]}
-                      </button>
-                    ))}
+                        onDraft({
+                          ...d,
+                          tags: d.tags.includes(tag)
+                            ? d.tags.filter((t) => t !== tag)
+                            : [
+                                ...d.tags.filter((t) => !exclusive.includes(t)),
+                                tag,
+                              ],
+                        });
+                      }}
+                    >
+                      {actionLabels[tag]}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -622,7 +620,7 @@ export function AnnotationCapture({
                     : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
               {d?.type === "PASS" && d.outcome === "COMPLETED"
                 ? "Le receveur sera sélectionné pour la suite."
-                : "Le joueur ciblé reste sélectionné."}
+                : "Le deuxième joueur choisi sera sélectionné pour la suite."}
             </p>
           )}
           {editing && d && (

@@ -70,6 +70,8 @@ export const VideoPlayer = forwardRef<
     annotation?: boolean;
     theatre?: boolean;
     onTheatre?: () => void;
+    onFullscreen?: () => void;
+    fullscreenActive?: boolean;
     onTime?: (seconds: number) => void;
     onStatus?: (status: VideoStatus) => void;
   }
@@ -81,6 +83,8 @@ export const VideoPlayer = forwardRef<
     annotation = false,
     theatre = false,
     onTheatre,
+    onFullscreen,
+    fullscreenActive,
     onTime,
     onStatus,
   },
@@ -91,8 +95,7 @@ export const VideoPlayer = forwardRef<
     [duration, setDuration] = useState(0),
     [viewMessage, setViewMessage] = useState("");
   useEffect(() => {
-    const sync = () =>
-      setFullscreen(document.fullscreenElement === playerRoot.current);
+    const sync = () => setFullscreen(document.fullscreenElement === playerRoot.current);
     document.addEventListener("fullscreenchange", sync);
     return () => document.removeEventListener("fullscreenchange", sync);
   }, []);
@@ -496,14 +499,14 @@ export const VideoPlayer = forwardRef<
           <button
             type="button"
             className="button"
-            onClick={() => void toggleFullscreen()}
+            onClick={() => onFullscreen ? onFullscreen() : void toggleFullscreen()}
           >
-            {fullscreen ? (
+            {(fullscreenActive ?? fullscreen) ? (
               <Minimize2 size={16} aria-hidden="true" />
             ) : (
               <Maximize2 size={16} aria-hidden="true" />
             )}
-            {fullscreen ? "Quitter le plein écran" : "Plein écran"}
+            {(fullscreenActive ?? fullscreen) ? "Quitter le plein écran" : "Plein écran"}
           </button>
         )}
         {reviewing && (

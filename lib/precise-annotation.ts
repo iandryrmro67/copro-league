@@ -327,10 +327,7 @@ export function recordPreciseAction(
       },
     },
     event: events.find((e) => e.id === event.id)!,
-    nextActor:
-      !editing && d.type === "PASS" && d.outcome === "COMPLETED"
-        ? d.mate
-        : playerId,
+    nextActor: !editing ? d.mate || d.opponent || playerId : playerId,
     sequenceId: nextSequence,
   };
 }
@@ -472,4 +469,36 @@ export function recordCirculationPass(
       precisionChosen: true,
     },
   });
+}
+
+/** Propose the operator's current selection without modifying the stored event. */
+export function prepareActionCorrection(
+  m: Match,
+  event: MatchEvent,
+  preferred: string,
+): { actor: string; draft: CaptureDraft | null } {
+  const actor = m.participants.some((p) => p.playerId === preferred && p.team)
+    ? preferred
+    : event.playerId;
+  if (!isV2(event)) return { actor, draft: null };
+  const draft: CaptureDraft = {
+    type: event.type,
+    outcome:
+      event.type === "FOUL"
+        ? "COMMITTED"
+        : String(event.metadata.outcome ?? ""),
+    mate: event.relatedPlayerId ?? "",
+    opponent: String(event.metadata.opponentPlayerId ?? ""),
+    tags: [...((event.metadata.tags as string[]) ?? [])],
+    participantChosen: true,
+    detailChosen: true,
+    position: (event.metadata.position as CaptureDraft["position"]) ?? null,
+    endPosition:
+      (event.metadata.endPosition as CaptureDraft["endPosition"]) ?? null,
+    linkedEventId: String(event.metadata.linkedEventId ?? "") || null,
+  };
+  return {
+    actor,
+    draft: actor === event.playerId ? draft : retargetCapture(draft),
+  };
 }
