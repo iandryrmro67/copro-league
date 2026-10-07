@@ -275,3 +275,23 @@ Retour arrière sans restaurer la base : promouvoir
 https://copro-league-pvjkfq9v2-yurr2.vercel.app
 (dpl_GmfxtjLzUa1HXE7fvGUr5cfGbCwn) avec --scope yurr2.
 Ce commit documentaire ne modifie pas la version applicative publiée.
+
+## Draft avec profils hybrides — 7 octobre 2026
+
+Version applicative 91b87b2, déploiement dpl_5nUNo64M6SK9SXJtBdR5SXoxqhgo,
+https://copro-league-jieelx08u-yurr2.vercel.app, promu sur
+https://copro-league.vercel.app. Algorithmes et limites : draft-v2.md.
+
+217 tests réussis, TypeScript et compilations locale/Vercel réussis. Contrôles
+d’interface : verrouillages, pack impair 4 contre 5, validation, choix serpent
+des capitaines et affichage mobile. Fixture temporaire retirée avant publication.
+Après promotion : version API no-store, routes publiques, protections des écritures,
+admin et export vérifiées. Réponse publique de la ligue identique au relevé avant
+publication. Draft équilibrée exécutée dans le navigateur en production sans
+erreur console ; aucune sauvegarde de match réel. Capture ignorée :
+outputs/draft-v2-production.png.
+
+Retour arrière sans modification de la base : promouvoir
+https://copro-league-7o522dqyn-yurr2.vercel.app
+(dpl_3rnDG1QRh2vpEQ9qeeUxCxHJCUGW) avec --scope yurr2.
+Ce commit documentaire ne modifie pas la version applicative publiée.
