@@ -329,44 +329,50 @@ function MatchOverview({
         </SectionTitle>
         {match.events.length > 0 ? (
           <div className="md-story panel">
-            <GoalFrieze match={match} goals={goals} onGoal={onGoal} />
-            <div className="md-momentum-title">
-              <h3>Momentum</h3>
-              <span>Tirs observés · par tranche de 5 min</span>
-            </div>
-            <div
-              className="md-momentum"
-              role="img"
-              aria-label={`Activité offensive : ${momentum.total - momentum.untimed} tirs avec un temps renseigné, ${momentum.untimed} sans temps.`}
-            >
-              {momentum.buckets.map((bucket) => {
-                const max = Math.max(
-                  1,
-                  ...momentum.buckets.map((b) => Math.max(b.A, b.B)),
-                );
-                return (
-                  <div
-                    className="md-momentum-bin"
-                    key={bucket.start}
-                    title={`${matchClock(bucket.start)}–${matchClock(bucket.end)} · ${teamName(match, "A")} : ${bucket.A} tirs · ${teamName(match, "B")} : ${bucket.B} tirs`}
-                  >
-                    <span style={{ height: `${(bucket.A / max) * 46}%` }} />
-                    <span style={{ height: `${(bucket.B / max) * 46}%` }} />
-                  </div>
-                );
-              })}
-            </div>
-            <div className="md-time-scale">
-              <span>0′</span>
-              <span>{Math.round(momentum.buckets.at(-1)!.end / 120)}′</span>
-              <span>{Math.round(momentum.buckets.at(-1)!.end / 60)}′</span>
-            </div>
+            {goals.some((g) => g.event.timestamp != null) && (
+              <GoalFrieze match={match} goals={goals} onGoal={onGoal} />
+            )}
+            {momentum.total > momentum.untimed && (
+              <>
+                <div className="md-momentum-title">
+                  <h3>Momentum</h3>
+                  <span>Tirs observés · par tranche de 5 min</span>
+                </div>
+                <div
+                  className="md-momentum"
+                  role="img"
+                  aria-label={`Activité offensive : ${momentum.total - momentum.untimed} tirs avec un temps renseigné, ${momentum.untimed} sans temps.`}
+                >
+                  {momentum.buckets.map((bucket) => {
+                    const max = Math.max(
+                      1,
+                      ...momentum.buckets.map((b) => Math.max(b.A, b.B)),
+                    );
+                    return (
+                      <div
+                        className="md-momentum-bin"
+                        key={bucket.start}
+                        title={`${matchClock(bucket.start)}–${matchClock(bucket.end)} · ${teamName(match, "A")} : ${bucket.A} tirs · ${teamName(match, "B")} : ${bucket.B} tirs`}
+                      >
+                        <span style={{ height: `${(bucket.A / max) * 46}%` }} />
+                        <span style={{ height: `${(bucket.B / max) * 46}%` }} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="md-time-scale">
+                  <span>0′</span>
+                  <span>{Math.round(momentum.buckets.at(-1)!.end / 120)}′</span>
+                  <span>{Math.round(momentum.buckets.at(-1)!.end / 60)}′</span>
+                </div>
+              </>
+            )}
             <p className="md-caption">
               {progression.complete
                 ? "Tous les buts du score final sont présents dans la frise."
                 : `Buts annotés : ${progression.annotatedA}–${progression.annotatedB}. ${!progression.timed ? "Certains temps manquent ; l’ordre complet ne peut pas être établi." : "La frise ne reconstitue pas encore tout le score officiel."}`}{" "}
               {momentum.untimed > 0 &&
-                `${momentum.untimed} tirs sans temps ne figurent pas dans le graphique.`}
+                `${momentum.untimed} tirs sans temps ne peuvent pas être placés dans le momentum.`}
             </p>
           </div>
         ) : (
@@ -1034,7 +1040,9 @@ function ActionRow({
       id={`md-event-${event.id}`}
       className={`md-action-row md-side-${goal?.team ?? event.team}${goal ? " md-goal-row" : ""}${focused ? " md-action-focused" : ""}`}
     >
-      <span className="md-action-time">{matchClock(event.timestamp)}</span>
+      <span className="md-action-time" title={matchClock(event.timestamp)}>
+        {event.timestamp == null ? "—" : matchClock(event.timestamp)}
+      </span>
       <span className="md-action-symbol" aria-hidden="true">
         {goal ? "●" : "·"}
       </span>
@@ -1042,11 +1050,9 @@ function ActionRow({
         <div className="md-action-heading">
           <strong>{actor}</strong>
           <span>{describeEvent(event)}</span>
-          {goal && (
+          {goal && goal.scoreA != null && (
             <span className="md-running-score" aria-label="Score après ce but">
-              {goal.scoreA == null
-                ? "Score inconnu"
-                : `${goal.scoreA}–${goal.scoreB}`}
+              {`${goal.scoreA}–${goal.scoreB}`}
             </span>
           )}
         </div>
@@ -1213,7 +1219,11 @@ function MatchActions({
       <SectionTitle
         number="LE DÉTAIL DU MATCH"
         title={
-          view === "goals" ? "Les buts, dans l’ordre" : "Les séquences de jeu"
+          view === "goals"
+            ? progression.timed
+              ? "Les buts, dans l’ordre"
+              : "Les buts annotés"
+            : "Les séquences de jeu"
         }
       />
       <div className="md-action-toolbar">
