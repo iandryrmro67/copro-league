@@ -231,3 +231,13 @@ Le candidat conserve les 23 joueurs, 9 matchs, 80 participations, statistiques b
 Après promotion : version API avec `no-store`, métadonnée HTML et notes publiques identiques au candidat vérifié. Contrôles HTTP publics et refus des écritures anonymes réussis. Parcours CUA authentifié sur un match historique : notes partielles, explication V2, même match comme référence, aucun bonus de victoire ; aucune erreur console. Affichage à 390 px sans débordement horizontal. Capture locale ignorée : `outputs/rating-v2-production.jpg`.
 
 Retour arrière de déploiement : promouvoir `https://copro-league-6ktj9v7t8-yurr2.vercel.app` (`dpl_BtNiNuKNL1EVVHb7BazcDG9qS3Sf`) avec `--scope yurr2`. Le commit documentaire suivant ne change pas l’application publiée.
+
+## Réécriture des textes — 7 octobre 2026
+
+Version applicative publiée : `93def0a6d745d8e91639aff6369a78f7080d4ff5` sur `codex/vercel-supabase`. Déploiement `dpl_GmfxtjLzUa1HXE7fvGUr5cfGbCwn`, candidat `https://copro-league-pvjkfq9v2-yurr2.vercel.app`, promu sur `https://copro-league.vercel.app`. L’API de version et la métadonnée de page affichent `93def0a`.
+
+Réécriture validée par l’utilisateur : ton sportif et direct, tutoiement, vocabulaire jeune conservé, humour ponctuel sans private jokes. Pages publiques, admin, annotation, publication des stats, vidéo, erreurs, glossaire, badges et awards harmonisés. Les écrans propres à la version Vercel ont été adaptés en conservant les règles V2 et la limite vidéo de 50 Mo. Les descriptions actuelles des awards sont affichées même pour les saisons figées, sans changer les données du palmarès. Référence éditoriale : `docs/copywriting.md`.
+
+Vérifications : 197 tests réussis, TypeScript et compilation locaux puis Vercel réussis. Assertions de texte existantes actualisées. Contrôles HTTP publics/protégés réussis après promotion. Version API, titre et métadonnée HTML vérifiés. Comparaison des données avant/candidat/après : 23 joueurs et 9 matchs identiques, y compris statistiques et notes calculées ; seuls les textes d’explication du rating ont été exclus de la comparaison avant/candidat. Aucun enregistrement de match, joueur, brouillon ou réglage ; aucune migration.
+
+Retour arrière sans restauration de base : promouvoir `https://copro-league-35q3nuzdv-yurr2.vercel.app` (`dpl_3basqNuoZqyPaNAdQkhP34J9674x`) avec `--scope yurr2`. Le commit documentaire suivant ne modifie pas l’application publiée.
