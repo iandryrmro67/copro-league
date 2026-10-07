@@ -83,6 +83,7 @@ function DraftSession({
     [turn, setTurn] = useState(0),
     [drawing, setDrawing] = useState(false),
     [revealOrder, setRevealOrder] = useState<string[]>([]),
+    [swapPlayer, setSwapPlayer] = useState<string | null>(null),
     [automatic, setAutomatic] = useState(false);
   const workerRef = useRef<Worker | null>(null);
   const generation = useRef(0);
@@ -121,6 +122,7 @@ function DraftSession({
     setDrawing(false);
     setAutomatic(false);
     setRevealOrder([]);
+    setSwapPlayer(null);
     setTeams({});
     setLocks({});
     setReveal(0);
@@ -150,8 +152,10 @@ function DraftSession({
     setNotice("");
     const run = ++generation.current;
     try {
-      if (players.length < 2 || players.length > 20 || (mode !== "pack" && players.length % 2))
-        throw Error(mode === "pack" ? "Choisis entre 2 et 20 joueurs." : "Choisis un nombre pair de joueurs, entre 2 et 20.");
+      if (mode === "pack" && players.length !== 10)
+        throw Error("Choisis exactement 10 joueurs pour un pack à 5 contre 5.");
+      if (players.length < 2 || players.length > 20 || players.length % 2)
+        throw Error("Choisis un nombre pair de joueurs, entre 2 et 20.");
       if (mode === "captains") {
         if (!capA || !capB || capA === capB || !players.some(p => p.id === capA) || !players.some(p => p.id === capB))
           throw Error("Choisis deux capitaines différents.");
@@ -187,6 +191,7 @@ function DraftSession({
         });
       }
       if (run !== generation.current) return;
+      setSwapPlayer(null);
       setTeams({
         ...Object.fromEntries(d.A.map(id => [id, "A" as const])),
         ...Object.fromEntries(d.B.map(id => [id, "B" as const])),
@@ -202,7 +207,7 @@ function DraftSession({
   async function apply() {
     if (!base || busy || drawing) return;
     if (!validTeams || !fullyRevealed) {
-      setError("Le tirage doit être complet, avec au moins un joueur dans chaque équipe.");
+      setError(mode === "pack" ? "Le pack doit être complet, avec 5 joueurs dans chaque équipe." : "Le tirage doit être complet, avec le même nombre de joueurs dans chaque équipe.");
       return;
     }
     setBusy(true);
@@ -283,7 +288,7 @@ function DraftSession({
           <section className="panel draftselection">
             <h2>Qui joue ?</h2>
             <p className="muted">
-              {mode === "pack" ? "Choisis les participants parmi les joueurs actifs." : "Choisis un nombre pair de participants parmi les joueurs actifs."}
+              {mode === "pack" ? "Choisis exactement 10 participants pour jouer à 5 contre 5." : "Choisis un nombre pair de participants parmi les joueurs actifs."}
             </p>
             <CardCarousel
               items={data.players.filter((p) => !p.archived && !p.demo)}
@@ -352,7 +357,7 @@ function DraftSession({
                     ? "Les équipes sont équilibrées selon les notes de draft et l’ELO."
                     : mode === "captains"
                       ? "Après les capitaines, les choix alternent dans cet ordre : A, B, B, A…"
-                      : "Les cartes se révèlent une à une. Le hasard décide des équipes et de leur taille."}
+                      : "Les cartes se révèlent une à une. Le hasard compose deux équipes de 5 joueurs."}
                 </p>
               </div>
               <button className="button primary" onClick={generate}>
@@ -523,11 +528,35 @@ function DraftSession({
                             <ArrowLeftRight size={16} />
                           </button>
                         )}
+                        {mode === "pack" && fullyRevealed && (
+                          <button
+                            className="iconbutton"
+                            aria-label={(swapPlayer && teams[swapPlayer] !== side ? "Échanger avec " : "Échanger ") + p.name}
+                            aria-pressed={swapPlayer === p.id}
+                            onClick={() => {
+                              if (swapPlayer === p.id) setSwapPlayer(null);
+                              else if (swapPlayer && teams[swapPlayer] !== side) {
+                                setTeams(current => ({ ...current, [p.id]: current[swapPlayer], [swapPlayer]: current[p.id] }));
+                                setSwapPlayer(null);
+                              } else setSwapPlayer(p.id);
+                            }}
+                          >
+                            <ArrowLeftRight size={16} />
+                          </button>
+                        )}
                       </div>
                     ))}
                 </section>
               ))}
             </div>
+            {mode === "pack" && ready && fullyRevealed && (
+              <p className="muted" role="status">
+                {swapPlayer
+                  ? `${players.find(p => p.id === swapPlayer)?.name} sélectionné·e : choisis un joueur de l’autre équipe pour les échanger.`
+                  : "Pour ajuster les équipes, sélectionne un joueur puis un joueur adverse avec le bouton d’échange. Chaque équipe garde 5 joueurs."}
+                {swapPlayer && <button className="button" onClick={() => setSwapPlayer(null)}>Annuler l’échange</button>}
+              </p>
+            )}
             {estimate && <p className="muted" role="status">{estimate.available ? "Estimation indicative selon l’ELO et les nuls observés. Aucun résultat n’est garanti." : estimate.reason}</p>}
             {ready && (mode !== "pack" || reveal === players.length) && (
               <div className="split draftresult">

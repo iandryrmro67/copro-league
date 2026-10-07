@@ -72,12 +72,12 @@ function checkPlayers(players: Player[], equal: boolean) {
   if (new Set(players.map(p => p.id)).size !== players.length) throw Error('Un joueur ne peut être sélectionné deux fois.');
 }
 
-/** Independent coins, no quota or automatic correction, including empty sides. */
+/** Uniform random five-a-side split, independent of ratings and profiles. */
 export function randomPackDraft(players: Player[], random: () => number = Math.random): Pick<DraftResult, 'A' | 'B'> {
-  checkPlayers(players, false);
-  const A: string[] = [], B: string[] = [];
-  for (const p of players) (random() < .5 ? A : B).push(p.id);
-  return { A, B };
+  checkPlayers(players, true);
+  if (players.length !== 10) throw Error('Choisis exactement 10 joueurs pour un pack à 5 contre 5.');
+  const ids = shuffledIds(players, random);
+  return { A: ids.slice(0, 5), B: ids.slice(5) };
 }
 export function shuffledIds(players: Player[], random: () => number = Math.random): string[] {
   const ids = players.map(p => p.id);
@@ -175,7 +175,7 @@ export async function computeDraft(request: DraftRequest): Promise<DraftResult> 
 export function canApplyDraft(players: Player[], teams: Record<string, DraftSide>, mode: string): boolean {
   if (players.length < 2 || players.length > 20 || new Set(players.map(p => p.id)).size !== players.length || Object.keys(teams).length !== players.length) return false;
   const a = players.filter(p => teams[p.id] === 'A').length, b = players.filter(p => teams[p.id] === 'B').length;
-  return a > 0 && b > 0 && a + b === players.length && (mode === 'pack' || a === b);
+  return a > 0 && b > 0 && a + b === players.length && (mode === 'pack' ? a === 5 && b === 5 : a === b);
 }
 
 export type PackEstimate = { available: true; A: { win: number; draw: number; lose: number }; B: { win: number; draw: number; lose: number } } | { available: false; reason: string };

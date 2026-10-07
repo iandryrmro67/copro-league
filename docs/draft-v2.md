@@ -1,4 +1,4 @@
-# Drafts — équilibrage hybride et pack libre
+# Drafts — équilibrage hybride et pack à 5 contre 5
 
 Implémentation du 7 octobre 2026 dans la version Vercel.
 
@@ -39,34 +39,39 @@ Les matchs historiques non datés restent utilisables sans inventer de date.
 
 ## Pack
 
-Chaque joueur est attribué indépendamment à A ou B à 50 %. Pas de quota, de
-verrou ou de correction selon le niveau ; nombres impairs de 3 à 19 possibles,
-avec 2 à 20 participants au total. Une équipe vide reste tirable, mais sa
-validation est bloquée avec un message et possibilité de relance.
-Les cartes sont révélées suivant une permutation indépendante. Puissance,
-écart et estimations ne sont affichés qu'après la dernière carte.
-Une composition inégale non vide est enregistrable dans le match ou transmissible
-au brouillon de l'admin. Les autres modes gardent la validation à effectifs égaux.
+Le pack nécessite exactement 10 participants. Une permutation Fisher–Yates des
+identifiants attribue les cinq premiers à A et les cinq autres à B, sans consulter
+notes, ELO, profils ou verrous. Les équipes restent donc aléatoires en niveau,
+mais comportent obligatoirement cinq joueurs chacune. Les cartes sont révélées
+suivant une permutation indépendante. Puissance, écart, estimations et commandes
+d’échange restent masqués jusqu’à la dernière carte.
+
+Après révélation, un joueur peut être sélectionné pour un échange avec un joueur
+adverse. L’échange conserve cinq joueurs par équipe ; sélection annulable, effacée
+à la relance ou au changement de participants, de match ou de mode. La validation
+exige les dix identifiants uniques sélectionnés et une répartition 5/5.
 
 Victoire/nul/défaite : modèle ELO indicatif pour des effectifs égaux uniquement,
 au moins 20 matchs valides dans la ligue et 5 par joueur. ELO moyen -> score
 attendu e ; fréquence empirique de nuls d plafonnée à 2×min(e,1−e) ;
 P(victoire A)=e−d/2, P(victoire B)=1−e−d/2. Résultats symétriques et total 100 %.
-Pour des effectifs différents ou un historique insuffisant, aucune probabilité
-n'est inventée : message d'indisponibilité. Il reste à calibrer un modèle tenant
-compte de l'avantage numérique sur des matchs comparables.
+Pour un historique insuffisant, aucune probabilité n’est inventée : message
+d’indisponibilité. La fonction d’estimation refuse également des effectifs
+différents si elle est utilisée hors du pack.
 
-## Validation
+## Validation de la correction du pack
 
-217 tests du projet réussis, dont 11 nouveaux sur les aptitudes, corrections,
-absence de données, frontière temporelle, attribution distincte, optimum global,
-verrous, groupe imparfait, hasard sans quota, validation d'effectifs inégaux et
-estimations. 80 comparaisons indépendantes du matching avec une recherche brute.
-TypeScript propre ; lint ciblé sans erreur, avertissement image préexistant.
+217 tests réussis, dont validation du format 5/5 même aux extrêmes du générateur,
+absence d’équilibrage selon le niveau, rejet des effectifs incomplets et doublons,
+validation après échange. TypeScript propre ; lint ciblé sans erreur,
+avertissement image préexistant.
 
-CUA sur fixture temporaire : équilibré sans profils affichés, verrou conservé
-après relance, déplacement bloquant la validation 4/6 en équilibré, pack à
-neuf participants, indicateurs masqués avant révélation, validation 4/5 et
-transmission complète au brouillon fictif, remise à zéro après validation,
-choix serpent des huit picks après les deux capitaines (A,B,B,A,A,B,B,A).
-Aucune écriture en base réelle. La fixture est retirée avant le build final.
+CUA en local avec données publiques : pack à neuf joueurs refusé, dix cartes
+révélées en 5/5, aucun joueur ni échange affiché avant révélation, échange de deux
+adversaires conservant 5/5 et absence d’erreur console. Aucun match réel sauvegardé.
+
+La correction touche uniquement la draft. Comparaison avec le commit timeline
+6bc8e50 : aucun changement aux fichiers de timeline, saisie d’actions, calcul de
+statistiques ou notes. Les marqueurs de la saisie révisée sont aussi présents dans
+le JavaScript publié avant cette correction (captureRevision, passTypeChosen,
+SECOND_BALL, ESCAPE_PRESSURE et Position inconnue).

@@ -52,18 +52,26 @@ test('No required role or five-percent cutoff blocks an imperfect group', () => 
  const d=hybridBalancedDraft(players,{},skills);assert.equal(d.A.length,5);assert.equal(d.B.length,5);assert.ok(d.gap>5);
  assert.throws(()=>hybridBalancedDraft(players,{},skills,Object.fromEntries(players.slice(0,6).map(p=>[p.id,'A' as const]))),/verrouillages/);
 });
-test('Pack has no quota, accepts odd rosters and never corrects an empty side', () => {
- const players=Array.from({length:7},(_,i)=>player('p'+i));let i=0;
- const d=randomPackDraft(players,()=>i++<5?.1:.9);assert.equal(d.A.length,5);assert.equal(d.B.length,2);assert.equal(new Set([...d.A,...d.B]).size,7);
- assert.equal(randomPackDraft(players,()=>.1).B.length,0);
+test('Pack always draws five versus five without using player strength', () => {
+ const players=Array.from({length:10},(_,i)=>player('p'+i,{overall:i<5?100:0}));
+ for(const random of [()=>0,()=>.999,Math.random]){
+  const before=structuredClone(players);const d=randomPackDraft(players,random);
+  assert.equal(d.A.length,5);assert.equal(d.B.length,5);assert.equal(new Set([...d.A,...d.B]).size,10);
+  assert.deepEqual([...d.A,...d.B].sort(),players.map(p=>p.id).sort());assert.deepEqual(players,before);
+ }
+ const draw=randomPackDraft(players,()=>.999);assert.deepEqual(draw.A,players.slice(0,5).map(p=>p.id));
+ assert.throws(()=>randomPackDraft(players.slice(0,8)),/10 joueurs/);
+ assert.throws(()=>randomPackDraft([...players,players[0],players[1]]),/deux fois/);
  const ids=shuffledIds(players,()=>0);assert.deepEqual([...ids].sort(),players.map(p=>p.id).sort());assert.notDeepEqual(ids,players.map(p=>p.id));
 });
-test('Uneven teams can be applied only in pack, empty or unfinished teams cannot', () => {
- const players=Array.from({length:7},(_,i)=>player('p'+i));const teams=Object.fromEntries(players.map((p,i)=>[p.id,i<5?'A' as const:'B' as const]));
- assert.equal(canApplyDraft(players,teams,'pack'),true);assert.equal(canApplyDraft(players,teams,'balanced'),false);assert.equal(canApplyDraft(players,teams,'captains'),false);
- assert.equal(canApplyDraft(players,Object.fromEntries(players.map(p=>[p.id,'A' as const])),'pack'),false);
+test('Pack validation requires a complete unique ten-player roster split five versus five', () => {
+ const players=Array.from({length:10},(_,i)=>player('p'+i));const teams=Object.fromEntries(players.map((p,i)=>[p.id,i<5?'A' as const:'B' as const]));
+ assert.equal(canApplyDraft(players,teams,'pack'),true);
+ assert.equal(canApplyDraft(players,{...teams,p0:'B'},'pack'),false);
+ assert.equal(canApplyDraft(players.slice(0,8),Object.fromEntries(players.slice(0,8).map((p,i)=>[p.id,i<4?'A':'B'])),'pack'),false);
  assert.equal(canApplyDraft(players,{p0:'A',p1:'B'},'pack'),false);
  assert.equal(canApplyDraft(players,{...teams,stranger:'B'},'pack'),false);
+ assert.equal(canApplyDraft(players,{...teams,p0:'B',p5:'A'},'pack'),true);
  const m=match(0,players.map(p=>({playerId:p.id,team:teams[p.id],stats:{}})),{status:'scheduled',date:'2026-10-15T12:00:00Z',scoreA:null,scoreB:null});
  assert.equal(matchSchema.safeParse(m).success,true);
 });
