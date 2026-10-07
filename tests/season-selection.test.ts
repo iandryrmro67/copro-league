@@ -46,3 +46,15 @@ test("undated seasons use natural numbering and real seasons take precedence ove
   );
   assert.equal(latestSeasonId([]), "");
 });
+
+test("match context wins over a chosen season and multiple active seasons", async () => {
+  const { pageSeasonId } = await import("../lib/season-selection.ts");
+  const seasons = [season("2", "2025-01-01"), season("3", "2026-01-01")];
+  assert.equal(
+    pageSeasonId("/matchs/m", seasons, [{ id: "m", seasonId: "3" }], "2"),
+    "3",
+  );
+  assert.equal(pageSeasonId("/matchs", seasons, []), "3");
+  assert.equal(pageSeasonId("/joueurs", seasons, [], "2"), "2");
+  assert.equal(pageSeasonId("/", seasons, [], "2"), "3");
+});

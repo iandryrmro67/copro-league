@@ -3,6 +3,7 @@ import "./globals.css";
 import "./tokens.css";
 import "./design-system.css";
 import "./animations.css";
+import "./match-detail.css";
 import { AnimationProvider } from "@/components/animations/AnimationProvider";
 import { LeagueDataProvider } from "@/components/animations/LeagueDataProvider";
 export const metadata: Metadata = {

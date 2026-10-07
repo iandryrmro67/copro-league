@@ -11,3 +11,22 @@ export function latestSeasonId(seasons: Season[]): string {
     )[0]?.id ?? ""
   );
 }
+
+/** Match pages inherit the match's season even when several seasons are active. */
+export function pageSeasonId(
+  path: string,
+  seasons: Season[],
+  matches: { id: string; seasonId: string }[],
+  chosen = "",
+) {
+  if (path.startsWith("/matchs/")) {
+    const match = matches.find((m) => m.id === path.split("/")[2]);
+    if (match) return match.seasonId;
+  }
+  if (path === "/") return latestSeasonId(seasons);
+  return (
+    chosen ||
+    latestSeasonId(seasons.filter((s) => s.status === "active")) ||
+    latestSeasonId(seasons)
+  );
+}
