@@ -1,9 +1,10 @@
 "use client";
 import { CardCarousel } from "./animations/CardCarousel";
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { League, Match } from "@/lib/model";
 import { teamName } from "@/lib/model";
-import { aggregate, balancedDraft, power } from "@/lib/engine";
+import { power } from "@/lib/engine";
+import { draftHistory, draftElos, randomPackDraft, shuffledIds, computeDraft, canApplyDraft, packEstimate, type DraftRequest, type DraftResult } from "@/lib/draft";
 import { Picker, Avatar, Empty, fmt } from "./league-ui";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -79,16 +80,27 @@ function DraftSession({
     [busy, setBusy] = useState(false),
     [capA, setCapA] = useState(""),
     [capB, setCapB] = useState(""),
-    [turn, setTurn] = useState(0);
+    [turn, setTurn] = useState(0),
+    [drawing, setDrawing] = useState(false),
+    [revealOrder, setRevealOrder] = useState<string[]>([]),
+    [automatic, setAutomatic] = useState(false);
+  const workerRef = useRef<Worker | null>(null);
+  const generation = useRef(0);
+  useEffect(() => () => { generation.current++; workerRef.current?.terminate(); }, []);
   const players = data.players.filter(
     (p) =>
       !p.archived &&
       !p.demo &&
       m?.participants.some((x) => x.playerId === p.id),
   );
-  const elos = Object.fromEntries(
-    aggregate(data.players, data.matches).map((s) => [s.player.id, s.elo]),
-  );
+  const history = useMemo(() => draftHistory(data.matches, external ?? data.matches.find(match => match.id === matchId)), [data.matches, external, matchId]);
+  const elos = useMemo(() => draftElos(data.players, history), [data.players, history]);
+  const visibleIds = new Set(revealOrder.slice(0, reveal));
+  const fullyRevealed = mode !== "pack" || reveal === players.length;
+  const validTeams = canApplyDraft(players, teams, mode);
+  const estimate = mode === "pack" && fullyRevealed && Object.keys(teams).length
+    ? packEstimate(players.filter(p => teams[p.id] === "A"), players.filter(p => teams[p.id] === "B"), data.players, history)
+    : null;
   const ready =
     players.length > 1 && Object.keys(teams).length === players.length;
   const score = (side: "A" | "B") => {
@@ -103,6 +115,12 @@ function DraftSession({
         100
       : 0;
   function resetDraw() {
+    generation.current++;
+    workerRef.current?.terminate();
+    workerRef.current = null;
+    setDrawing(false);
+    setAutomatic(false);
+    setRevealOrder([]);
     setTeams({});
     setLocks({});
     setReveal(0);
@@ -116,7 +134,7 @@ function DraftSession({
     setRoster([]);
   }
   function chooseParticipant(id: string, checked: boolean) {
-    if (busy) return;
+    if (busy || drawing) return;
     if (players.some((p) => p.id === id) === checked) return;
     setRoster(
       checked
@@ -126,32 +144,67 @@ function DraftSession({
     resetDraw();
     setNotice("");
   }
-  function generate() {
-    if (busy) return;
+  async function generate() {
+    if (busy || drawing) return;
     setError("");
     setNotice("");
+    const run = ++generation.current;
     try {
-      if (players.length < 2 || players.length > 20 || players.length % 2)
-        throw Error("Choisis un nombre pair de joueurs, entre 2 et 20.");
+      if (players.length < 2 || players.length > 20 || (mode !== "pack" && players.length % 2))
+        throw Error(mode === "pack" ? "Choisis entre 2 et 20 joueurs." : "Choisis un nombre pair de joueurs, entre 2 et 20.");
       if (mode === "captains") {
-        if (!capA || !capB || capA === capB)
+        if (!capA || !capB || capA === capB || !players.some(p => p.id === capA) || !players.some(p => p.id === capB))
           throw Error("Choisis deux capitaines différents.");
         setTeams({ [capA]: "A", [capB]: "B" });
         setTurn(0);
         return;
       }
-      const d = balancedDraft(players, elos, locks, mode === "pack");
+      let d: Pick<DraftResult, "A" | "B">;
+      if (mode === "pack") {
+        d = randomPackDraft(players);
+        setRevealOrder(shuffledIds(players));
+      } else {
+        setDrawing(true);
+        const request: DraftRequest = { players, population: data.players.filter(p => !p.demo), matches: history, locks };
+        if (typeof Worker === "undefined") d = await computeDraft(request);
+        else d = await new Promise<DraftResult>((resolve, reject) => {
+          let worker: Worker;
+          try { worker = new Worker(new URL("../lib/draft.worker.ts", import.meta.url), { type: "module" }); }
+          catch { void computeDraft(request).then(resolve, reject); return; }
+          workerRef.current = worker;
+          worker.onmessage = (event: MessageEvent<{ result?: DraftResult; error?: string }>) => {
+            worker.terminate();
+            workerRef.current = null;
+            if (event.data.result) resolve(event.data.result);
+            else reject(Error(event.data.error ?? "Le tirage a échoué. Réessaie."));
+          };
+          worker.onerror = () => {
+            worker.terminate();
+            workerRef.current = null;
+            void computeDraft(request).then(resolve, reject);
+          };
+          worker.postMessage(request);
+        });
+      }
+      if (run !== generation.current) return;
       setTeams({
-        ...Object.fromEntries(d.A.map((id) => [id, "A"])),
-        ...Object.fromEntries(d.B.map((id) => [id, "B"])),
+        ...Object.fromEntries(d.A.map(id => [id, "A" as const])),
+        ...Object.fromEntries(d.B.map(id => [id, "B" as const])),
       });
+      setAutomatic(mode === "balanced");
       setReveal(mode === "pack" ? 0 : players.length);
     } catch (e) {
-      setError((e as Error).message);
+      if (run === generation.current) setError(e instanceof Error ? e.message : "Le tirage a échoué. Réessaie.");
+    } finally {
+      if (run === generation.current) setDrawing(false);
     }
   }
   async function apply() {
-    if (!base || busy) return;
+    if (!base || busy || drawing) return;
+    if (!validTeams || !fullyRevealed) {
+      setError("Le tirage doit être complet, avec au moins un joueur dans chaque équipe.");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -195,7 +248,7 @@ function DraftSession({
     }
   }
   return (
-    <fieldset className="draftroom draft-controls" disabled={busy}>
+    <fieldset className="draftroom draft-controls" disabled={busy || drawing}>
       {!base && (
         <p className="muted">
           Tu es en tirage libre. Pour enregistrer ces équipes, crée un match dans l’admin.
@@ -230,7 +283,7 @@ function DraftSession({
           <section className="panel draftselection">
             <h2>Qui joue ?</h2>
             <p className="muted">
-              Choisis un nombre pair de participants parmi les joueurs actifs.
+              {mode === "pack" ? "Choisis les participants parmi les joueurs actifs." : "Choisis un nombre pair de participants parmi les joueurs actifs."}
             </p>
             <CardCarousel
               items={data.players.filter((p) => !p.archived && !p.demo)}
@@ -271,6 +324,7 @@ function DraftSession({
           <Tabs
             value={mode}
             onValueChange={(v) => {
+              if (busy || drawing) return;
               setMode(v);
               resetDraw();
               setNotice("");
@@ -298,12 +352,12 @@ function DraftSession({
                     ? "Les équipes sont équilibrées selon les notes de draft et l’ELO."
                     : mode === "captains"
                       ? "Après les capitaines, les choix alternent dans cet ordre : A, B, B, A…"
-                      : "Les cartes se révèlent une à une. Objectif : 5 % d’écart maximum entre les équipes."}
+                      : "Les cartes se révèlent une à une. Le hasard décide des équipes et de leur taille."}
                 </p>
               </div>
               <button className="button primary" onClick={generate}>
                 <Shuffle size={16} />
-                {Object.keys(teams).length ? "Relancer" : "Lancer le draft"}
+                {drawing ? "Tirage en cours…" : Object.keys(teams).length ? "Relancer" : "Lancer le draft"}
               </button>
             </div>
             {mode === "captains" && (
@@ -409,14 +463,17 @@ function DraftSession({
                   <div className="split">
                     <h3>{teamName(m, side)}</h3>
                     <span className="accent">
-                      {Object.keys(teams).length ? fmt(score(side)) : "—"}{" "}
+                      {Object.keys(teams).length && fullyRevealed ? fmt(score(side)) : "—"}{" "}
                       <small>PUISSANCE</small>
                     </span>
                   </div>
+                  {estimate?.available && (
+                    <p className="muted">Victoire <strong>{fmt(estimate[side].win)} %</strong> · Nul {fmt(estimate[side].draw)} % · Défaite <strong>{fmt(estimate[side].lose)} %</strong></p>
+                  )}
                   {players
                     .filter(
-                      (p, i) =>
-                        teams[p.id] === side && (mode !== "pack" || i < reveal),
+                      (p) =>
+                        teams[p.id] === side && (mode !== "pack" || visibleIds.has(p.id)),
                     )
                     .map((p) => (
                       <div className="draftplayer" key={p.id}>
@@ -451,6 +508,7 @@ function DraftSession({
                             className="iconbutton"
                             aria-label={"Déplacer " + p.name}
                             onClick={() => {
+                              setAutomatic(false);
                               setTeams({
                                 ...teams,
                                 [p.id]: side === "A" ? "B" : "A",
@@ -470,15 +528,16 @@ function DraftSession({
                 </section>
               ))}
             </div>
+            {estimate && <p className="muted" role="status">{estimate.available ? "Estimation indicative selon l’ELO et les nuls observés. Aucun résultat n’est garanti." : estimate.reason}</p>}
             {ready && (mode !== "pack" || reveal === players.length) && (
               <div className="split draftresult">
                 <p>
                   Écart de puissance{" "}
                   <strong className="accent">{fmt(gap)} %</strong>
-                  {gap > 5 && (
+                  {gap > 5 && mode === "balanced" && automatic && (
                     <span className="muted">
                       {" "}
-                      · Meilleur équilibre possible avec ces joueurs et ces verrouillages.
+                      · L’équilibre reste limité avec ces joueurs et ces verrouillages.
                     </span>
                   )}
                 </p>
@@ -486,9 +545,7 @@ function DraftSession({
                   <button
                     className="button primary"
                     disabled={
-                      busy ||
-                      players.filter((p) => teams[p.id] === "A").length !==
-                        players.length / 2
+                      busy || drawing || !validTeams
                     }
                     onClick={apply}
                   >
@@ -499,6 +556,7 @@ function DraftSession({
                 {!(base && (data.admin || onApply)) && (
                   <button
                     className="button primary"
+                    disabled={!validTeams || drawing}
                     onClick={() => {
                       finishDraw();
                       setNotice("Draft terminée. Prêt pour un nouveau tirage.");
