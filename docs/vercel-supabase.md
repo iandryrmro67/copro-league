@@ -241,3 +241,37 @@ Réécriture validée par l’utilisateur : ton sportif et direct, tutoiement, v
 Vérifications : 197 tests réussis, TypeScript et compilation locaux puis Vercel réussis. Assertions de texte existantes actualisées. Contrôles HTTP publics/protégés réussis après promotion. Version API, titre et métadonnée HTML vérifiés. Comparaison des données avant/candidat/après : 23 joueurs et 9 matchs identiques, y compris statistiques et notes calculées ; seuls les textes d’explication du rating ont été exclus de la comparaison avant/candidat. Aucun enregistrement de match, joueur, brouillon ou réglage ; aucune migration.
 
 Retour arrière sans restauration de base : promouvoir `https://copro-league-35q3nuzdv-yurr2.vercel.app` (`dpl_3basqNuoZqyPaNAdQkhP34J9674x`) avec `--scope yurr2`. Le commit documentaire suivant ne modifie pas l’application publiée.
+
+## Timeline et positions finales — 7 octobre 2026
+
+Source applicative publiée : 6bc8e50d52c3382d9669141de9fd1f4c0dbcb0a1,
+branche codex/vercel-supabase. Déploiement dpl_3rnDG1QRh2vpEQ9qeeUxCxHJCUGW,
+candidat https://copro-league-7o522dqyn-yurr2.vercel.app, promu sur
+https://copro-league.vercel.app après vérification de sa version et comparaison
+exacte des joueurs, saisons, matchs, statistiques, notes et réglages publics.
+
+Types de passe obligatoires, joueurs triés par équipe, issues rapides, position
+observée en dernière étape de chaque nouvelle action, arrivée de passe facultative,
+Golazo décoratif, CSC, sortie de pression, pressing distinct du récupérateur et
+second ballon. Guide de déduction et contacts estimés séparés des touches exactes.
+Les observations révisées portent captureRevision=3 ; les anciens événements
+conservent leur interprétation. Aucune migration SQL ni écriture de données
+réelles pendant les vérifications.
+
+206 tests réussis (9 nouveaux), TypeScript et build locaux puis Vercel réussis.
+Lint ciblé : aucune erreur, avertissement image préexistant. Essais CUA sur fixture
+temporaire : passe avec type, aucune écriture avant position, position inconnue,
+chaîne et assist déduite, but positionné, récupération après pressing, CSC,
+interception et sortie de pression. À 390 px : aucune extension de largeur.
+Fixture retirée avant la compilation finale ; capture locale ignorée
+outputs/timeline-position-final.jpg.
+
+Après promotion : tests HTTP publics et protection admin/écritures/exports/vidéos
+réussis ; version API no-store et métadonnée HTML concordantes ; 23 joueurs et
+9 matchs, données et notes identiques à la version précédente. Page d’accueil
+vérifiée dans la session navigateur existante, sans erreur console.
+
+Retour arrière sans restaurer la base : promouvoir
+https://copro-league-pvjkfq9v2-yurr2.vercel.app
+(dpl_GmfxtjLzUa1HXE7fvGUr5cfGbCwn) avec --scope yurr2.
+Ce commit documentaire ne modifie pas la version applicative publiée.
