@@ -31,7 +31,7 @@ export function GameMenu({
 }) {
   const router = useRouter(),
     path = usePathname(),
-    { reduced, sound, setSound, navigate, setLayer, play } = useAnimations();
+    { reduced, sound, setSound, motionPreference, setMotionPreference, navigate, setLayer, play } = useAnimations();
   const [open, setOpen] = useState(initialOpen),
     [selected, setSelected] = useState<number | null>(null);
   const dialog = useRef<HTMLDialogElement>(null),
@@ -123,6 +123,11 @@ export function GameMenu({
           <HudLabel text={seasonName} />
         </span>
         <div className="hud-controls">
+          <label className="motion-preference">Animations
+            <select aria-label="Animations" value={motionPreference} onChange={e=>setMotionPreference(e.target.value as "auto"|"full"|"reduced")}>
+              <option value="auto">Selon l’appareil</option><option value="full">Activées</option><option value="reduced">Réduites</option>
+            </select>
+          </label>
           <button
             className="button"
             type="button"

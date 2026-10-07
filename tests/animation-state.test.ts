@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {bootProgress, snapIndex, unlockedIds, createSingleFlight, magneticOffset} from '../lib/animation-state.ts';
+import {bootProgress, snapIndex, unlockedIds, createSingleFlight, magneticOffset, resolveReducedMotion} from '../lib/animation-state.ts';
 test('boot cannot complete before the real league request', () => {
   assert.equal(bootProgress({fonts:false,image:false,data:false}),0);
   assert.equal(bootProgress({fonts:true,image:true,data:false}),40);
@@ -36,4 +36,11 @@ test('simultaneous page loads share one real request and a failed request can re
   assert.deepEqual(await Promise.all([a,b]),[7,7]);
   let calls=0;const retry=createSingleFlight(async()=>{if(++calls===1)throw Error('offline');return 8;});
   await assert.rejects(retry(),/offline/);assert.equal(await retry(),8);
+});
+
+test('motion follows the system unless explicitly enabled or reduced',()=>{
+ assert.equal(resolveReducedMotion('auto',true),true);
+ assert.equal(resolveReducedMotion('auto',false),false);
+ assert.equal(resolveReducedMotion('full',true),false);
+ assert.equal(resolveReducedMotion('reduced',false),true);
 });

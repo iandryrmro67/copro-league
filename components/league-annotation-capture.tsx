@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { League, Match, MatchEvent } from "@/lib/model";
+import { actionCriteria } from "@/lib/action-criteria";
 import { teamName } from "@/lib/model";
 import {
   actionDefinitions as definitions,
@@ -79,6 +80,8 @@ type Props = {
   draft: CaptureDraft | null;
   editing: MatchEvent | null;
   busy?: boolean;
+  positionCapture: boolean;
+  onPositionCapture: (enabled:boolean) => void;
   chainTeam: "A" | "B" | null;
   onChain: (team: "A" | "B") => void;
   onFailedChain: () => void;
@@ -96,6 +99,8 @@ export function AnnotationCapture({
   editing,
   busy,
   chainTeam,
+  positionCapture,
+  onPositionCapture,
   onChain,
   onFailedChain,
   onPlayer,
@@ -186,7 +191,7 @@ export function AnnotationCapture({
         x <= 100 &&
         y >= 0 &&
         y <= 100;
-    onDraft({ ...d, positionInput: input, position: valid ? { x, y } : null });
+    onDraft({ ...d, positionPending: valid ? false : d.positionPending, positionInput: input, position: valid ? { x, y } : null });
   }
   function selectResult(outcome: string) {
     if (d)
@@ -215,6 +220,15 @@ export function AnnotationCapture({
           <h3>{editing ? "Corriger l’action" : "Noter une action"}</h3>
         </div>
       </div>
+      <details className="action-criteria">
+        <summary>Critères des actions</summary>
+        <p>Les critères ci-dessous servent de référence commune pour annoter le match.</p>
+        {Object.entries(actionCriteria).map(([type,criteria])=><details key={type} open={d?.type===type}>
+          <summary>{definitions[type]?.label}</summary><p>{criteria.definition}</p><p className="muted">{criteria.choices}</p>
+        </details>)}
+      </details>
+      {!d && !editing && <label className="checklabel"><input type="checkbox" checked={positionCapture} onChange={e=>onPositionCapture(e.target.checked)}/>Renseigner la position pendant la saisie</label>}
+      {actor && <button type="button" className="textbutton" onClick={()=>onPlayer(actor)}>Désélectionner le joueur</button>}
       {d && (
         <div className="capture-compact-actions">
           <button
@@ -222,7 +236,7 @@ export function AnnotationCapture({
             className="textbutton"
             onClick={() => setPlayersOpen((v) => !v)}
           >
-            Changer le joueur
+            {editing ? "Modifier l’auteur" : "Changer le joueur"}
           </button>
           <button
             type="button"
@@ -299,7 +313,7 @@ export function AnnotationCapture({
                             type="button"
                             key={p.playerId}
                             aria-label={
-                              (chainTeam && actor && actor !== p.playerId
+                              (active ? "Désélectionner " : chainTeam && actor && actor !== p.playerId
                                 ? "Passe vers "
                                 : "Choisir ") + name(p.playerId)
                             }
@@ -408,6 +422,100 @@ export function AnnotationCapture({
               Annuler la saisie
             </button>
           </div>
+          {d && <details className="precise-position-inline" open={positionCapture || step === "position"}>
+            <summary>Position de l’action · {d.position ? "renseignée" : "facultative"}</summary>
+              <div className="precise-position-board">
+                <div className="split">
+                  <strong>Position observée</strong>
+                  <button
+                    type="button"
+                    className="textbutton"
+                    onClick={() =>
+                      onDraft({
+                        ...d,
+                        position: null,
+                        positionInput: undefined,
+                        endPosition: null,
+                      })
+                    }
+                  >
+                    Effacer
+                  </button>
+                </div>
+                <div
+                  className="precise-pitch"
+                  role="img"
+                  aria-label="Terrain pour placer la position observée, attaque vers la droite"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    onDraft({
+                      ...d,
+                      positionPending: false,
+                      positionInput: undefined,
+                      position: {
+                        x: Math.round(
+                          ((e.clientX - rect.left) / rect.width) * 100,
+                        ),
+                        y: Math.round(
+                          ((e.clientY - rect.top) / rect.height) * 100,
+                        ),
+                      },
+                    });
+                  }}
+                >
+                  <span className="precise-pitch-circle" />
+                  <span className="precise-pitch-box left" />
+                  <span className="precise-pitch-box right" />
+                  {d.position && (
+                    <span
+                      className="precise-pitch-dot"
+                      style={{
+                        left: d.position.x + "%",
+                        top: d.position.y + "%",
+                      }}
+                    >
+                      {name(actor).slice(0, 2)}
+                    </span>
+                  )}
+                  <span className="precise-pitch-direction">But adverse →</span>
+                </div>
+              </div>
+              <details className="precise-coordinate-fields">
+                <summary>Saisir les coordonnées au clavier</summary>
+              <div className="precise-position">
+                <label>
+                  Position X (vers le but adverse)
+                  <input
+                    aria-label="Position X observée"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={d.positionInput?.x ?? d.position?.x ?? ""}
+                    onChange={(e) => coordinate("x", e.target.value)}
+                  />
+                </label>
+                <label>
+                  Position Y (gauche → droite)
+                  <input
+                    aria-label="Position Y observée"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={d.positionInput?.y ?? d.position?.y ?? ""}
+                    onChange={(e) => coordinate("y", e.target.value)}
+                  />
+                </label>
+              </div>
+              <p className="capture-help">
+                {incompletePosition
+                  ? "Renseigne X et Y pour enregistrer une position observée. "
+                  : ""}
+                Coordonnées de 0 à 100. À renseigner uniquement si la position
+                est observée.
+              </p>
+              </details>
+            {!editing && step === "position" && <button type="button" className="button" disabled={busy} onClick={()=>onDraft({...d,positionPending:false,position:null,positionInput:undefined})}>Enregistrer sans position</button>}
+          </details>}
           {legacy && (
             <p>
               Cette action historique garde ses données. Tu peux corriger le
@@ -606,7 +714,7 @@ export function AnnotationCapture({
               disabled={busy}
               onClick={() => onDraft({ ...d, precisionChosen: true })}
             >
-              Enregistrer le tir
+              {d.positionPending ? "Continuer vers la position" : "Enregistrer le tir"}
             </button>
           )}
           {!editing && (
@@ -615,103 +723,17 @@ export function AnnotationCapture({
                 ? "Choisis le résultat pour continuer."
                 : step === "detail"
                   ? "Choisis une précision pour enregistrer."
+                  : step === "position"
+                    ? "Clique sur le terrain pour placer l’action, ou enregistre sans position."
                   : step === "precision"
                     ? "Ajoute les précisions utiles puis enregistre le tir."
-                    : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
-              {d?.type === "PASS" && d.outcome === "COMPLETED"
-                ? "Le receveur sera sélectionné pour la suite."
-                : "Le deuxième joueur choisi sera sélectionné pour la suite."}
+                    : d?.positionPending ? "Choisis le joueur impliqué, puis place l’action sur le terrain." : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
+              {d?.type === "PASS" ? "La sélection suivra le receveur ou l’intercepteur." : d && ["DUEL","TACKLE"].includes(d.type) ? "La sélection suivra le gagnant." : d && ["RECOVERY","INTERCEPTION"].includes(d.type) ? "Le récupérateur restera sélectionné." : "La sélection du joueur sera effacée après l’enregistrement."}
             </p>
           )}
-          {editing && d && (
+          {editing && d && ["SHOT", "SAVE", "BLOCK", "TURNOVER"].includes(d.type) && (
             <details className="precise-extra">
-              <summary>Position et action liée · facultatives</summary>
-              <div className="precise-position-board">
-                <div className="split">
-                  <strong>Position observée</strong>
-                  <button
-                    type="button"
-                    className="textbutton"
-                    onClick={() =>
-                      onDraft({
-                        ...d,
-                        position: null,
-                        positionInput: undefined,
-                        endPosition: null,
-                      })
-                    }
-                  >
-                    Effacer
-                  </button>
-                </div>
-                <div
-                  className="precise-pitch"
-                  role="img"
-                  aria-label="Terrain pour placer la position observée, attaque vers la droite"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    onDraft({
-                      ...d,
-                      positionInput: undefined,
-                      position: {
-                        x: Math.round(
-                          ((e.clientX - rect.left) / rect.width) * 100,
-                        ),
-                        y: Math.round(
-                          ((e.clientY - rect.top) / rect.height) * 100,
-                        ),
-                      },
-                    });
-                  }}
-                >
-                  <span className="precise-pitch-circle" />
-                  <span className="precise-pitch-box left" />
-                  <span className="precise-pitch-box right" />
-                  {d.position && (
-                    <span
-                      className="precise-pitch-dot"
-                      style={{
-                        left: d.position.x + "%",
-                        top: d.position.y + "%",
-                      }}
-                    >
-                      {name(actor).slice(0, 2)}
-                    </span>
-                  )}
-                  <span className="precise-pitch-direction">But adverse →</span>
-                </div>
-              </div>
-              <div className="precise-position">
-                <label>
-                  Position X (vers le but adverse)
-                  <input
-                    aria-label="Position X observée"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={d.positionInput?.x ?? d.position?.x ?? ""}
-                    onChange={(e) => coordinate("x", e.target.value)}
-                  />
-                </label>
-                <label>
-                  Position Y (gauche → droite)
-                  <input
-                    aria-label="Position Y observée"
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={d.positionInput?.y ?? d.position?.y ?? ""}
-                    onChange={(e) => coordinate("y", e.target.value)}
-                  />
-                </label>
-              </div>
-              <p className="capture-help">
-                {incompletePosition
-                  ? "Renseigne X et Y pour enregistrer une position observée. "
-                  : ""}
-                Coordonnées de 0 à 100. À renseigner uniquement si la position
-                est observée.
-              </p>
+              <summary>Action liée · facultative</summary>
               {["SHOT", "SAVE", "BLOCK", "TURNOVER"].includes(d.type) && (
                 <label>
                   Action liée
@@ -773,7 +795,7 @@ export function AnnotationCapture({
             <button
               type="button"
               className="button primary"
-              disabled={busy || incompletePosition || (!!d && step !== "ready")}
+              disabled={busy || !actor || incompletePosition || (!!d && step !== "ready")}
               onClick={onSaveEdit}
             >
               Enregistrer la correction

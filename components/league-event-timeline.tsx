@@ -3,7 +3,7 @@ import {useMemo,useState} from 'react';
 import {ArrowLeft,ArrowRight,ArrowUpRight,CircleDot,Play,Target,Trash2} from 'lucide-react';
 import type {League,Match,MatchEvent} from '@/lib/model';
 import {teamName} from '@/lib/model';
-import {actionDefinitions,eventLabel,isGoal,isOwnGoal,scoringTeam} from '@/lib/actions';
+import {actionDefinitions,actionLabels,eventLabel,isGoal,isOwnGoal,scoringTeam} from '@/lib/actions';
 import {filterActions,timelineWindow,type ActionFilters} from '@/lib/annotation-controls';
 import {formatVideoTime} from './league-video';
 
@@ -30,6 +30,22 @@ export function EventTimeline({match:m,data,time,selected,filters,onFilters,onSe
    <label>Action<select aria-label="Filtrer les actions par type" value={filters.type??'all'} onChange={e=>update('type',e.target.value)}><option value="all">Toutes les actions</option><option value="GOAL">Buts</option><option value="ASSIST">Passes décisives</option>{Object.entries(actionDefinitions).map(([key,value])=><option key={key} value={key}>{value.label}</option>)}</select></label>
    <label>Recherche<input aria-label="Rechercher un événement" placeholder="Nom ou action…" value={filters.query??''} onChange={e=>update('query',e.target.value)}/></label>
    {hasFilters&&<button type="button" className="textbutton" onClick={()=>{onFilters({});setLimit(80);}}>Tout afficher</button>}
+  </div>}
+  {!compact&&<div className="timeline-filter-options">
+   <button type="button" className="button" onClick={()=>{onFilters({...filters,type:'GOAL',assist:'without'});setLimit(80);}}>Buts sans passe décisive</button>
+   <details open={!!(filters.assist||filters.outcome||filters.tag||filters.position||filters.role||filters.from||filters.to)}>
+    <summary>Combiner les filtres</summary>
+    <p className="timeline-help">Tous les critères s’appliquent ensemble. Tu peux les combiner avec l’équipe, le joueur et le type d’action.</p>
+    <div className="timeline-filters">
+     <label>Passe décisive<select aria-label="Filtrer par passe décisive" value={filters.assist??'all'} onChange={e=>update('assist',e.target.value)}><option value="all">Indifférent</option><option value="with">Buts avec passe décisive</option><option value="without">Buts sans passe décisive</option></select></label>
+     <label>Résultat<select aria-label="Filtrer par résultat" value={filters.outcome??'all'} onChange={e=>update('outcome',e.target.value)}><option value="all">Tous les résultats</option>{[...new Set(Object.values(actionDefinitions).flatMap(d=>d.outcomes))].map(v=><option key={v} value={v}>{actionLabels[v]??v}</option>)}</select></label>
+     <label>Précision<select aria-label="Filtrer par précision" value={filters.tag??'all'} onChange={e=>update('tag',e.target.value)}><option value="all">Toutes les précisions</option>{[...new Set(Object.values(actionDefinitions).flatMap(d=>d.tags))].map(v=><option key={v} value={v}>{actionLabels[v]??v}</option>)}</select></label>
+     <label>Position<select aria-label="Filtrer par position" value={filters.position??'all'} onChange={e=>update('position',e.target.value)}><option value="all">Indifférent</option><option value="known">Position renseignée</option><option value="missing">Position manquante</option></select></label>
+     <label>Rôle du joueur<select aria-label="Filtrer par rôle du joueur" value={filters.role??'all'} onChange={e=>update('role',e.target.value)}><option value="all">Auteur ou joueur impliqué</option><option value="actor">Auteur uniquement</option></select></label>
+     <label>À partir de (minute)<input aria-label="Filtrer depuis la minute" type="number" min="0" step="0.5" value={filters.from?Number(filters.from)/60:''} onChange={e=>update('from',e.target.value===''?'':String(Number(e.target.value)*60))}/></label>
+     <label>Jusqu’à (minute)<input aria-label="Filtrer jusqu’à la minute" type="number" min="0" step="0.5" value={filters.to?Number(filters.to)/60:''} onChange={e=>update('to',e.target.value===''?'':String(Number(e.target.value)*60))}/></label>
+    </div>
+   </details>
   </div>}
   {!compact&&<div className="timeline-navigation">
    <select aria-label="Zoom de la timeline" value={span} onChange={e=>{setSpan(Number(e.target.value));setCenter(null);}}><option value={0}>Tout le match</option><option value={600}>10 minutes</option><option value={300}>5 minutes</option><option value={120}>2 minutes</option><option value={30}>30 secondes</option></select>

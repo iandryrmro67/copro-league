@@ -150,7 +150,7 @@ test("a suffered foul attributes the offence to the opponent and keeps the victi
       }),
     ),
   );
-  assert.equal(result.nextActor, "c");
+  assert.equal(result.nextActor, "");
   assert.equal(result.event.playerId, "c");
   assert.equal(result.event.team, "B");
   assert.equal(result.event.metadata.opponentPlayerId, "a");
@@ -839,7 +839,7 @@ test("restoring an unfinished shot keeps immediate precisions pending", async ()
   assert.deepEqual(restored.tags, ["LEFT_FOOT"]);
 });
 
-test("every new action follows its explicitly selected second player, corrections retain their author", () => {
+test("only possession actions retain an automatic player after creation or correction", () => {
   for (const value of [
     draft({ outcome: "FAILED", opponent: "c", participantChosen: true }),
     draft({
@@ -874,16 +874,16 @@ test("every new action follows its explicitly selected second player, correction
     }),
   ]) {
     const result = recordPreciseAction(fixture(), input(value));
-    assert.equal(result.nextActor, value.mate || value.opponent);
+    assert.equal(result.nextActor, value.type === "PASS" ? value.opponent : value.type === "DUEL" ? "a" : "");
     const correction = recordPreciseAction(result.match, {
       ...input(value),
       editing: result.event.id,
     });
-    assert.equal(correction.nextActor, "a");
+    assert.equal(correction.nextActor, result.nextActor);
   }
 });
 
-test("correction starts with the last selected player and clears incompatible observations", async () => {
+test("correction reloads its stored author and participants regardless of the previous selection", async () => {
   const { prepareActionCorrection } =
     await import("../lib/precise-annotation.ts");
   const original = recordPreciseAction(
@@ -899,9 +899,9 @@ test("correction starts with the last selected player and clears incompatible ob
     ),
   );
   const prepared = prepareActionCorrection(original.match, original.event, "b");
-  assert.equal(prepared.actor, "b");
-  assert.equal(prepared.draft?.mate, "");
-  assert.equal(prepared.draft?.position, null);
+  assert.equal(prepared.actor, "a");
+  assert.equal(prepared.draft?.mate, "b");
+  assert.deepEqual(prepared.draft?.position, { x: 30, y: 20 });
   assert.deepEqual(prepared.draft?.tags, ["KEY_PASS"]);
   assert.equal(original.event.playerId, "a");
   assert.equal(original.event.relatedPlayerId, "b");
@@ -916,4 +916,25 @@ test("correction starts with the last selected player and clears incompatible ob
     prepareActionCorrection(original.match, original.event, "missing").actor,
     "a",
   );
+});
+
+
+test('optional position capture waits before committing and does not invent coordinates',()=>{
+ const pending=draft({outcome:'COMPLETED',mate:'b',participantChosen:true,positionPending:true});
+ assert.equal(captureStep(pending),'position');
+ assert.throws(()=>recordPreciseAction(fixture(),input(pending)),/choix/);
+ const positioned={...pending,positionPending:false,position:{x:70,y:25}};
+ assert.equal(captureStep(positioned),'ready');
+ assert.deepEqual(recordPreciseAction(fixture(),input(positioned)).event.metadata.position,{x:70,y:25});
+ assert.equal(recordPreciseAction(fixture(),input({...pending,positionPending:false})).event.metadata.position,null);
+});
+test('possession selection follows the winner and recoverer rather than the last clicked opponent',()=>{
+ for(const type of ['DUEL','TACKLE'])for(const outcome of ['WON','LOST']){
+  const value=draft({type,outcome,opponent:'c',participantChosen:true});
+  assert.equal(recordPreciseAction(fixture(),input(value)).nextActor,outcome==='WON'?'a':'c');
+ }
+ for(const type of ['RECOVERY','INTERCEPTION']){
+  const value=draft({type,outcome:'',tags:type==='RECOVERY'?['OPPONENT_ERROR']:[],detailChosen:true,opponent:'c',participantChosen:true});
+  assert.equal(recordPreciseAction(fixture(),input(value)).nextActor,'a');
+ }
 });

@@ -34,7 +34,10 @@ function PublicationPreview(){
  const [match,setMatch]=useState<Match>(()=>{
   const events:MatchEvent[]=Array.from({length:60},(_,i)=>({id:'review-'+i,playerId:'p0',team:'A' as const,type:i%2?'RECOVERY':'PASS',timestamp:i+1,relatedPlayerId:i%2?null:'p1',metadata:{schemaVersion:2,sequenceId:'review',outcome:i%2?'':'FAILED',tags:[],opponentPlayerId:i%2?null:'p5',counterpartStats:true}}));
   events.push({id:'review-assist',playerId:'p0',team:'A',type:'PASS',timestamp:80,relatedPlayerId:'p1',metadata:{schemaVersion:2,sequenceId:'review',outcome:'COMPLETED',tags:['ASSIST'],opponentPlayerId:null,counterpartStats:false}});
-  const m=beginAnalysis({...fixture(),scoreA:0,scoreB:0,events,participants:fixture().participants.map(p=>({...p,stats:{goals:0}}))});
+  if(params.has('csc')) events.splice(0,events.length,
+   {id:'goal',playerId:'p0',team:'A',type:'SHOT',timestamp:30,relatedPlayerId:null,metadata:{schemaVersion:2,outcome:'GOAL',tags:[],sequenceId:'goal',position:null}},
+   {id:'csc',playerId:'p5',team:'B',type:'OWN_GOAL',timestamp:60,relatedPlayerId:null,metadata:{schemaVersion:2,tags:[],sequenceId:'csc',position:null}});
+  const m=beginAnalysis({...fixture(),scoreA:params.has('csc')?2:0,scoreB:0,events,participants:fixture().participants.map(p=>({...p,stats:{goals:0}}))});
   m.analysis!.completeKeys=Object.values(coverageFamilies).flat();m.analysis!.ranges=[{start:0,end:180}];m.analysis!.status='review';return m;
  });
  const data:League={players,seasons:[],matches:[match],settings:{minRating:5,minRadar:5,minDuo:5,minPasses:30,minAttempts:10},admin:true,bootstrap:false,user:'publication-fixture'};

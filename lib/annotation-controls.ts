@@ -1,5 +1,5 @@
 import type {Match,MatchEvent} from './model.ts';
-import {isGoal,eventLabel,isV2,canonicalEffects,isOwnGoal} from './actions.ts';
+import {isGoal,eventLabel,isV2,canonicalEffects,isOwnGoal,scoringTeam} from './actions.ts';
 import {beginAnalysis,previousPass} from './match-analysis.ts';
 
 export const quickActions={
@@ -74,7 +74,7 @@ export function reviewRanges(events:MatchEvent[],offset:number,before=4,after=3,
  return merged;
 }
 
-export type ActionFilters={player?:string;team?:string;type?:string;query?:string};
+export type ActionFilters={player?:string;team?:string;type?:string;query?:string;assist?:string;outcome?:string;tag?:string;position?:string;role?:string;from?:string;to?:string};
 export function filterActions(events:MatchEvent[],filters:ActionFilters,name:(id:string)=>string=id=>id){
  const creditKeys:Record<string,string>={SHOT:'shots',PASS:'passesAttempted',INTERCEPTION:'interceptions',RECOVERY:'recoveries',SAVE:'saves',BLOCK:'blocks',TURNOVER:'turnovers'};
  return events.filter(e=>{
@@ -82,8 +82,19 @@ export function filterActions(events:MatchEvent[],filters:ActionFilters,name:(id
   const credited=isV2(e)&&!!creditKey&&canonicalEffects(e,events).some(([id,key])=>
     key===creditKey&&(!filters.player||filters.player==='all'||id===filters.player)&&
     (!filters.team||filters.team==='all'||(id===e.playerId||id===e.relatedPlayerId?e.team:(e.team==='A'?'B':'A'))===filters.team));
-  if(filters.team&&filters.team!=='all'&&e.team!==filters.team&&!credited)return false;
+  if(filters.team&&filters.team!=='all'&&(filters.type==='GOAL'?scoringTeam(e):e.team)!==filters.team&&!credited)return false;
   if(filters.player&&filters.player!=='all'&&![e.playerId,e.relatedPlayerId,e.metadata.opponentPlayerId].includes(filters.player))return false;
+  if(filters.role==='actor'&&filters.player&&filters.player!=='all'&&e.playerId!==filters.player)return false;
+  if(filters.assist&&filters.assist!=='all'){
+   if(!isGoal(e)||isOwnGoal(e))return false;
+   if((filters.assist==='with')!==!!e.relatedPlayerId)return false;
+  }
+  const outcome=String(e.metadata.outcome??({PASS_COMPLETED:'COMPLETED',PASS_FAILED:'FAILED',GOAL:'GOAL',SHOT_ON_TARGET:'ON_TARGET',SHOT_OFF_TARGET:'OFF_TARGET',DUEL_WON:'WON',DUEL_LOST:'LOST'} as Record<string,string>)[e.type]??'');
+  if(filters.outcome&&filters.outcome!=='all'&&outcome!==filters.outcome)return false;
+  if(filters.tag&&filters.tag!=='all'&&!((e.metadata.tags as string[])??[]).includes(filters.tag))return false;
+  if(filters.position==='known'&&e.metadata.position==null||filters.position==='missing'&&e.metadata.position!=null)return false;
+  if(filters.from&&Number.isFinite(Number(filters.from))&&(e.timestamp==null||e.timestamp<Number(filters.from)))return false;
+  if(filters.to&&Number.isFinite(Number(filters.to))&&(e.timestamp==null||e.timestamp>Number(filters.to)))return false;
   const type=filters.type;
   if(type&&type!=='all'&&!credited){
    if(type==='GOAL'){if(!isGoal(e))return false;}

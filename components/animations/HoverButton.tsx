@@ -35,7 +35,7 @@ export const HoverButton = forwardRef<HTMLButtonElement, Props>(
     useEffect(() => {
       if (!magnetic || reduced || props.disabled || variant !== "primary")
         return;
-      const fine = matchMedia("(hover:hover) and (pointer:fine)");
+      const fine = matchMedia("(any-hover:hover) and (any-pointer:fine)");
       const move = (e: PointerEvent) => {
         const element = button.current;
         if (!element || !fine.matches || e.pointerType === "touch") return;

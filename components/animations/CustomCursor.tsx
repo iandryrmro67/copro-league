@@ -13,7 +13,7 @@ export function CustomCursor() {
     [visible, setVisible] = useState(false);
   useEffect(() => {
     if (reduced || busy) return;
-    const fine = matchMedia("(hover:hover) and (pointer:fine)");
+    const fine = matchMedia("(any-hover:hover) and (any-pointer:fine)");
     let frame = 0,
       cx = -100,
       cy = -100,

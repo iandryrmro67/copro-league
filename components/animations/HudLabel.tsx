@@ -15,7 +15,7 @@ export function HudLabel({ text }: { text: string }) {
   function decode() {
     if (
       reduced ||
-      !window.matchMedia("(hover:hover) and (pointer:fine)").matches
+      !window.matchMedia("(any-hover:hover) and (any-pointer:fine)").matches
     )
       return;
     if (timer.current) clearInterval(timer.current);

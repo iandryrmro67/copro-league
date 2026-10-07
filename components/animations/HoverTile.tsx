@@ -47,7 +47,7 @@ export const HoverTile = forwardRef<HTMLElement, Props>(function HoverTile(
         onPointerMove?.(e);
         if (
           reduced ||
-          !window.matchMedia("(hover:hover) and (pointer:fine)").matches
+          !window.matchMedia("(any-hover:hover) and (any-pointer:fine)").matches
         )
           return;
         const r = e.currentTarget.getBoundingClientRect(),

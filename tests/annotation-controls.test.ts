@@ -159,3 +159,23 @@ test('own goals appear among goals but not shots or assists',()=>{
  assert.equal(filterActions([own],{type:'SHOT'}).length,0);
  assert.equal(filterActions([own],{type:'ASSIST'}).length,0);
 });
+
+
+test('timeline combines goal, assist absence, author, time and position filters',()=>{
+ const goal:MatchEvent={id:'g',playerId:'a',team:'A',type:'SHOT',timestamp:30,relatedPlayerId:null,metadata:{schemaVersion:2,outcome:'GOAL',tags:[]}};
+ const assisted={...goal,id:'assisted',relatedPlayerId:'b'};
+ const earlier={...goal,id:'early',timestamp:5};
+ const positioned={...goal,id:'positioned',metadata:{...goal.metadata,position:{x:40,y:50}}};
+ const own={...goal,id:'own',type:'OWN_GOAL'};
+ assert.deepEqual(filterActions([goal,assisted,earlier,positioned,own],{type:'GOAL',assist:'without',player:'a',role:'actor',from:'10',to:'40',position:'missing'}).map(e=>e.id),['g']);
+ assert.deepEqual(filterActions([goal,assisted],{type:'GOAL',assist:'with'}).map(e=>e.id),['assisted']);
+ assert.equal(filterActions([assisted],{player:'b',role:'actor'}).length,0);
+ assert.equal(filterActions([assisted],{player:'b'}).length,1);
+});
+test('timeline combines results and precision tags without rewriting stored events',()=>{
+ const completed:MatchEvent={id:'p',playerId:'a',team:'A',type:'PASS',timestamp:10,relatedPlayerId:'b',metadata:{schemaVersion:2,outcome:'COMPLETED',tags:['KEY_PASS']}};
+ const failed={...completed,id:'f',metadata:{...completed.metadata,outcome:'FAILED',tags:[]}};
+ assert.deepEqual(filterActions([completed,failed],{type:'PASS',outcome:'COMPLETED',tag:'KEY_PASS'}).map(e=>e.id),['p']);
+ assert.equal(filterActions([completed],{outcome:'FAILED'}).length,0);
+ assert.deepEqual(completed.metadata.tags,['KEY_PASS']);
+});

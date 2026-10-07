@@ -11,6 +11,7 @@ export type CaptureDraft = {
   participantChosen: boolean;
   detailChosen: boolean;
   precisionChosen?: boolean;
+  positionPending?: boolean;
   position?: Point | null;
   positionInput?: { x: string; y: string };
   scene?: Scene;
@@ -18,7 +19,7 @@ export type CaptureDraft = {
   linkedEventId?: string | null;
 };
 export type CaptureStep =
-  "action" | "outcome" | "mate" | "opponent" | "detail" | "precision" | "ready";
+  "action" | "outcome" | "mate" | "opponent" | "detail" | "precision" | "position" | "ready";
 export function captureStep(d: CaptureDraft): CaptureStep {
   if (!d.type) return "action";
   const outcomes =
@@ -38,9 +39,10 @@ export function captureStep(d: CaptureDraft): CaptureStep {
     !d.participantChosen ||
     (participantRequired(d) && (d.type === "PASS" ? !d.mate : !d.opponent))
   ) {
-    return captureParticipant(d) ?? "ready";
+    const participant = captureParticipant(d);
+    if (participant) return participant;
   }
-  return "ready";
+  return d.positionPending ? "position" : "ready";
 }
 export function captureParticipant(
   d: CaptureDraft,
@@ -327,7 +329,7 @@ export function recordPreciseAction(
       },
     },
     event: events.find((e) => e.id === event.id)!,
-    nextActor: !editing ? d.mate || d.opponent || playerId : playerId,
+    nextActor: nextAnnotationActor(d, playerId),
     sequenceId: nextSequence,
   };
 }
@@ -366,6 +368,7 @@ export function restoreCaptureDraft(
       tags: builder.tags,
       participantChosen: builder.participantChosen ?? !!builder.editing,
       precisionChosen: builder.precisionChosen,
+      positionPending: builder.positionPending,
       detailChosen: builder.detailChosen ?? !!builder.editing,
       position,
       positionInput: builder.positionInput,
@@ -444,6 +447,14 @@ export function retargetCapture(d: CaptureDraft): CaptureDraft {
   };
 }
 
+/** Only possession actions keep a player selected after recording. */
+export function nextAnnotationActor(d:CaptureDraft, author:string):string {
+ if(d.type==='PASS')return d.outcome==='COMPLETED'?d.mate:d.opponent;
+ if(['DUEL','TACKLE'].includes(d.type))return d.outcome==='LOST'?d.opponent:author;
+ if(['RECOVERY','INTERCEPTION'].includes(d.type))return author;
+ return '';
+}
+
 /** One explicit recipient click creates one observed completed pass. */
 export function recordCirculationPass(
   match: Match,
@@ -471,15 +482,15 @@ export function recordCirculationPass(
   });
 }
 
-/** Propose the operator's current selection without modifying the stored event. */
+/** Load the stored event: prior capture selection must never rewrite its author. */
 export function prepareActionCorrection(
   m: Match,
   event: MatchEvent,
   preferred: string,
 ): { actor: string; draft: CaptureDraft | null } {
-  const actor = m.participants.some((p) => p.playerId === preferred && p.team)
-    ? preferred
-    : event.playerId;
+  const actor = event.playerId;
+  if (!m.participants.some(p => p.playerId === actor)) throw Error("Auteur de l’action absent du match.");
+  void preferred;
   if (!isV2(event)) return { actor, draft: null };
   const draft: CaptureDraft = {
     type: event.type,
@@ -499,6 +510,6 @@ export function prepareActionCorrection(
   };
   return {
     actor,
-    draft: actor === event.playerId ? draft : retargetCapture(draft),
+    draft,
   };
 }

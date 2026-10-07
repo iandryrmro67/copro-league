@@ -328,3 +328,12 @@ input::placeholder, textarea::placeholder { color: var(--ash); opacity: 1; }
   .precise-workspace.workspace-fullscreen { padding: 12px; }
   .precise-workspace.workspace-fullscreen .precise-player video,.precise-workspace.workspace-fullscreen .precise-player .youtube { max-height: 38vh; }
 }
+
+.action-criteria,.precise-position-inline,.timeline-filter-options details { border:1px solid var(--line); padding:12px; margin:12px 0; }
+.action-criteria summary,.precise-position-inline summary,.timeline-filter-options summary { cursor:pointer; font-weight:600; }
+.action-criteria p { line-height:1.6; max-width:850px; }
+.action-criteria details { padding:10px 0; border-top:1px solid var(--line); }
+.precise-position-inline .precise-pitch { width:min(100%,360px); height:150px; min-height:0; margin:10px 0; }
+.precise-position-inline .precise-position { max-width:500px; }
+.precise-position-inline .capture-help { font-size:12px; }
+.timeline-filter-options { margin-bottom:14px; }

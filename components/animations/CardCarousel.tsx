@@ -234,7 +234,7 @@ export function CardCarousel<T extends { id: string }>({
                 if (
                   i !== index ||
                   reduced ||
-                  !window.matchMedia("(hover:hover) and (pointer:fine)").matches
+                  !window.matchMedia("(any-hover:hover) and (any-pointer:fine)").matches
                 )
                   return;
                 const box = e.currentTarget.getBoundingClientRect();

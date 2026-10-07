@@ -100,6 +100,7 @@ export function Analyzer({
     [future, setFuture] = useState<Match[]>([]),
     [message, setMessage] = useState(""),
     [lastId, setLastId] = useState<string | null>(null);
+  const [positionCapture, setPositionCapture] = useState(false);
   const [chainTeam, setChainTeam] = useState<"A" | "B" | null>(null);
   const resumePlayback = useRef(false);
   const video = useRef<VideoPlayerHandle>(null),
@@ -180,6 +181,7 @@ export function Analyzer({
       participantChosen: draft?.participantChosen ?? false,
       detailChosen: draft?.detailChosen ?? false,
       precisionChosen: draft?.precisionChosen,
+      positionPending: draft?.positionPending,
       videoHidden: hidden,
       captureVideoTime:
         frozen.current?.timestamp ===
@@ -280,7 +282,7 @@ export function Analyzer({
       resumePlayback.current = false;
       remember(result.match);
       setSequence(result.sequenceId);
-      if (!editing) setActor(result.nextActor);
+      setActor(result.nextActor);
       setDraft(null);
       setEditing(null);
       setManual(false);
@@ -327,7 +329,7 @@ export function Analyzer({
       setManual(true);
       committed.current = false;
       setMessage("");
-      const next = { ...blank(type), ...initial };
+      const next = { ...blank(type), positionPending: positionCapture, ...initial };
       setDraft(next);
       if (!editing && captureStep(next) === "ready") commit(next, marked);
     } catch (error) {
@@ -347,6 +349,12 @@ export function Analyzer({
   }
   function choosePlayer(id: string) {
     if (busy) return;
+    if (actor === id) {
+      setActor("");
+      if (draft || editing) cancel();
+      setMessage("");
+      return;
+    }
     if (chainTeam) {
       const target = m.participants.find((p) => p.playerId === id);
       if (target?.team !== chainTeam) {
@@ -405,11 +413,7 @@ export function Analyzer({
     setStamp(clock(e.timestamp));
     setManual(true);
     committed.current = false;
-    setMessage(
-      correction.actor === e.playerId
-        ? ""
-        : `Correction pour ${name(correction.actor)} · auteur précédent : ${name(e.playerId)}. Choisis à nouveau les joueurs impliqués avant de sauvegarder.`,
-    );
+    setMessage("");
     setDraft(correction.draft);
     root.current
       ?.querySelector(".precise-capture")
@@ -788,6 +792,8 @@ export function Analyzer({
           draft={draft}
           editing={edited}
           busy={busy}
+          positionCapture={positionCapture}
+          onPositionCapture={setPositionCapture}
           chainTeam={chainTeam}
           onChain={toggleChain}
           onFailedChain={() => start("PASS", { outcome: "FAILED" })}

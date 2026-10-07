@@ -87,3 +87,9 @@ export function carouselTransition(reduced: boolean) {
     ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
   };
 }
+
+export type MotionPreference = "auto" | "full" | "reduced";
+/** Auto respects accessibility settings; only an explicit choice overrides them. */
+export function resolveReducedMotion(preference: MotionPreference, systemReduced: boolean) {
+  return preference === "auto" ? systemReduced : preference === "reduced";
+}

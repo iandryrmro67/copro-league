@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   useCallback,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { LazyMotion, MotionConfig, useReducedMotion } from "motion/react";
@@ -16,13 +17,39 @@ import {
   shouldAnimateNavigation,
 } from "@/lib/animated-navigation";
 import { CustomCursor } from "./CustomCursor";
+import { resolveReducedMotion, type MotionPreference } from "@/lib/animation-state";
 import { eases } from "@/lib/motion";
+let localMotionPreference: MotionPreference | null = null;
+function readMotionPreference(): MotionPreference {
+  if (localMotionPreference) return localMotionPreference;
+  try {
+    const value = localStorage.getItem("copro:motion");
+    return value === "full" || value === "reduced" ? value : "auto";
+  } catch { return "auto"; }
+}
+function subscribeMotionPreference(listener: () => void) {
+  const sync = () => { localMotionPreference = null; listener(); };
+  window.addEventListener("storage", sync);
+  window.addEventListener("copro:motion", listener);
+  return () => {
+    window.removeEventListener("storage", sync);
+    window.removeEventListener("copro:motion", listener);
+  };
+}
+function setMotionPreference(value: MotionPreference) {
+  localMotionPreference = value;
+  try { localStorage.setItem("copro:motion", value); } catch {}
+  window.dispatchEvent(new Event("copro:motion"));
+}
+const serverMotionPreference = (): MotionPreference => "auto";
 const loadFeatures = () =>
   import("./features").then((module) => module.default);
 type Animations = {
   previewTransition: (reducedOverride?: boolean) => Promise<void>;
   seenUnlocks: Set<string>;
   reduced: boolean;
+  motionPreference: MotionPreference;
+  setMotionPreference: (value: MotionPreference) => void;
   sound: boolean;
   setSound: (v: boolean) => void;
   busy: boolean;
@@ -34,6 +61,8 @@ const Context = createContext<Animations>({
   previewTransition: async () => {},
   seenUnlocks: new Set(),
   reduced: false,
+  motionPreference: "auto",
+  setMotionPreference: () => {},
   sound: false,
   setSound: () => {},
   busy: false,
@@ -55,7 +84,7 @@ export function AnimationPreview({
     <Context.Provider
       value={{ ...settings, reduced: reduced || settings.reduced }}
     >
-      <MotionConfig reducedMotion={reduced ? "always" : "user"}>
+      <MotionConfig reducedMotion={reduced || settings.reduced ? "always" : "never"}>
         <div data-motion-reduced={reduced || settings.reduced}>{children}</div>
       </MotionConfig>
     </Context.Provider>
@@ -65,7 +94,13 @@ export function AnimationPreview({
 export function AnimationProvider({ children }: { children: ReactNode }) {
   const router = useRouter(),
     path = usePathname(),
-    reduced = !!useReducedMotion();
+    systemReduced = !!useReducedMotion();
+  const motionPreference = useSyncExternalStore(subscribeMotionPreference, readMotionPreference, serverMotionPreference);
+  const reduced = resolveReducedMotion(motionPreference, systemReduced);
+  useEffect(() => {
+    document.documentElement.dataset.coproMotion = motionPreference;
+    document.documentElement.dataset.motionReduced = String(reduced);
+  }, [motionPreference, reduced]);
   const [sound, setSound] = useState(false),
     [routeReduced, setRouteReduced] = useState(false),
     [phase, setPhase] = useState<"idle" | "cover" | "reveal">("idle"),
@@ -240,12 +275,14 @@ export function AnimationProvider({ children }: { children: ReactNode }) {
   );
   return (
     <LazyMotion features={loadFeatures}>
-      <MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion={reduced ? "always" : "never"}>
         <Context.Provider
           value={{
             previewTransition,
             seenUnlocks,
             reduced,
+            motionPreference,
+            setMotionPreference,
             sound,
             setSound,
             busy: phase !== "idle" || layers.length > 0,
