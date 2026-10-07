@@ -39,6 +39,7 @@ import {
 import {
   captureStep,
   restoreCaptureDraft,
+  restoredCaptureActor,
   retargetCapture,
   correctHistoricalAction,
   recordPreciseAction,
@@ -75,8 +76,11 @@ export function Analyzer({
   busy?: boolean;
 }) {
   const saved = m.analysis?.session.builder;
-  const [actor, setActor] = useState(saved?.actor ?? ""),
-    [stamp, setStamp] = useState(saved?.stamp ?? "00:00"),
+  const restoredActor = saved ? restoredCaptureActor(m, saved) : "";
+  const recoveredCorrection = !!saved?.editing && restoredActor !== saved.actor;
+  const storedCorrection = recoveredCorrection ? m.events.find(e=>e.id===saved?.editing) : undefined;
+  const [actor, setActor] = useState(restoredActor),
+    [stamp, setStamp] = useState(storedCorrection ? clock(storedCorrection.timestamp) : saved?.stamp ?? "00:00"),
     [manual, setManual] = useState(saved?.manual ?? false);
   const [editing, setEditing] = useState<string | null>(saved?.editing ?? null);
   const [draft, setDraft] = useState<CaptureDraft | null>(() =>
@@ -98,7 +102,7 @@ export function Analyzer({
     [filters, setFilters] = useState<ActionFilters>({});
   const [past, setPast] = useState<Match[]>([]),
     [future, setFuture] = useState<Match[]>([]),
-    [message, setMessage] = useState(""),
+    [message, setMessage] = useState(recoveredCorrection ? "Ancienne correction rechargée depuis l’action enregistrée. Vérifie les choix avant de sauvegarder." : ""),
     [lastId, setLastId] = useState<string | null>(null);
   const [positionCapture, setPositionCapture] = useState(false);
   const [chainTeam, setChainTeam] = useState<"A" | "B" | null>(null);
@@ -182,6 +186,7 @@ export function Analyzer({
       detailChosen: draft?.detailChosen ?? false,
       precisionChosen: draft?.precisionChosen,
       positionPending: draft?.positionPending,
+      correctionVersion: editing ? 1 : undefined,
       videoHidden: hidden,
       captureVideoTime:
         frozen.current?.timestamp ===

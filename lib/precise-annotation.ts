@@ -333,11 +333,19 @@ export function recordPreciseAction(
     sequenceId: nextSequence,
   };
 }
+/** Older sessions could silently select a different author when opening an event. */
+export function restoredCaptureActor(m:Match,builder:AnnotationBuilder):string {
+ const event=m.events.find(e=>e.id===builder.editing);
+ return event && builder.correctionVersion!==1 ? event.playerId : builder.actor;
+}
+
 export function restoreCaptureDraft(
   m: Match,
   builder: AnnotationBuilder,
 ): CaptureDraft | null {
   const event = m.events.find((e) => e.id === builder.editing);
+  if (event && builder.correctionVersion !== 1 && builder.actor !== event.playerId)
+    return prepareActionCorrection(m, event, event.playerId).draft;
   const active =
     builder.captureActive ??
     (builder.manual || builder.positionKnown || !!builder.editing);

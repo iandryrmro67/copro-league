@@ -68,3 +68,5 @@ Depuis le 7 octobre 2026, les positions inconnues et les passes marquées décis
 La sauvegarde d’une analyse ne compare plus son ancienne feuille manuelle avec le résultat officiel. À la publication des buts, le serveur vérifie le score des événements, CSC inclus. Les matchs manuels sans analyse conservent le contrôle des buts individuels, complété par les CSC adverses.
 
 Le réglage « Animations » propose selon l’appareil, activées ou réduites. Le choix explicite est conservé sur cet appareil ; le mode automatique respecte la préférence d’accessibilité du système. Les effets détectent aussi les souris connectées aux PC tactiles. Le curseur natif reste actif dans les champs, vidéos, fenêtres modales et l’atelier de précision.
+
+Les corrections anciennes laissées ouvertes avec un auteur différent sont rechargées depuis l’événement enregistré, avec message explicite. Aucun événement n’est réécrit pendant la reprise. Les corrections de cette version portent un marqueur de session qui permet de conserver un changement d’auteur volontaire après rechargement.

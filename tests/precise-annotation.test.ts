@@ -938,3 +938,15 @@ test('possession selection follows the winner and recoverer rather than the last
   assert.equal(recordPreciseAction(fixture(),input(value)).nextActor,'a');
  }
 });
+
+test('old pending corrections cannot restore the previous actor while explicit new corrections survive reload',async()=>{
+ const {restoreCaptureDraft,restoredCaptureActor}=await import('../lib/precise-annotation.ts');
+ const first=recordPreciseAction(fixture(),input(draft({outcome:'COMPLETED',mate:'b',participantChosen:true,position:{x:70,y:30}})));
+ const builder={actor:'c',mate:'',opponent:'',type:'PASS',outcome:'FAILED',tags:[],stamp:'0:40',manual:true,editing:first.event.id,linked:'',positionKnown:false,quick:false,view:'builder',scene:{players:{},ball:null},end:null,captureActive:true};
+ assert.equal(restoredCaptureActor(first.match,builder),'a');
+ const recovered=restoreCaptureDraft(first.match,builder);
+ assert.equal(recovered?.outcome,'COMPLETED');assert.equal(recovered?.mate,'b');assert.deepEqual(recovered?.position,{x:70,y:30});
+ const explicit={...builder,correctionVersion:1 as const};
+ assert.equal(restoredCaptureActor(first.match,explicit),'c');assert.equal(restoreCaptureDraft(first.match,explicit)?.outcome,'FAILED');
+ assert.equal(first.match.events[0].playerId,'a');
+});
