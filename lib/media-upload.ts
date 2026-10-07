@@ -10,7 +10,7 @@ export async function uploadMedia(kind:'videos'|'photos',file:File,options:{sign
   const done=(error?:Error)=>{options.signal?.removeEventListener('abort',abort);error?reject(error):resolve()};
   xhr.open('PUT',ticket.signedUrl);xhr.setRequestHeader('Content-Type',ticket.type);xhr.setRequestHeader('Cache-Control','max-age=3600');
   xhr.upload.onprogress=e=>{if(e.lengthComputable)options.onProgress?.(Math.round(e.loaded/e.total*100))};
-  xhr.onerror=()=>done(Error('Envoi interrompu. Réessayez.'));
+  xhr.onerror=()=>done(Error("L’envoi a été interrompu. Réessaie."));
   xhr.onabort=()=>done(new DOMException('Envoi annulé.','AbortError'));
   xhr.onload=()=>done(xhr.status>=200&&xhr.status<300?undefined:Error('Le stockage a refusé le fichier. Vérifie sa taille et réessaie.'));
   if(options.signal?.aborted){done(new DOMException('Envoi annulé.','AbortError'));return}

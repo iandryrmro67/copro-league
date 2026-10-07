@@ -675,8 +675,7 @@ export function Analyzer({
           <label className="video-local-primary">
             <strong>{localName || "Ouvrir ma vidéo"}</strong>
             <span>
-              Depuis cet ordinateur · sans limite de taille imposée · aucun
-              envoi
+              Lecture sur cet appareil · aucune limite de taille imposée
             </span>
             <input
               aria-label="Ouvrir une vidéo locale"

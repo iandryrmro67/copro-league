@@ -241,8 +241,8 @@ export const VideoPlayer = forwardRef<
                 : [101, 150].includes(event.data)
                   ? "YouTube interdit la lecture intégrée de cette vidéo (restriction d’âge ou intégration désactivée)."
                   : event.data === 153
-                    ? "YouTube ne reconnaît pas ce lecteur intégré. Ouvrez la vidéo sur YouTube ou utilisez le fichier local."
-                    : "YouTube ne permet pas de lire cette vidéo ici. Ouvrez-la sur YouTube ou utilisez le fichier local.",
+                    ? "YouTube ne reconnaît pas le lecteur du site. Ouvre la vidéo sur YouTube ou utilise un fichier local."
+                    : "Cette vidéo ne peut pas être lue ici. Ouvre-la sur YouTube ou utilise un fichier local.",
             );
           },
         },
@@ -413,8 +413,7 @@ export const VideoPlayer = forwardRef<
       )}
       {!id && !local && (
         <p className="muted">
-          Ajoutez une vidéo YouTube ou importez un fichier pour analyser le
-          match.
+          Ajoute une vidéo YouTube ou importe un fichier pour analyser le match.
         </p>
       )}
       {annotation && (
@@ -532,7 +531,7 @@ export const VideoPlayer = forwardRef<
           >
             Ouvrir sur YouTube à {formatVideoTime(time)}
           </a>
-          . Pour annoter avec un temps synchronisé, utilisez le fichier local.
+          . Pour garder le temps synchronisé pendant l’annotation, utilise un fichier local.
         </p>
       )}
       {viewMessage && <p role="status">{viewMessage}</p>}
@@ -545,6 +544,6 @@ export const VideoPlayer = forwardRef<
   );
 });
 export function VideoSource({value,onChange,onLocal}:{value:string;onChange:(url:string)=>void;onLocal?:(file:File)=>void}){const [tab,setTab]=useState<'youtube'|'file'>(value.startsWith('/api/videos/')?'file':'youtube'),[progress,setProgress]=useState<number|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),xhr=useRef<AbortController|null>(null);
- const upload=async(file:File)=>{setError('');if(file.size>MAX_VIDEO_BYTES){if(onLocal){onLocal(file);return}setError('L’envoi au stockage est limité à 50 Mo. Ouvre ce fichier localement depuis l’atelier d’analyse.');return}if(!/\.(mp4|mov|webm)$/i.test(file.name)){setError('Choisissez un fichier MP4, MOV ou WebM.');return}const controller=new AbortController();xhr.current=controller;setBusy(true);setProgress(0);try{const url=await uploadMedia('videos',file,{signal:controller.signal,onProgress:setProgress});setProgress(100);onChange(url)}catch(e){if((e as Error).name!=='AbortError')setError((e as Error).message);else setProgress(null)}finally{setBusy(false);xhr.current=null}};
- return <div className="panel formstack"><h3>Ajouter une vidéo</h3><div className="actions"><button type="button" className={tab==='youtube'?'button primary':'button'} onClick={()=>setTab('youtube')}>YouTube</button><button type="button" className={tab==='file'?'button primary':'button'} onClick={()=>setTab('file')}>Importer depuis l’ordinateur</button></div>{tab==='youtube'?<label className="field"><span>URL YouTube</span><input type="url" value={value.startsWith('/api/videos/')?'':value} placeholder="https://www.youtube.com/watch?v=…" onChange={e=>onChange(e.target.value)}/></label>:<><label className="field"><span>MP4, MOV ou WebM · 50 Mo maximum</span><input type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" disabled={busy} onChange={e=>{const file=e.target.files?.[0];if(file)upload(file)}}/></label>{busy&&<><progress value={progress??0} max="100" style={{width:'100%'}}/><span>{progress??0} %</span><button type="button" className="button" onClick={()=>xhr.current?.abort()}>Annuler l’envoi</button></>}{value.startsWith('/api/videos/')&&<p className="success">Vidéo importée et prête à lire.</p>}</>}<p className="muted">Les vidéos restent dans le stockage objet. Pour les longs matchs, ouvre le fichier localement dans l’atelier : aucune compression nécessaire. MOV : lecture selon les codecs du navigateur ; conversion automatique non disponible.</p>{onLocal&&<label className="local-video-choice"><strong>Lire un fichier de mon ordinateur</strong><span>Sans upload · pas de limite de taille imposée · MP4, MOV, WebM</span><input type="file" accept=".mp4,.mov,.webm" onChange={e=>{const f=e.target.files?.[0];if(f)onLocal(f)}}/><small>Le fichier reste sur cet appareil. Après rechargement, sélectionnez-le à nouveau ; les annotations restent enregistrées.</small></label>}{error&&<p role="alert" className="error">{error}</p>}</div>
+ const upload=async(file:File)=>{setError('');if(file.size>MAX_VIDEO_BYTES){if(onLocal){onLocal(file);return}setError('L’envoi au stockage est limité à 50 Mo. Ouvre ce fichier localement depuis l’atelier d’analyse.');return}if(!/\.(mp4|mov|webm)$/i.test(file.name)){setError("Choisis un fichier MP4, MOV ou WebM.");return}const controller=new AbortController();xhr.current=controller;setBusy(true);setProgress(0);try{const url=await uploadMedia('videos',file,{signal:controller.signal,onProgress:setProgress});setProgress(100);onChange(url)}catch(e){if((e as Error).name!=='AbortError')setError((e as Error).message);else setProgress(null)}finally{setBusy(false);xhr.current=null}};
+ return <div className="panel formstack"><h3>Ajouter une vidéo</h3><div className="actions"><button type="button" className={tab==='youtube'?'button primary':'button'} onClick={()=>setTab('youtube')}>YouTube</button><button type="button" className={tab==='file'?'button primary':'button'} onClick={()=>setTab('file')}>Importer une vidéo</button></div>{tab==='youtube'?<label className="field"><span>URL YouTube</span><input type="url" value={value.startsWith('/api/videos/')?'':value} placeholder="https://www.youtube.com/watch?v=…" onChange={e=>onChange(e.target.value)}/></label>:<><label className="field"><span>MP4, MOV ou WebM · 50 Mo maximum</span><input type="file" accept=".mp4,.mov,.webm,video/mp4,video/quicktime,video/webm" disabled={busy} onChange={e=>{const file=e.target.files?.[0];if(file)upload(file)}}/></label>{busy&&<><progress value={progress??0} max="100" style={{width:'100%'}}/><span>{progress??0} %</span><button type="button" className="button" onClick={()=>xhr.current?.abort()}>Annuler l’envoi</button></>}{value.startsWith('/api/videos/')&&<p className="success">Vidéo importée et prête à lire.</p>}</>}<p className="muted">La vidéo importée est enregistrée sur le site, dans la limite de 50 Mo. Pour un fichier plus lourd, ouvre-le localement dans l’atelier. La lecture des MOV dépend du navigateur ; le site ne les convertit pas.</p>{onLocal&&<label className="local-video-choice"><strong>Lire un fichier de mon ordinateur</strong><span>Lecture sur cet appareil · MP4, MOV ou WebM · aucune limite de taille imposée</span><input type="file" accept=".mp4,.mov,.webm" onChange={e=>{const f=e.target.files?.[0];if(f)onLocal(f)}}/><small>Le fichier reste sur ton appareil. Après avoir rechargé la page, sélectionne-le à nouveau. Les annotations sauvegardées sont conservées.</small></label>}{error&&<p role="alert" className="error">{error}</p>}</div>
 }

@@ -67,7 +67,7 @@ export function automaticRatingV2(stats:Stats,peers:Stats[],weights:Record<strin
  const keys=new Set(Object.keys(stats).filter(k=>known(stats[k])&&peers.filter(p=>known(p[k])).length>=ratingV2Config.minPeers));
  const target=observations(stats,keys),population=peers.map(p=>observations(p,keys));
  const domains:Partial<Record<RatingDomain,DomainRating>>={};
- const explanation:string[]=['Barème v2.0 · référence : les joueurs de ce match · aucun bonus de victoire ni de poste.'];
+ const explanation:string[]=["Barème v2.0 · comparaison avec les joueurs de ce match · aucun bonus de victoire ou de poste."];
  for(const [key,config]of Object.entries(ratingV2Config.domains)){
   const domain=key as RatingDomain,o=target[domain];
   const multiplier=weights[domain]??(domain==='progression'?weights.percussion:undefined)??1;
@@ -117,6 +117,6 @@ export function automaticRatingV2(stats:Stats,peers:Stats[],weights:Record<strin
  if(penalty)explanation.push(`Pertes observées : −${penalty.toFixed(2)} avant compression.`);
  const coverage=available.reduce((sum,[k])=>sum+ratingV2Config.domains[k].weight,0);
  explanation.push(`${available.length}/7 domaines comparables · ${coverage} % du barème couvert${coverage<100?' · note partielle':''}. Les données manquantes sont exclues ; zéro reste une observation. Les petits volumes ont une influence réduite.`);
- explanation.push('Au-delà de 8, les gains sont progressivement réduits : une excellente catégorie seule ne garantit pas 10.');
+ explanation.push("Au-delà de 8, les gains diminuent progressivement. Une seule excellente catégorie ne suffit pas à garantir un 10.");
  return {value:rating,domains,coverage,explanation};
 }

@@ -132,10 +132,10 @@ function DraftSession({
     setNotice("");
     try {
       if (players.length < 2 || players.length > 20 || players.length % 2)
-        throw Error("Choisissez un nombre pair de 2 à 20 joueurs.");
+        throw Error("Choisis un nombre pair de joueurs, entre 2 et 20.");
       if (mode === "captains") {
         if (!capA || !capB || capA === capB)
-          throw Error("Choisissez deux capitaines différents.");
+          throw Error("Choisis deux capitaines différents.");
         setTeams({ [capA]: "A", [capB]: "B" });
         setTurn(0);
         return;
@@ -166,7 +166,7 @@ function DraftSession({
         onApply(next);
         finishDraw();
         setNotice(
-          "Équipes appliquées au brouillon du match. Le tirage est réinitialisé.",
+          "Équipes ajoutées au brouillon du match. Le draft est prêt pour un nouveau tirage.",
         );
       } else {
         const r = await fetch("/api/matches", {
@@ -178,7 +178,7 @@ function DraftSession({
         if (!r.ok) throw Error(d.error ?? "Enregistrement impossible");
         finishDraw();
         setNotice(
-          "Équipes validées sur la feuille de match. Prêt pour une nouvelle draft.",
+          "Équipes enregistrées sur la feuille de match. Tu peux lancer un nouveau draft.",
         );
         try {
           await refresh();
@@ -198,8 +198,7 @@ function DraftSession({
     <fieldset className="draftroom draft-controls" disabled={busy}>
       {!base && (
         <p className="muted">
-          Tirage libre. Pour enregistrer ces équipes, créez un match dans
-          l’administration.
+          Tu es en tirage libre. Pour enregistrer ces équipes, crée un match dans l’admin.
         </p>
       )}
       {!external && (
@@ -224,15 +223,14 @@ function DraftSession({
       )}
       {!m ? (
         <Empty>
-          Créez un match et choisissez ses participants pour lancer le draft.
+          Crée un match et choisis les participants pour lancer le draft.
         </Empty>
       ) : (
         <>
           <section className="panel draftselection">
             <h2>Qui joue ?</h2>
             <p className="muted">
-              Les joueurs actifs de la ligue. Choisissez un nombre pair de
-              participants.
+              Choisis un nombre pair de participants parmi les joueurs actifs.
             </p>
             <CardCarousel
               items={data.players.filter((p) => !p.archived && !p.demo)}
@@ -289,18 +287,18 @@ function DraftSession({
               <div>
                 <h2>
                   {mode === "balanced"
-                    ? "Le collectif avant tout."
+                    ? "Deux équipes équilibrées"
                     : mode === "captains"
-                      ? "À vous de choisir."
-                      : "Le hasard a du talent."}
+                      ? "Les capitaines choisissent"
+                      : "Le draft se dévoile"}
                 </h2>
                 <p className="muted">
                   {players.length} participants ·{" "}
                   {mode === "balanced"
-                    ? "Équilibre des caractéristiques et de l’ELO."
+                    ? "Les équipes sont équilibrées selon les notes de draft et l’ELO."
                     : mode === "captains"
-                      ? "Choix serpent : A, B, B, A… après les capitaines."
-                      : "Révélation progressive. Écart visé : 5 % maximum."}
+                      ? "Après les capitaines, les choix alternent dans cet ordre : A, B, B, A…"
+                      : "Les cartes se révèlent une à une. Objectif : 5 % d’écart maximum entre les équipes."}
                 </p>
               </div>
               <button className="button primary" onClick={generate}>
@@ -480,7 +478,7 @@ function DraftSession({
                   {gap > 5 && (
                     <span className="muted">
                       {" "}
-                      · Équilibre optimal sous les contraintes actuelles.
+                      · Meilleur équilibre possible avec ces joueurs et ces verrouillages.
                     </span>
                   )}
                 </p>
@@ -517,7 +515,7 @@ function DraftSession({
                 {players.map((p) => (
                   <Avatar key={p.id} player={p} />
                 ))}
-                <span className="muted">Prêts pour le tirage.</span>
+                <span className="muted">Choisis les joueurs, puis lance le draft.</span>
               </div>
             )}
           </section>

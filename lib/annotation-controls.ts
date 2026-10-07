@@ -34,13 +34,13 @@ export function annotationMoment({videoTime,offset,stamp,useVideo}:{videoTime:nu
 
 export function recordQuickAction(input:Match,{preset,playerId,recipientId,sequenceId,moment}:{preset:QuickAction;playerId:string;recipientId?:string;sequenceId:string;moment:AnnotationMoment}){
  const participant=input.participants.find(p=>p.playerId===playerId);
- if(!participant?.team)throw Error('Sélectionnez un joueur affecté à une équipe.');
+ if(!participant?.team)throw Error("Choisis un joueur qui a déjà une équipe.");
  if(!Number.isFinite(moment.timestamp)||moment.timestamp<0||!Number.isFinite(moment.videoTimestamp)||moment.videoTimestamp<0)throw Error('Temps de l’action invalide.');
  const action=quickActions[preset];
  if(!action)throw Error('Action inconnue.');
  if(preset==='pass'){
   const recipient=input.participants.find(p=>p.playerId===recipientId);
-  if(!recipient||recipient.team!==participant.team||recipient.playerId===playerId)throw Error('Sélectionnez un autre partenaire de la même équipe.');
+  if(!recipient||recipient.team!==participant.team||recipient.playerId===playerId)throw Error("Choisis un autre coéquipier.");
  }
  const pass=action.type==='SHOT'?previousPass(input,playerId,sequenceId,moment.timestamp):null;
  const now=new Date().toISOString();

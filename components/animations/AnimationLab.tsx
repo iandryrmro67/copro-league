@@ -26,7 +26,7 @@ const players = [
 const badges: ViewerBadge[] = [
   {
     id: "demo-badge-1",
-    name: "LE COLLECTIF",
+    name: "L’EFFECTIF COPRO",
     description:
       "Une distinction fictive pour explorer les animations. Aucun résultat de match n’est modifié.",
     icon: "users",

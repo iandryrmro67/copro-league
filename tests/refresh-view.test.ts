@@ -45,7 +45,7 @@ mock.module(import.meta.resolve("next/image"), {
 const { default: LeagueApp } = await import("../components/league.tsx");
 test("background refresh errors keep the current page and offer a retry", () => {
   const html = renderToStaticMarkup(React.createElement(LeagueApp));
-  assert.match(html, /COMPRENDRE LES STATS/);
+  assert.match(html, /LE GUIDE DES STATS/);
   assert.match(html, /Connexion temporairement indisponible/);
   assert.match(html, /Réessayer/);
 });
@@ -100,8 +100,8 @@ test("home renders the latest season even when the earlier season is active and 
   ];
   try {
     const html = renderToStaticMarkup(React.createElement(LeagueApp));
-    assert.match(html, /LE CLUB \/ Saison 3/);
-    assert.doesNotMatch(html, /LE CLUB \/ Saison 2/);
+    assert.match(html, /LA LIGUE \/ Saison 3/);
+    assert.doesNotMatch(html, /LA LIGUE \/ Saison 2/);
     assert.doesNotMatch(html, /Replay du match 99/);
   } finally {
     currentPath = "/glossaire";

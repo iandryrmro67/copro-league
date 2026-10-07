@@ -71,7 +71,7 @@ test('review waits for an asynchronous seek before advancing clips',()=>{
 });
 
 test('passes reject a self-recipient, opponent or unassigned player',()=>{
- for(const recipientId of ['a','c','unknown'])assert.throws(()=>recordQuickAction(fixture(),{preset:'pass',playerId:'a',recipientId,sequenceId:'seq',moment}),/partenaire/i);
+ for(const recipientId of ['a','c','unknown'])assert.throws(()=>recordQuickAction(fixture(),{preset:'pass',playerId:'a',recipientId,sequenceId:'seq',moment}),/coéquipier/i);
  assert.throws(()=>recordQuickAction(fixture(),{preset:'goal',playerId:'unknown',sequenceId:'seq',moment}),/équipe/i);
 });
 

@@ -132,25 +132,25 @@ export function recordPreciseAction(
 ) {
   const p = match.participants.find((p) => p.playerId === playerId),
     definition = actionDefinitions[d.type];
-  if (!p?.team) throw Error("Choisissez un joueur affecté à une équipe.");
+  if (!p?.team) throw Error("Choisis un joueur qui a déjà une équipe.");
   if (!definition) throw Error("Action inconnue.");
   const outcomes =
     d.type === "FOUL" ? ["COMMITTED", "SUFFERED"] : definition.outcomes;
   if (outcomes.length && !outcomes.includes(d.outcome))
-    throw Error("Choisissez un résultat valide.");
+    throw Error("Choisis un résultat valide.");
   if (d.tags.some((t) => !definition.tags.includes(t)))
     throw Error("Précision invalide.");
 
   const mate = match.participants.find((p) => p.playerId === d.mate),
     opponent = match.participants.find((p) => p.playerId === d.opponent);
   if (d.mate && (!mate || mate.team !== p.team || mate.playerId === playerId))
-    throw Error("Choisissez un autre partenaire de la même équipe.");
+    throw Error("Choisis un autre coéquipier.");
   if (d.opponent && (!opponent?.team || opponent.team === p.team))
-    throw Error("Choisissez un adversaire de l’autre équipe.");
+    throw Error("Choisis un joueur de l’équipe adverse.");
   if (d.type === "PASS" && d.outcome === "COMPLETED" && !mate)
-    throw Error("Choisissez le receveur.");
+    throw Error("Choisis le receveur.");
   if (participantRequired(d) && d.type !== "PASS" && !opponent)
-    throw Error("Choisissez l’adversaire.");
+    throw Error("Choisis l’adversaire.");
   if (captureStep(d) !== "ready")
     throw Error("Complétez les choix de cette action.");
   if (d.type === "PASS" && d.outcome === "FAILED" && d.tags.includes("ASSIST"))

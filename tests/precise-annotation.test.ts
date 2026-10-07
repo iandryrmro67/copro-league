@@ -91,7 +91,7 @@ test("a precise completed pass stays atomic and follows its recipient", () => {
           fixture(),
           input(draft({ outcome: "COMPLETED", mate, participantChosen: true })),
         ),
-      /partenaire/i,
+      /coéquipier/i,
     );
 });
 test("blocked shots and duels require an opposing player, ordinary shots do not", () => {
@@ -121,7 +121,7 @@ test("blocked shots and duels require an opposing player, ordinary shots do not"
             }),
           ),
         ),
-      /adversaire/i,
+      /advers(?:aire|e)/i,
     );
   const result = recordPreciseAction(
     fixture(),

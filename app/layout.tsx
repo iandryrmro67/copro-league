@@ -7,8 +7,8 @@ import "./match-detail.css";
 import { AnimationProvider } from "@/components/animations/AnimationProvider";
 import { LeagueDataProvider } from "@/components/animations/LeagueDataProvider";
 export const metadata: Metadata = {
-  title: "Copro League — Plus qu’un jeu",
-  description: "Matchs, joueurs et histoire de notre ligue de football à 5.",
+  title: "Copro League — Foot à 5 entre potes",
+  description: "Calendrier, résultats, stats et awards de notre ligue de foot à 5.",
   icons: { icon: "/favicon.svg" },
   other: { "copro-version": process.env.NEXT_PUBLIC_APP_VERSION ?? "local" },
 };

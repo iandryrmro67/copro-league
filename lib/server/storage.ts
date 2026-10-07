@@ -24,7 +24,7 @@ export async function mediaComplete(kind:MediaKind,id:string,ownerId:string){
  if(!record)return response({error:'Envoi introuvable.'},404);
  if(record.ready)return response({url:`/api/${kind}/${id}`});
  const bucket=storage();const {data:info,error}=await bucket.info(record.object_path);
- if(error||!info)return response({error:'Envoi incomplet. Réessayez.'},409);
+ if(error||!info)return response({error:'Envoi incomplet. Réessaie.'},409);
  if(info.size!==record.size||info.contentType!==record.content_type)return response({error:'Le fichier reçu ne correspond pas au fichier annoncé.'},400);
  const {data:signed,error:signError}=await bucket.createSignedUrl(record.object_path,60);
  if(signError||!signed)throw Error('Validation du fichier indisponible.');

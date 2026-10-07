@@ -31,9 +31,9 @@ export type AnalysisIssue={code:string;message:string;blocking:boolean;eventId?:
 export function reviewAnalysis(m:Match):AnalysisIssue[]{
  const issues:AnalysisIssue[]=[];const a=m.analysis;const add=(code:string,message:string,blocking=true,eventId?:string)=>issues.push({code,message,blocking,eventId});
  if(!a)return issues;
- if(!a.completeKeys.length)add('categories','Choisissez les catégories observées sur tout le match.');
- if(a.completeKeys.length&&(m.duration<1||!a.ranges.some(r=>r.start===0)||coveredSeconds(a.ranges.filter(r=>r.start>=0&&r.end<=m.duration*60))<m.duration*60))add('coverage','La totalité du match doit être couverte pour publier ces catégories. Renseignez la durée et les périodes observées.');
- if(m.status!=='finished'||m.scoreA==null||m.scoreB==null)add('result','Renseignez le résultat officiel et terminez le match avant de publier les statistiques.');
+ if(!a.completeKeys.length)add('categories',"Choisis les catégories observées sur tout le match.");
+ if(a.completeKeys.length&&(m.duration<1||!a.ranges.some(r=>r.start===0)||coveredSeconds(a.ranges.filter(r=>r.start>=0&&r.end<=m.duration*60))<m.duration*60))add('coverage',"Pour publier ces catégories, tu dois avoir observé tout le match. Renseigne la durée et les périodes observées.");
+ if(m.status!=='finished'||m.scoreA==null||m.scoreB==null)add('result',"Renseigne le score officiel et passe le match à « Terminé » avant de publier les stats.");
  const score=annotatedScore(m);if(a.completeKeys.includes('goals')&&(score.A!==m.scoreA||score.B!==m.scoreB))add('score',`Score officiel ${m.scoreA??'—'}–${m.scoreB??'—'} ; buts annotés ${score.A}–${score.B}. Corrigez cet écart.`);
  const used=new Set<string>();
  for(const e of m.events){

@@ -321,7 +321,7 @@ function MatchOverview({
       <section className="md-section">
         <SectionTitle
           number="01 / LE FIL DU MATCH"
-          title="Comment le match s’est joué"
+          title="Le déroulement du match"
         >
           <button className="textbutton" onClick={() => onGoal("")}>
             Les {goals.length} buts <ArrowRight size={14} />
@@ -385,7 +385,7 @@ function MatchOverview({
       </section>
       <section className="md-section">
         <SectionTitle
-          number="02 / LES JOUEURS QUI ONT PESÉ"
+          number="LES LEADERS DU MATCH"
           title="Les meilleurs de chaque équipe"
         >
           <button className="textbutton" onClick={onPlayers}>
@@ -510,7 +510,7 @@ function GoalFrieze({
       <div className="md-frieze-heading">
         <span className="eyebrow">Les buts</span>
         <span className="md-caption">
-          Par tranche de {fmt(end / bins / 60)} min · cliquez sur un but
+          Par tranche de {fmt(end / bins / 60)} min · clique sur un but
         </span>
       </div>
       {sides.map((side) => (
@@ -728,10 +728,9 @@ function TeamPlayers({ match, data }: { match: Match; data: League }) {
   const stats = new Map(summaries.map((s) => [s.player.id, s.stats]));
   return (
     <section className="md-section">
-      <SectionTitle number="LES PERFORMANCES" title="Une équipe, une colonne" />
+      <SectionTitle number="LES PERFORMANCES" title="Les joueurs par équipe" />
       <p className="md-caption md-player-intro">
-        Triés par note. Le MVP est désigné séparément de la meilleure note.
-        Ouvrez un joueur pour voir toutes ses statistiques.
+        Les joueurs sont triés par note. Le MVP est désigné séparément et n’a pas forcément la meilleure note. Clique sur un joueur pour voir toutes ses stats.
       </p>
       <div className="md-rating-legend">
         <span className="md-note-excellent">8–10 · Excellent</span>
@@ -1258,7 +1257,7 @@ function MatchActions({
         <p className="md-caption">
           {view === "goals"
             ? "Le score évolue à chaque but. Les CSC bénéficient à l’adversaire."
-            : "Les actions sont regroupées en passages de jeu. Ouvrez une séquence pour voir les détails."}
+            : "Les actions sont regroupées en séquences de jeu. Ouvre une séquence pour voir les détails."}
         </p>
       </div>
       <div className="md-filter-row md-action-filters">

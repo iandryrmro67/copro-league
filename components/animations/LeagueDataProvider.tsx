@@ -42,7 +42,7 @@ export function LeagueDataProvider({ children }: { children: ReactNode }) {
           signal: abort.signal,
         });
         if (!r.ok)
-          throw Error("La base de données est momentanément indisponible.");
+          throw Error("Les données de la ligue sont indisponibles pour le moment.");
         const league = (await r.json()) as League;
         setData(league);
         setError("");
@@ -52,7 +52,7 @@ export function LeagueDataProvider({ children }: { children: ReactNode }) {
         const message =
           e instanceof Error && e.name !== "AbortError"
             ? e.message
-            : "Chargement interrompu. Réessayez.";
+            : "Le chargement a été interrompu. Réessaie.";
         setError(message);
         throw Error(message);
       } finally {
