@@ -80,9 +80,14 @@ test('goalkeeper ratings require comparable goalkeeper observations',async()=>{
  assert.equal(rateMatches([m])[0].participants[2].auto_rating,null);
 });
 test('spatial categories cannot publish unpositioned recoveries as verified zeroes',async()=>{
- const {beginAnalysis,reviewAnalysis}=await import('../lib/match-analysis.ts');
- const m=beginAnalysis({...match([action('r','RECOVERY','a','')]),scoreA:8,scoreB:6});m.analysis!.completeKeys=['highRecoveries'];m.analysis!.ranges=[{start:0,end:3600}];
- assert.ok(reviewAnalysis(m).some(i=>i.code==='position'&&i.blocking));
+ const {beginAnalysis,reviewAnalysis,publishAnalysis}=await import('../lib/match-analysis.ts');
+ const m=beginAnalysis({...match([action('r','RECOVERY','a','')]),scoreA:8,scoreB:6});m.analysis!.completeKeys=['recoveries','highRecoveries'];m.analysis!.ranges=[{start:0,end:3600}];
+ assert.equal(reviewAnalysis(m).some(i=>i.code==='position'&&i.blocking),false);
+ const published=publishAnalysis(m);
+ assert.equal(published.participants[0].stats.recoveries,1);
+ assert.equal(published.participants[0].stats.highRecoveries,null);
+ assert.deepEqual(published.analysis!.publishedKeys,['recoveries']);
+ assert.equal(m.analysis!.status,'in_progress');
 });
 test('one pass cannot create two shot links',()=>{
  const p=action('p','PASS','a','COMPLETED','b',10);
@@ -103,5 +108,54 @@ test('legacy goals contribute to shots when the shot category is explicitly comp
  const m=beginAnalysis(input);m.analysis!.completeKeys=['shots','shotsOnTarget'];m.analysis!.ranges=[{start:0,end:3600}];
  const published=publishAnalysis(m);
  assert.equal(published.participants[0].stats.shots,1);assert.equal(published.participants[0].stats.shotsOnTarget,1);
+ assert.equal(matchSchema.safeParse(published).success,true);
+});
+
+
+test('unmatched assist tags are optional and cannot invent a published assist',async()=>{
+ const {beginAnalysis,publishAnalysis,reviewAnalysis}=await import('../lib/match-analysis.ts');
+ const m=beginAnalysis(match([action('p','PASS','a','COMPLETED','b',10,{tags:['ASSIST']})]));
+ m.analysis!.completeKeys=['assists','passesAttempted','passesCompleted'];m.analysis!.ranges=[{start:0,end:3600}];
+ assert.ok(reviewAnalysis(m).some(i=>i.code==='assist'&&!i.blocking));
+ const published=publishAnalysis(m);
+ assert.equal(published.participants[0].stats.assists,0);
+ assert.equal(published.participants[0].stats.passesCompleted,1);
+ assert.deepEqual(published.events[0].metadata.tags,['ASSIST']);
+});
+test('missing touch positions preserve the manual baseline when replacing a published zone category',async()=>{
+ const {beginAnalysis,publishAnalysis}=await import('../lib/match-analysis.ts');
+ const source=match([action('t','TOUCH','a','',null,10,{position:{x:90,y:50}})]);
+ source.participants[0].stats.boxTouches=4;
+ let m=beginAnalysis(source);m.analysis!.completeKeys=['touches','boxTouches'];m.analysis!.ranges=[{start:0,end:3600}];
+ m=publishAnalysis(m);assert.equal(m.participants[0].stats.boxTouches,1);
+ m.events.push(action('t2','TOUCH','b',''));m.analysis!.status='review';
+ const published=publishAnalysis(m);
+ assert.deepEqual(published.analysis!.publishedKeys,['touches']);
+ assert.equal(published.participants[0].stats.boxTouches,4);
+ assert.equal(published.participants[1].stats.boxTouches,null);
+ assert.equal(published.participants[1].stats.touches,1);
+});
+test('fully positioned recoveries remain publishable as complete zone observations',async()=>{
+ const {beginAnalysis,publishAnalysis}=await import('../lib/match-analysis.ts');
+ const m=beginAnalysis(match([action('r','RECOVERY','a','',null,10,{position:{x:90,y:50}})]));
+ m.analysis!.completeKeys=['recoveries','highRecoveries'];m.analysis!.ranges=[{start:0,end:3600}];
+ const published=publishAnalysis(m);
+ assert.deepEqual(published.analysis!.publishedKeys,['recoveries','highRecoveries']);
+ assert.equal(published.participants[0].stats.highRecoveries,1);
+ assert.equal(published.participants[1].stats.highRecoveries,0);
+});
+
+
+test('a positioned defensive counterpart validates its recovery zone without requiring passer coordinates',async()=>{
+ const {beginAnalysis,publishAnalysis}=await import('../lib/match-analysis.ts');
+ const m=beginAnalysis(match([
+  action('p','PASS','a','FAILED',null,10,{counterpartStats:true,opponentPlayerId:'c'}),
+  action('i','INTERCEPTION','c','',null,10,{counterpartStats:true,opponentPlayerId:'a',position:{x:90,y:50}}),
+ ]));
+ m.analysis!.completeKeys=['passesAttempted','interceptions','recoveries','highRecoveries'];m.analysis!.ranges=[{start:0,end:3600}];
+ const published=publishAnalysis(m);
+ assert.equal(published.analysis!.publishedKeys!.includes('highRecoveries'),true);
+ assert.equal(published.participants[2].stats.highRecoveries,1);
+ assert.equal(published.participants[2].stats.recoveries,1);
  assert.equal(matchSchema.safeParse(published).success,true);
 });

@@ -4,14 +4,14 @@ import {isGoal,isV2,canonicalEffects,scoringTeam} from './actions.ts';
 import {observedEvents} from './events.ts';
 
 export const coverageFamilies:Record<string,string[]>={
- 'Buts et assists':['goals','assists','ownGoals'],
- 'Secondary assists':['secondaryAssists'],
+ 'Buts et passes décisives':['goals','assists','ownGoals'],
+ 'Secondes passes décisives':['secondaryAssists'],
  'Tirs':['shots','shotsOnTarget'],
  'Passes':['passesAttempted','passesCompleted','keyPasses','chancesCreated','longPassesAttempted','longPassesCompleted','crossesAttempted','crossesCompleted'],
  'Dribbles':['dribblesAttempted','dribblesCompleted','dribbledPast'],
  'Duels':['duelsAttempted','duelsWon','aerialDuelsAttempted','aerialDuelsWon'],
  'Défense':['tackles','interceptions','recoveries','blocks','clearances'],
- 'Récupérations hautes':['highRecoveries'], 'Touches dans la surface':['boxTouches'], 'Pertes de balle':['turnovers'], 'Fautes':['fouls','foulsWon'],
+ 'Récupérations dans le dernier tiers':['highRecoveries'], 'Touches dans la surface adverse':['boxTouches'], 'Pertes de balle':['turnovers'], 'Fautes':['fouls','foulsWon'],
  'Arrêts':['saves'], 'Touches':['touches'],
 };
 export const analysisLabels={not_started:'Non commencée',in_progress:'En cours',review:'À vérifier',validated:'Validée'};
@@ -44,23 +44,36 @@ export function reviewAnalysis(m:Match):AnalysisIssue[]{
    if(!linked||linked.timestamp==null||e.timestamp==null||linked.timestamp>e.timestamp||linked.metadata.sequenceId!==e.metadata.sequenceId)add('link','Lien hors de la séquence ou dans le mauvais ordre.',true,e.id);
    if(e.type==='SHOT'){if(used.has(String(linkedId)))add('duplicate','Une même passe est liée à plusieurs tirs.',true,e.id);used.add(String(linkedId));}
   }
-  if(isV2(e)&&e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes('ASSIST')&&!m.events.some(g=>isGoal(g)&&g.relatedPlayerId===e.playerId&&g.metadata.sequenceId===e.metadata.sequenceId&&g.timestamp!=null&&e.timestamp!=null&&g.timestamp>=e.timestamp))add('assist','Passe déclarée décisive sans but correspondant.',true,e.id);
-  if(a.completeKeys.includes('highRecoveries')&&canonicalEffects(e,m.events).some(([id,key])=>key==='recoveries'&&id!==e.playerId))add('position','Position du récupérateur inconnue : renseignez une interception ou récupération liée au même instant pour valider les récupérations hautes.',true,e.id);
-  if(e.metadata.position==null){const spatial=(a.completeKeys.includes('highRecoveries')&&(['RECOVERY','INTERCEPTION'].includes(e.type)||(e.type==='TACKLE'&&(e.metadata.tags as string[]??[]).includes('BALL_RECOVERED'))))||(a.completeKeys.includes('boxTouches')&&e.type==='TOUCH');add('position',spatial?'Position requise pour valider la catégorie de zone.':'Position inconnue : exclue des cartes.',spatial,e.id);}
+  if(isV2(e)&&e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes('ASSIST')&&!m.events.some(g=>isGoal(g)&&g.relatedPlayerId===e.playerId&&g.metadata.sequenceId===e.metadata.sequenceId&&g.timestamp!=null&&e.timestamp!=null&&g.timestamp>=e.timestamp))add('assist','Passe décisive sans but associé : la précision est conservée, mais aucune passe décisive supplémentaire n’est comptée.',false,e.id);
+  if(a.completeKeys.includes('highRecoveries')&&canonicalEffects(e,m.events).some(([id,key])=>key==='recoveries'&&id!==e.playerId))add('position','Positions manquantes : les statistiques de zone concernées restent non validées. Les autres statistiques peuvent être publiées.',false,e.id);
+  if(e.metadata.position==null){const spatial=(a.completeKeys.includes('highRecoveries')&&(['RECOVERY','INTERCEPTION'].includes(e.type)||(e.type==='TACKLE'&&(e.metadata.tags as string[]??[]).includes('BALL_RECOVERED'))))||(a.completeKeys.includes('boxTouches')&&e.type==='TOUCH');add('position',spatial?'Positions manquantes : les statistiques de zone concernées restent non validées. Les autres statistiques peuvent être publiées.':'Actions sans position : elles comptent dans les statistiques, mais n’apparaissent pas sur les cartes.',false,e.id);}
  }
  return issues;
+}
+/** Optional positions must not turn unknown zone totals into verified zeroes. */
+export function incompleteSpatialKeys(m:Match):string[]{
+ const missing=new Set<string>();
+ for(const e of m.events){
+  if(m.analysis?.completeKeys.includes('highRecoveries')&&canonicalEffects(e,m.events).some(([id,key])=>key==='recoveries'&&(id!==e.playerId||e.metadata.position==null)))missing.add('highRecoveries');
+  if(m.analysis?.completeKeys.includes('boxTouches')&&e.type==='TOUCH'&&e.metadata.position==null)missing.add('boxTouches');
+ }
+ return [...missing];
+}
+export function publicationKeys(m:Match):string[]{
+ const missing=incompleteSpatialKeys(m);
+ return (m.analysis?.completeKeys??[]).filter(k=>!missing.includes(k));
 }
 export function publishAnalysis(input:Match):Match {
  const m=beginAnalysis(structuredClone(input));const blocking=reviewAnalysis(m).filter(i=>i.blocking);
  if(blocking.length)throw Error(blocking.map(i=>i.message).join(' · '));
- const observed=analysisCounts(m),a=m.analysis!;
+ const observed=analysisCounts(m),a=m.analysis!,missing=incompleteSpatialKeys(m),keys=a.completeKeys.filter(k=>!missing.includes(k));
  m.participants=m.participants.map(p=>{const stats:Stats={...p.stats};
   // Removing a previously published category restores its original manual observation.
-  for(const k of a.publishedKeys??[])if(!a.completeKeys.includes(k))stats[k]=a.manualStats?.[p.playerId]?.[k]??null;
-  for(const k of a.completeKeys)stats[k]=observed.participants.find(q=>q.playerId===p.playerId)?.stats[k]??0;
+  for(const k of new Set([...(a.publishedKeys??[]),...missing]))if(!keys.includes(k))stats[k]=a.manualStats?.[p.playerId]?.[k]??null;
+  for(const k of keys)stats[k]=observed.participants.find(q=>q.playerId===p.playerId)?.stats[k]??0;
   return {...p,stats};});
- m.trackedKeys=[...a.completeKeys];
- m.analysis={...a,status:'validated',publishedKeys:[...a.completeKeys],publishedRanges:structuredClone(a.ranges),publishedEvents:structuredClone(m.events),publishedAt:new Date().toISOString()};
+ m.trackedKeys=[...keys];
+ m.analysis={...a,status:'validated',publishedKeys:[...keys],publishedRanges:structuredClone(a.ranges),publishedEvents:structuredClone(m.events),publishedAt:new Date().toISOString()};
  return m;
 }
 export function publicMatch(m:Match):Match {

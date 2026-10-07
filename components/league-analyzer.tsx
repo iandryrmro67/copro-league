@@ -921,14 +921,14 @@ export function Analyzer({
           </p>
         </details>
         <details className="draft-counters">
-          <summary>Statistiques des actions saisies</summary>
+          <summary>Statistiques du brouillon</summary>
           <div className="review-table">
             <table>
               <thead>
                 <tr>
                   <th>Joueur</th>
                   <th>Buts</th>
-                  <th>Passes déc.</th>
+                  <th>Passes décisives</th>
                   <th>Tirs</th>
                   <th>Passes</th>
                   <th>Pertes</th>
@@ -978,7 +978,7 @@ export function Analyzer({
           </div>
           <p className="muted">
             Ces compteurs concernent le brouillon. Valide les catégories et
-            publie dans l’onglet Vérifier.
+            publie dans l’onglet « Vérifier et publier ».
           </p>
         </details>
       </div>

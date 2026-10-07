@@ -682,7 +682,7 @@ test("an automatic recovery cannot imply a high recovery from the passer positio
   assert.ok(
     reviewAnalysis(result.match).some(
       (i) =>
-        i.code === "position" && i.blocking && i.eventId === result.event.id,
+        i.code === "position" && !i.blocking && i.eventId === result.event.id,
     ),
   );
 });
