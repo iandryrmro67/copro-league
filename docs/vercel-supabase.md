@@ -295,3 +295,27 @@ Retour arrière sans modification de la base : promouvoir
 https://copro-league-7o522dqyn-yurr2.vercel.app
 (dpl_3rnDG1QRh2vpEQ9qeeUxCxHJCUGW) avec --scope yurr2.
 Ce commit documentaire ne modifie pas la version applicative publiée.
+
+## Correction pack 5 contre 5 et échange après tirage
+
+Version 0b3cc67, déploiement dpl_HyGBZeDuNZoCjKCjZ7vtX1iyrjHf,
+https://copro-league-c8drof1fr-yurr2.vercel.app, promu sur l’adresse canonique.
+Pack : dix participants obligatoires, tirage par permutation sans équilibrage
+selon les notes, cinq joueurs par équipe. Échange après révélation entre deux
+adversaires ; conservation du format 5/5 et validation complète obligatoire.
+
+217 tests, TypeScript, compilation locale et Vercel réussis. Lint ciblé sans
+erreur (avertissement image existant). Vérifications CUA : neuf participants
+refusés, dix cartes en 5/5, échange réussi en local puis en production, aucune
+erreur console. Capture ignorée outputs/pack-five-swap-production.png. Aucun
+match réel sauvegardé. Routes, version API/HTML et protections contrôlées.
+Réponses publiques des données avant correction, candidat et production identiques.
+
+Timeline : comparaison de tous les fichiers hors draft et documentation avec
+6bc8e50 strictement identique. Capture révisée, types de passe obligatoires,
+position finale, second ballon et sortie de pression conservés ; marqueurs
+également vérifiés dans les fichiers JavaScript de la production corrigée.
+
+Retour arrière applicatif sans changer la base : promouvoir
+https://copro-league-jieelx08u-yurr2.vercel.app avec --scope yurr2.
+Ce commit documentaire ne modifie pas la version applicative publiée.
