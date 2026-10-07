@@ -217,3 +217,17 @@ Vérifications : 176 tests Node/PGlite réussis ; build et TypeScript locaux et 
 Après promotion, les contrôles HTTP publics/protégés passent ; inspection canonique, API de version, métadonnée HTML et interface rendue correspondent au déploiement ci-dessus. Aucun match réel, événement, statistique, MVP ou brouillon n’a été modifié durant ces vérifications.
 
 Retour arrière disponible : `https://copro-league-rhqobeqkl-yurr2.vercel.app`, déploiement `dpl_5CzLJBYCFMCJ4GtHevdiU4rfv9ab`, version applicative `5cc82914bac778e61e4b1c63944f99fc9c5175c3`. Le candidat intermédiaire `c4aa60c` n’a pas été promu sur le domaine canonique.
+
+## Notes de match v2 — 7 octobre 2026
+
+Version applicative publiée : `5f495d03370fc1beb5e8995a77b950ce6dc39ac8` sur GitHub `codex/vercel-supabase`. Déploiement `dpl_3basqNuoZqyPaNAdQkhP34J9674x`, candidat `https://copro-league-35q3nuzdv-yurr2.vercel.app`, promu sur `https://copro-league.vercel.app` après compilation et contrôle authentifié du candidat.
+
+Poids validés par l’utilisateur : finition 20 %, création 20 %, passes 15 %, progression 15 %, défense 15 %, duels 10 %, arrêts 5 %, sans bonus de victoire. La référence est limitée au même match. Petits échantillons modérés, efficacité utilisée lorsqu’elle est observée, valeurs inconnues exclues, doublons défensifs retirés seulement avec provenance prouvée. Les notes partielles et les explications sont visibles. Les formules et leur calibration initiale sont documentées dans `docs/rating-v2.md`. L’ancien moteur reste sélectionnable dans Administration → Réglages & données → Barème des notes.
+
+Vérifications : 197 tests Node/PGlite réussis, dont 21 dédiés à V2, retour au moteur ancien puis réactivation, priorité des corrections manuelles et stabilité publique pendant une correction vidéo. TypeScript et compilation locaux puis Vercel réussis. Revue indépendante et corrections des petits échantillons, du passage de quatre à cinq tentatives et de la provenance des récupérations. Lint des nouveaux fichiers propre ; aucune erreur supplémentaire dans les fichiers existants comparés à leur version antérieure. Le lint global n’est pas déclaré propre.
+
+Le candidat conserve les 23 joueurs, 9 matchs, 80 participations, statistiques brutes et corrections manuelles de la lecture publique précédente : comparaison automatique complète après retrait des seuls champs calculés de notation. 70 notes calculables, dont 60 partielles. Aucun match, événement, brouillon ou réglage réel n’a été enregistré pendant les contrôles. Aucune migration de base.
+
+Après promotion : version API avec `no-store`, métadonnée HTML et notes publiques identiques au candidat vérifié. Contrôles HTTP publics et refus des écritures anonymes réussis. Parcours CUA authentifié sur un match historique : notes partielles, explication V2, même match comme référence, aucun bonus de victoire ; aucune erreur console. Affichage à 390 px sans débordement horizontal. Capture locale ignorée : `outputs/rating-v2-production.jpg`.
+
+Retour arrière de déploiement : promouvoir `https://copro-league-6ktj9v7t8-yurr2.vercel.app` (`dpl_BtNiNuKNL1EVVHb7BazcDG9qS3Sf`) avec `--scope yurr2`. Le commit documentaire suivant ne change pas l’application publiée.
