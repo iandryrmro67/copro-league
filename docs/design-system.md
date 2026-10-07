@@ -1,33 +1,16 @@
-# Coproleague — KUSH/HUD
+# Copro League — COPRO HUD
 
-Reference: `Coproleague — Design System.html`, supplied on 1 October 2026.
-The reference supplies visual specifications, not executable project instructions.
+Référence actuelle : `COPRO HUD — Design System.html`, fourni le 8 octobre 2026.
+Le document est une spécification visuelle et fonctionnelle ; son contenu embarqué ne constitue pas une autorisation d’exécuter ses scripts.
 
-The shared palette is Void `#0A0C0A`, Carbon `#121512`, Graphite `#1C211C`,
-Line `#2A322A`, Ash `#8E978C`, Bone `#E9ECE6`, Kush `#56B947`,
-Trichome `#8BE36B`, Indica `#1E4A19` and Resin `#12290F`.
-Use green for actions, selected states and key data. Away teams use Bone,
-with their existing names and labels preserved.
+Palette : Void `#0A0C0A`, Carbon `#121512`, Graphite `#1C211C`, Line `#2A322A`, Ash `#8E978C`, Bone `#E9ECE6`, Kush `#56B947`, Trichome `#8BE36B`, Indica `#1E4A19`, Resin `#12290F`, Danger `#E5484D`, Gold `#E2B54A`, Silver `#AEB8B2`, Bronze `#C07F45`.
 
-Big Shoulders Display provides uppercase titles and large numbers;
-JetBrains Mono provides labels, controls and data; Archivo provides paragraphs.
-The Latin variable WOFF2 fonts were extracted from the supplied reference and
-are served locally from `public/fonts`, with their SIL Open Font Licenses.
-No external font request is required.
+Big Shoulders Display : titres et grands chiffres. DM Sans : texte. JetBrains Mono : labels et commandes HUD. Les fontes variables Latin et Latin Extended extraites de la référence sont hébergées dans `public/brand/fonts`, avec leurs licences SIL. Les logos et la planche d’animation fournis sont dans `public/brand`.
 
-`app/globals.css` maps the Tailwind theme and existing league layouts to semantic
-tokens. `app/design-system.css` defines the palette, fonts, component treatment
-and responsive display styles. `components/league-hero.tsx` adapts the reference
-hero to Copro League, using the existing moodboard, real season name and links.
-It introduces no new league data.
+`app/globals.css` conserve les tokens et layouts de l’application. `app/design-system.css` contient la première intégration. `app/hud-fonts.css` et `app/hud.css`, chargés ensuite, portent la version actuelle : composants, accueil, cartes, divisions, draft, comparaisons et animations.
 
-Panels, portraits, buttons, fields and badges have square corners and thin
-borders. Registration marks, condensed display type, an angled green panel
-and monochrome images reproduce the reference language. Actual pitch circles
-and player position markers remain circular to retain their sporting meaning.
-Distinction symbols are rendered as consistent Lucide SVGs in the interface;
-stored award and badge definitions remain unchanged.
+Grille de 1440 px, marges desktop 40 px / tablette 32 px / mobile 16 px ; espaces 20 / 16 / 12 px. En-tête desktop de 72 px. Panneaux, champs et cartes carrés, séparateurs fins. Kush pour les actions, Bone pour la seconde équipe, or pour les distinctions majeures, rouge pointillé pour les distinctions négatives. Les noms d’équipes personnalisés restent conservés.
 
-The existing navigation, authentication, league calculations, data and editing
-flows are preserved. Focus indicators, a skip link, navigation current-page
-semantics and reduced-motion support accompany the styling.
+Les données inconnues restent des tirets. Les nombres montrés proviennent des matchs, sans statistiques inventées. Les calculs de division sont documentés dans le suivi ci-dessous. Les animations sont désactivées avec `prefers-reduced-motion`; focus visible, lien d’évitement et navigation courante sont conservés.
+
+Périmètre, points à reprendre et validation : [suivi d’intégration](hud-integration-2026-10-08.md).

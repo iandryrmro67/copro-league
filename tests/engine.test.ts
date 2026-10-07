@@ -13,3 +13,12 @@ test('a missing percentage numerator does not become an observed zero',()=>{cons
 test('per-match metrics use observed matches, not absent observations',()=>{const many=Array.from({length:5},(_,i)=>({...structuredClone(matches[0]),id:'m'+i,number:i,participants:[{playerId:'a',team:'A',stats:i?{}:{recoveries:10}},{playerId:'b',team:'B',stats:{}}]}));assert.equal(metric(aggregate(players as any,many as any)[0],'recoveries',true),10)});
 test('goals minus xG only compares matches where both are known',()=>{const many=Array.from({length:5},(_,i)=>({...structuredClone(matches[0]),id:'m'+i,number:i,participants:[{playerId:'a',team:'A',stats:i?{goals:2}:{goals:2,xg:1}},{playerId:'b',team:'B',stats:{}}]}));assert.equal(aggregate(players as any,many as any)[0].stats.goalsMinusXg,1)});
 test('rating fact excludes an ineligible player with a single rating',()=>{const many=Array.from({length:5},(_,i)=>({...structuredClone(matches[0]),id:'m'+i,number:i,participants:[{playerId:'a',team:'A',stats:i?{}:{rating:10}},{playerId:'b',team:'B',stats:{rating:8}}]}));const fs=facts(aggregate(players as any,many as any)).filter(f=>f.text.includes('ratings'));assert.equal(fs.length,1);assert.equal(fs[0].playerId,'b')});
+test('ELO draft minimizes the sum difference independently of player attributes and respects locks',()=>{
+  const ps=Array.from({length:6},(_,i)=>({id:String(i),name:String(i),attributes:{overall:i===0?1:99}}));
+  const elos={'0':1600,'1':1400,'2':1200,'3':1100,'4':1000,'5':900};
+  const draft=balancedDraft(ps as any,elos,{'0':'A'},false,'elo');
+  const sum=(ids:string[])=>ids.reduce((n,id)=>n+elos[id as keyof typeof elos],0);
+  let optimal=Infinity;
+  for(let mask=0;mask<64;mask++){const ids=ps.filter((_,i)=>mask&(1<<i)).map(p=>p.id);if(ids.length===3&&ids.includes('0'))optimal=Math.min(optimal,Math.abs(sum(ids)-sum(ps.filter(p=>!ids.includes(p.id)).map(p=>p.id))))}
+  assert.equal(Math.abs(sum(draft.A)-sum(draft.B)),optimal);assert.ok(draft.A.includes('0'));assert.equal(draft.A.length,3);assert.equal(draft.B.length,3);
+});

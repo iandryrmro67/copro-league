@@ -42,7 +42,7 @@ badge('one-shot','ONE SHOT ONE KILL','💥','Finishing','Peu de tirs, beaucoup d
 badge('ghost','GHOST MODE','👻','Finishing','Peu de touches, des contributions décisives.',[bottom('touchesPM',30),p('gaPM',75),g('ga',3)]),
 badge('optic','OPTIC 2000','👓','Creation / Technique','Voit les passes qui créent de vraies occasions.',[p('xaPM',85),p('chancesCreatedPM',85),g('chancesCreated',5)]),
 badge('baller','CERTIFIED BALLER','🪄','Creation / Technique','Élimine avec volume et réussite.',[p('dribblesCompletedPM',80),p('dribblePct',70),g('dribblePct',55),g('dribblesAttempted',15)]),
-badge('menace','MENACE II SOCIETY','⚡','Creation / Technique','Percussion, fautes obtenues et implication offensive.',[count(2,p('dribblesCompleted',75),p('foulsWon',75),p('ga',70))]),
+badge('menace','MENACE II SOCIETY','⚡','Creation / Technique','Percussion, fautes obtenues et implication offensive.',[p('dribblesCompleted',75),p('foulsWon',75)]),
 badge('sees','HE SEES IT','🔭','Creation / Technique','Trouve les partenaires à longue distance.',[p('longPassesCompletedPM',85),p('longPassPct',70),g('longPassesAttempted',10)]),
 badge('system','THE SYSTEM','🧠','Control','Le ballon et les occasions passent par lui.',[p('touchesPM',85),p('passesAttemptedPM',85),p('chancesCreated',65),g('passPct',70)]),
 badge('magnet','BALL MAGNET','🧲','Control','Toujours disponible pour toucher le ballon.',[p('touchesPM',90),g('matches',6)]),
