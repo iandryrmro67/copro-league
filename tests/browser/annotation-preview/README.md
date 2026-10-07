@@ -55,3 +55,6 @@ Mathis → Passe → Longue → Réussie → Loris : une seule observation avec 
 ## Lecteur agrandi et commandes
 
 Sur la fixture vidéo de 30 s : le lecteur est plus large que la saisie, avec curseur « Position dans la vidéo », vitesse contrastée, boutons théâtre et plein écran. Tester les vitesses 0,5× / 1,5× / 2× contre la propriété réelle `playbackRate`, puis Home / End sur le curseur contre `currentTime`. Le théâtre conserve la vidéo montée. Le plein écran affiche l’image et les commandes, puis revient à l’atelier. Pendant une passe commencée à 00:01, déplacer la vidéo à 00:30 doit conserver le temps figé de l’action à 00:01. À 390 px : commandes et vitesse visibles, aucun débordement de page. Refaire End sur le fichier synthétique de 2 h : `duration` et `currentTime` valent 7200.
+
+
+Régressions du 7 octobre : `?video=none&old-correction=1` simule une correction de passe Mathis → Loris à 00:30 dont l’ancienne session cible Alex à 00:40. La reprise doit afficher Mathis, Loris, passe réussie, passe clé et position 70/30, sans changer l’événement. `?review=1&csc=1&video=none` propose un score 2–0, un but normal et un CSC adverse ; publier doit produire un but personnel et un CSC, sans blocage sur le total des buts personnels. Ces scénarios utilisent exclusivement des matchs fictifs locaux.
