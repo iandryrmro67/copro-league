@@ -1,7 +1,8 @@
+import type {DomainRating,RatingDomain} from './rating-v2.ts';
 export type Stats=Record<string,number|null>;
 export type Player={id:string;name:string;bio:string;photo:string;archived:boolean;demo:boolean;funFacts:string;attributes:Record<string,number>;version:number};
 export type Season={id:string;name:string;start:string;end:string;status:'active'|'inactive'|'finished'|'archived';demo:boolean;contribution:number;winnerId:string|null;minParticipation:number;version:number};
-export type Participant={minutesPlayed?:number|null;role?:'field'|'goalkeeper'|'mixed';playerId:string;team:'A'|'B'|null;stats:Stats;auto_rating?:number|null;admin_rating?:number|null;final_rating?:number|null;ratingExplanation?:string[]};
+export type Participant={minutesPlayed?:number|null;role?:'field'|'goalkeeper'|'mixed';playerId:string;team:'A'|'B'|null;stats:Stats;auto_rating?:number|null;admin_rating?:number|null;final_rating?:number|null;ratingVersion?:'v1'|'v2.0';ratingDomains?:Partial<Record<RatingDomain,DomainRating>>;ratingCoverage?:number;ratingExplanation?:string[]};
 export type MatchEvent={id:string;playerId:string;team:'A'|'B';type:string;timestamp:number|null;relatedPlayerId:string|null;metadata:Record<string,unknown>};
 export type AnnotationBuilder={correctionVersion?:1;automaticLink?:boolean;capturePosition?:{x:number;y:number}|null;positionInput?:{x:string;y:string};captureVideoTime?:number;captureActive?:boolean;positionPending?:boolean;precisionChosen?:boolean;participantChosen?:boolean;detailChosen?:boolean;videoHidden?:boolean;actor:string;mate:string;opponent:string;type:string;outcome:string;tags:string[];stamp:string;manual:boolean;editing:string|null;linked:string;positionKnown:boolean;quick:boolean;view:string;scene:{players:Record<string,{x:number;y:number}>;ball:{x:number;y:number}|null};end:{x:number;y:number}|null};
 export type MatchAnalysis={
@@ -11,9 +12,9 @@ export type MatchAnalysis={
  manualStats?:Record<string,Stats>;publishedEvents?:MatchEvent[];publishedKeys?:string[];publishedRanges?:{start:number;end:number}[];publishedAt?:string;
 };
 export type Match={analysis?:MatchAnalysis;id:string;seasonId:string;number:number;date:string;duration:number;location:string;status:'scheduled'|'finished'|'cancelled';scoreA:number|null;scoreB:number|null;mvpId:string|null;level:number;video:string;participants:Participant[];events:MatchEvent[];trackedKeys:string[];notes?:string;teamAName?:string;teamBName?:string;version:number};
-export type Settings={minRating:number;minRadar:number;minDuo:number;minPasses:number;minAttempts:number;ratingWeights?:Record<string,number>};
+export type Settings={minRating:number;minRadar:number;minDuo:number;minPasses:number;minAttempts:number;ratingEngine?:'v1'|'v2';ratingWeights?:Record<string,number>};
 export type League={players:Player[];seasons:Season[];matches:Match[];settings:Settings;admin:boolean;bootstrap:boolean;user:string|null};
-export const defaultSettings:Settings={minRating:5,minRadar:5,minDuo:5,minPasses:30,minAttempts:10};
+export const defaultSettings:Settings={ratingEngine:'v2',minRating:5,minRadar:5,minDuo:5,minPasses:30,minAttempts:10};
 export const statGroups:Record<string,Record<string,string>>={
 Tir:{goals:'Buts',ownGoals:'Buts contre son camp',xg:'Buts attendus (xG)',xgot:'xG cadrés (xGOT)',shots:'Tirs',shotsOnTarget:'Tirs cadrés'},
 Passe:{secondaryAssists:'Secondes passes décisives',assists:'Passes décisives',xa:'Passes décisives attendues (xA)',passesCompleted:'Passes réussies',passesAttempted:'Passes tentées',longPassesCompleted:'Passes longues réussies',longPassesAttempted:'Passes longues tentées',chancesCreated:'Occasions créées',keyPasses:'Passes clés',crossesCompleted:'Centres réussis',crossesAttempted:'Centres tentés'},

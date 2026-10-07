@@ -1,4 +1,5 @@
 import type {Match,Stats,Participant} from './model.ts';
+import {automaticRatingV2,ratingStats} from './rating-v2.ts';
 export const ratingConfig={base:6,min:3,max:10,families:{finition:{weight:1,keys:['goals','shotsOnTarget']},creation:{weight:1,keys:['assists','keyPasses','chancesCreated']},passes:{weight:1,keys:['passesCompleted','longPassesCompleted','passPct','longPassPct']},percussion:{weight:1,keys:['dribblesCompleted','boxTouches','foulsWon','dribblePct']},duels:{weight:1,keys:['duelsWon','aerialDuelsWon','duelPct']},defense:{weight:1,keys:['tackles','interceptions','recoveries','blocks','clearances','saves']}},turnoverPenalty:.06};
 const mean=(a:number[])=>a.reduce((s,v)=>s+v,0)/Math.max(1,a.length);
 export function automaticRating(stats:Stats,peers:Stats[],weights:Record<string,number>={}){const evidence:string[]=[];const values:{score:number;weight:number}[]=[];for(const [family,config]of Object.entries(ratingConfig.families)){const scores=config.keys.flatMap(k=>{const v=stats[k];if(v==null)return [];const observed=peers.map(p=>p[k]).filter((n):n is number=>n!=null);if(observed.length<3)return [];const typical=mean(observed);const score=typical===0?0:Math.max(-1,Math.min(1,(v-typical)/Math.max(1,typical)));return [score]});if(scores.length&&(weights[family]??config.weight)>0){const score=mean(scores);values.push({score,weight:weights[family]??config.weight});evidence.push(`${family} : ${score>.5?'très au-dessus':score>0?'au-dessus':score<-.5?'en dessous':'proche'} de la moyenne du groupe`);}}
@@ -9,7 +10,7 @@ function comparableStats(p:Participant):Stats {
  for(const [key,success,attempt]of [['passPct','passesCompleted','passesAttempted'],['longPassPct','longPassesCompleted','longPassesAttempted'],['dribblePct','dribblesCompleted','dribblesAttempted'],['duelPct','duelsWon','duelsAttempted']])if(p.stats[success]!=null&&(p.stats[attempt]??0)>=5)stats[key]=100*p.stats[success]!/p.stats[attempt]!;
  return stats;
 }
-export function rateMatches(matches:Match[],weights:Record<string,number>={}) {
+export function legacyRateMatches(matches:Match[],weights:Record<string,number>={}) {
  const peers=matches.filter(m=>m.status==='finished').flatMap(m=>m.participants);
  return matches.map(m=>({...m,participants:m.participants.map(p=>{
   const timed=p.minutesPlayed!=null&&p.minutesPlayed>0;
@@ -19,6 +20,18 @@ export function rateMatches(matches:Match[],weights:Record<string,number>={}) {
   const coverage=(m.analysis?.publishedKeys??(m.analysis?.publishedAt?m.analysis.completeKeys:[]))?.length??0;
   return {...p,auto_rating:a.value,admin_rating:override,final_rating:final,stats:{...p.stats,rating:final},ratingExplanation:[...(override!=null?[`Note administrateur : ${override.toFixed(1)} (calcul automatique : ${a.value??'—'}).`]:[]),...a.explanation,`${timed?'Volumes ramenés à 60 minutes de présence confirmée.':'Temps de jeu inconnu : comparaison des volumes par match avec les autres temps inconnus.'} Rôle : ${p.role==='goalkeeper'?'gardien':p.role==='mixed'?'champ et gardien':'champ'} ; ${comparable.length} observations comparables.`,m.analysis?`${coverage} catégories validées par vidéo ; autres données issues de la feuille de match.`:'Données historiques : couverture vidéo non documentée.','Note dynamique : la référence évolue avec les matchs comparables.']};
  })}));
+}
+export function rateMatches(matches:Match[],weights:Record<string,number>={},engine:'v1'|'v2'='v2'):Match[] {
+ if(engine==='v1')return legacyRateMatches(matches,weights).map(m=>({...m,participants:m.participants.map(p=>({...p,ratingVersion:'v1' as const}))}));
+ return matches.map(m=>{
+  const stats=ratingStats(m);
+  const peers=stats.filter((_,i)=>m.participants[i].team!=null&&m.participants[i].minutesPlayed!==0);
+  return {...m,participants:m.participants.map((p,i)=>{
+   const a=m.status==='finished'&&p.team!=null&&p.minutesPlayed!==0?automaticRatingV2(stats[i],peers,weights):{value:null,domains:{},coverage:0,explanation:['Temps de jeu nul ou match non terminé.']};
+   const override=p.admin_rating??null,final=override??a.value;
+   return {...p,auto_rating:a.value,admin_rating:override,final_rating:final,ratingVersion:'v2.0' as const,ratingDomains:a.domains,ratingCoverage:a.coverage,stats:{...p.stats,rating:final},ratingExplanation:[...(override!=null?[`Note administrateur : ${override.toFixed(1)} (calcul automatique : ${a.value??'—'}).`]:[]),...a.explanation]};
+  })};
+ });
 }
 export const styleDefinitions=[{name:'Finisseur',reference:'Harry Kane',keys:['goals','shotsOnTarget']},{name:'Créateur',reference:'Kevin De Bruyne',keys:['assists','keyPasses','chancesCreated']},{name:'Métronome',reference:'Toni Kroos',keys:['passesCompleted','longPassesCompleted']},{name:'Percuteur',reference:'Eden Hazard',keys:['dribblesCompleted','boxTouches','foulsWon']},{name:'Duelliste',reference:'N’Golo Kanté',keys:['duelsWon','aerialDuelsWon']},{name:'Intercepteur',reference:'Sergio Busquets',keys:['interceptions','recoveries']},{name:'Stoppeur',reference:'Paolo Maldini',keys:['tackles','blocks','clearances']}];
 function computePlayStyles(playerId:string,matches:Match[]){const finished=matches.filter(m=>m.status==='finished').sort((a,b)=>a.date.localeCompare(b.date)||a.number-b.number);const appearances=finished.filter(m=>m.participants.some(p=>p.playerId===playerId));if(appearances.length<3)return [];const ids=[...new Set(finished.flatMap(m=>m.participants.map(p=>p.playerId)))];const profiles=ids.map(id=>{const rows=finished.flatMap(m=>m.participants.filter(p=>p.playerId===id)).slice(-20);const values:Stats={};for(const key of [...new Set(styleDefinitions.flatMap(s=>s.keys))]){const seen=rows.map(p=>p.stats[key]).filter((v):v is number=>v!=null);if(seen.length>=3)values[key]=mean(seen)}return{id,values}});const target=profiles.find(p=>p.id===playerId)!;return styleDefinitions.flatMap(style=>{const evidence=style.keys.flatMap(key=>{const v=target.values[key],peers=profiles.map(p=>p.values[key]).filter((n):n is number=>n!=null);if(v==null||peers.length<3)return [];return[{key,value:v,percentile:100*(peers.filter(n=>n<v).length+.5*peers.filter(n=>n===v).length)/peers.length}]});if(!evidence.length)return [];return[{...style,score:Math.round(mean(evidence.map(e=>e.percentile))),evidence}] }).filter(s=>s.score>=60).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name)).slice(0,3)}

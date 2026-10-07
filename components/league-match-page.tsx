@@ -763,6 +763,7 @@ function TeamPlayers({ match, data }: { match: Match; data: League }) {
                         </span>
                       )}
                       <Note value={participant.stats.rating} />
+                      {participant.admin_rating==null&&participant.auto_rating!=null&&participant.ratingVersion==='v2.0'&&(participant.ratingCoverage??0)<100&&<span className="muted" title="Seuls les domaines renseignés et comparables sont évalués">Partielle</span>}
                       <ChevronDown className="md-player-chevron" size={15} />
                     </summary>
                     <div className="md-player-all">

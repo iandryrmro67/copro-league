@@ -69,15 +69,15 @@ test('shot links derive a key pass without counting the manual tag twice',()=>{
  assert.equal(projectEvents(match([p,shot])).participants[0].stats.keyPasses,1);
  assert.equal(matchSchema.safeParse(match([p,shot])).success,true);
 });
-test('ratings compare confirmed playing time on equal 60-minute volumes',async()=>{
+test('legacy ratings compare confirmed playing time on equal 60-minute volumes',async()=>{
  const {rateMatches}=await import('../lib/performance.ts');
  const m=match([]);m.participants=[{playerId:'a',team:'A',stats:{goals:2},minutesPlayed:30,role:'field'},{playerId:'b',team:'A',stats:{goals:4},minutesPlayed:60,role:'field'},{playerId:'c',team:'B',stats:{goals:4},minutesPlayed:60,role:'field'}];
- const result=rateMatches([m]);assert.deepEqual(result[0].participants.map(p=>p.auto_rating),[6,6,6]);
+ const result=rateMatches([m],{},'v1');assert.deepEqual(result[0].participants.map(p=>p.auto_rating),[6,6,6]);
 });
-test('goalkeeper ratings require comparable goalkeeper observations',async()=>{
+test('legacy goalkeeper ratings require comparable goalkeeper observations',async()=>{
  const {rateMatches}=await import('../lib/performance.ts');
  const m=match([]);m.participants=[{playerId:'a',team:'A',stats:{saves:1},role:'field'},{playerId:'b',team:'A',stats:{saves:1},role:'field'},{playerId:'c',team:'B',stats:{saves:10},role:'goalkeeper'}];
- assert.equal(rateMatches([m])[0].participants[2].auto_rating,null);
+ assert.equal(rateMatches([m],{},'v1')[0].participants[2].auto_rating,null);
 });
 test('spatial categories cannot publish unpositioned recoveries as verified zeroes',async()=>{
  const {beginAnalysis,reviewAnalysis,publishAnalysis}=await import('../lib/match-analysis.ts');

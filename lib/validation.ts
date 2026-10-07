@@ -38,3 +38,10 @@ export const draftMatchSchema=activeMatchSchema.innerType().extend({
  analysis:analysisSchema.extend({manualStats:z.record(z.record(z.number().finite().nullable())).optional()}).optional(),
  participants:z.array(z.object({playerId:id,team:z.enum(['A','B']).nullable(),stats:z.record(z.number().finite().nullable()),admin_rating:z.number().nullable().optional(),minutesPlayed:z.number().nullable().optional(),role:z.enum(['field','goalkeeper','mixed']).optional()})).max(20),
 });
+
+export const settingsSchema=z.object({
+ minRating:z.number().int().min(1).max(100),minRadar:z.number().int().min(1).max(100),minDuo:z.number().int().min(1).max(100),
+ minPasses:z.number().int().min(1).max(10000),minAttempts:z.number().int().min(1).max(10000),
+ ratingEngine:z.enum(['v1','v2']).optional(),
+ ratingWeights:z.record(z.number().finite().min(0).max(5)).refine(w=>Object.keys(w).every(k=>['finition','creation','passes','percussion','progression','duels','defense','arrets'].includes(k))).optional(),
+});

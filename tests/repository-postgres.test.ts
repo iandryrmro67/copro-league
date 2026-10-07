@@ -20,6 +20,15 @@ test('all season 2 records round-trip through the real repositories on PostgreSQ
  assert.equal(restored.players.length,22);assert.equal(restored.matches.length,6);
  assert.equal(restored.matches.flatMap(m=>m.participants).reduce((n,p)=>n+(p.stats.goals??0),0),271);
  assert.equal(restored.matches.flatMap(m=>m.participants).reduce((n,p)=>n+(p.stats.assists??0),0),184);
+ assert.ok(restored.matches.every(m=>m.participants.every(p=>p.ratingVersion==='v2.0'&&p.ratingCoverage===40)));
+ const originalTotals=restored.matches.map(m=>m.participants.map(p=>({goals:p.stats.goals,assists:p.stats.assists})));
+ await database.prepare('INSERT INTO settings(id,data) VALUES(?,?)').bind('thresholds',JSON.stringify({...restored.settings,ratingEngine:'v1'})).run();
+ const rollback=await readLeague();
+ assert.ok(rollback.matches.every(m=>m.participants.every(p=>p.ratingVersion==='v1')));
+ assert.deepEqual(rollback.matches.map(m=>m.participants.map(p=>({goals:p.stats.goals,assists:p.stats.assists}))),originalTotals);
+ await database.prepare('UPDATE settings SET data=? WHERE id=?').bind(JSON.stringify({...restored.settings,ratingEngine:'v2'}),'thresholds').run();
+ const reactivated=await readLeague();
+ assert.deepEqual(reactivated.matches.map(m=>m.participants.map(p=>p.auto_rating)),restored.matches.map(m=>m.participants.map(p=>p.auto_rating)));
  const newPlayer={...restored.players[0],id:'qa-new-player',name:'Nouveau joueur',version:0};
  await savePlayer(newPlayer);
  const createdPlayer=(await readLeague()).players.find(p=>p.id===newPlayer.id)!;
@@ -57,6 +66,7 @@ test('all season 2 records round-trip through the real repositories on PostgreSQ
  recovered=(await readLeague({drafts:true})).matches.find(m=>m.id===draft.id)!;
  await saveMatch({...recovered,events:[],analysis:{...recovered.analysis!,status:'in_progress'}});
  assert.equal((await readLeague()).matches.find(m=>m.id===draft.id)!.events.length,1);
+ assert.deepEqual((await readLeague()).matches.find(m=>m.id===draft.id)!.participants.map(p=>p.auto_rating),published.participants.map(p=>p.auto_rating));
  assert.equal((await readLeague({drafts:true})).matches.find(m=>m.id===draft.id)!.events.length,0);
  await assert.rejects(saveMatch({...recovered,events:[]}),/Conflit/);
  const latest=(await readLeague({drafts:true})).matches.find(m=>m.id===draft.id)!;
