@@ -186,7 +186,7 @@ export function Analyzer({
       detailChosen: draft?.detailChosen ?? false,
       precisionChosen: draft?.precisionChosen,
       positionPending: draft?.positionPending,
-      correctionVersion: editing ? 1 : undefined,
+      correctionVersion: editing ? 1 as const : undefined,
       videoHidden: hidden,
       captureVideoTime:
         frozen.current?.timestamp ===
