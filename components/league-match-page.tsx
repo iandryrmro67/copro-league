@@ -1000,7 +1000,7 @@ function describeEvent(event: MatchEvent) {
   return isOwnGoal(event)
     ? "But contre son camp"
     : isGoal(event)
-      ? "But"
+      ? "But"+(((event.metadata.tags??[]) as string[]).includes("GOLAZO")?" · ★ Golazo":"")
       : event.metadata.schemaVersion === 2
         ? eventLabel(event)
         : (legacyLabels[event.type] ??

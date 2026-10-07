@@ -1,8 +1,13 @@
 import type { Match, MatchEvent, AnnotationBuilder } from "./model.ts";
-import { actionDefinitions, isV2, type Point, type Scene } from "./actions.ts";
+import { actionDefinitions, passTypes, isV2, type Point, type Scene } from "./actions.ts";
 import { beginAnalysis, previousPass } from "./match-analysis.ts";
 import type { AnnotationMoment } from "./annotation-controls.ts";
 export type CaptureDraft = {
+  captureRevision?:3;
+  passTypeChosen?: boolean;
+  lossChosen?: boolean;
+  pressurePlayerId?: string;
+  pressureChosen?: boolean;
   type: string;
   outcome: string;
   mate: string;
@@ -19,7 +24,7 @@ export type CaptureDraft = {
   linkedEventId?: string | null;
 };
 export type CaptureStep =
-  "action" | "outcome" | "mate" | "opponent" | "detail" | "precision" | "position" | "ready";
+  "pass-type" | "pressure" | "action" | "outcome" | "mate" | "opponent" | "detail" | "precision" | "position" | "ready";
 export function captureStep(d: CaptureDraft): CaptureStep {
   if (!d.type) return "action";
   const outcomes =
@@ -27,6 +32,11 @@ export function captureStep(d: CaptureDraft): CaptureStep {
       ? ["COMMITTED", "SUFFERED"]
       : (actionDefinitions[d.type]?.outcomes ?? []);
   if (outcomes.length && !d.outcome) return "outcome";
+  if(d.type==="PASS" && d.passTypeChosen===false) return "pass-type";
+  if(d.type==="RECOVERY" && d.tags.includes("PRESSING") && d.pressureChosen===false) return "pressure";
+  if(d.type==="DRIBBLE" && d.outcome==="FAILED" && d.lossChosen===false) return "detail";
+  if(d.captureRevision===3 && d.type==="PASS" && d.outcome==="FAILED" && !d.detailChosen) return "detail";
+  if(d.captureRevision===3 && d.type==="TACKLE" && d.outcome==="WON" && !d.detailChosen) return "detail";
   if (
     d.type === "SHOT" &&
     ["OFF_TARGET", "WOODWORK"].includes(d.outcome) &&
@@ -61,8 +71,9 @@ export function captureParticipant(
       "SAVE",
       "BLOCK",
       "INTERCEPTION",
+      "PRESSURE",
     ].includes(d.type) ||
-    (d.type === "PASS" && d.outcome === "FAILED") ||
+    (d.type === "PASS" && d.outcome === "FAILED" && (d.captureRevision!==3||d.tags.includes("INTERCEPTED"))) ||
     (d.type === "SHOT" && ["BLOCKED", "ON_TARGET"].includes(d.outcome)) ||
     (d.type === "RECOVERY" && d.tags.includes("OPPONENT_ERROR")) ||
     (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED"))
@@ -71,6 +82,7 @@ export function captureParticipant(
   return null;
 }
 export function participantRequired(d: CaptureDraft) {
+  if(d.captureRevision===3 && ["DRIBBLE","TACKLE","BLOCK"].includes(d.type))return false;
   return (
     (d.type === "PASS" && d.outcome === "COMPLETED") ||
     ["DRIBBLE", "DUEL", "TACKLE", "FOUL"].includes(d.type) ||
@@ -80,6 +92,10 @@ export function participantRequired(d: CaptureDraft) {
 // Retain only links whose observations still agree after a correction.
 export function reconcileActionLinks(events: MatchEvent[]) {
   return events.map((e) => {
+    const origin=events.find(x=>x.id===e.metadata.recoveryOriginId);
+    if(e.metadata.recoveryOriginId&&(!origin||origin.id===e.id||origin.timestamp==null||e.timestamp==null||origin.timestamp>e.timestamp||
+      !(origin.type==="SAVE"&&origin.metadata.outcome==="SAVED_PARRIED"||origin.type==="SHOT"&&["BLOCKED","WOODWORK"].includes(String(origin.metadata.outcome))||["BLOCK","CLEARANCE","DUEL"].includes(origin.type))))
+      e={...e,metadata:{...e.metadata,recoveryOriginId:null}};
     const id = e.metadata.linkedEventId;
     if (!id) return e;
     const target = events.find((x) => x.id === id);
@@ -153,6 +169,8 @@ export function recordPreciseAction(
     throw Error("Choisis l’adversaire.");
   if (captureStep(d) !== "ready")
     throw Error("Complétez les choix de cette action.");
+  if(d.type==="PASS" && (d.passTypeChosen===true||d.captureRevision===3) && !d.tags.some(t=>passTypes.includes(t))) throw Error("Choisis le type de passe.");
+  if(d.pressurePlayerId&&!match.participants.some(q=>q.playerId===d.pressurePlayerId&&q.team===p.team)) throw Error("Presseur invalide.");
   if (d.type === "PASS" && d.outcome === "FAILED" && d.tags.includes("ASSIST"))
     throw Error("Une passe ratée ne peut être décisive.");
   if (
@@ -211,6 +229,9 @@ export function recordPreciseAction(
     metadata: {
       ...(old && isV2(old) ? old.metadata : {}),
       schemaVersion: 2,
+      ...(d.captureRevision===3?{captureRevision:3}:{}),
+      recoveryOriginId:d.type==="RECOVERY"&&d.tags.includes("SECOND_BALL")?(()=>{const origin=[...match.events].reverse().filter(e=>e.id!==editing&&e.timestamp!=null&&e.timestamp<=moment.timestamp).sort((a,b)=>b.timestamp!-a.timestamp!).at(0);return origin&&(origin.type==="SAVE"&&origin.metadata.outcome==="SAVED_PARRIED"||origin.type==="SHOT"&&["BLOCKED","WOODWORK"].includes(String(origin.metadata.outcome))||["BLOCK","CLEARANCE","DUEL"].includes(origin.type))?origin.id:null;})():null,
+      pressurePlayerId: d.type==="RECOVERY"&&d.tags.includes("PRESSING") ? d.pressurePlayerId||null : null,
       atomic: true,
       sequenceId: old
         ? String(old.metadata.sequenceId ?? sequenceId)
@@ -221,7 +242,7 @@ export function recordPreciseAction(
       // Opt in only after an explicit new selection; old observations retain their meaning.
       counterpartStats:
         !!d.opponent &&
-        ((d.type === "PASS" && d.outcome === "FAILED") ||
+        ((d.type === "PASS" && d.outcome === "FAILED" && (d.captureRevision!==3||d.tags.includes("INTERCEPTED"))) ||
           (d.type === "SHOT" && d.outcome === "ON_TARGET") ||
           (d.type === "TURNOVER" && d.tags.includes("DISPOSSESSED")) ||
           ["INTERCEPTION", "SAVE", "BLOCK"].includes(d.type) ||
@@ -304,6 +325,7 @@ export function recordPreciseAction(
   events = reconcileActionLinks(events);
   const ended =
     d.type === "OWN_GOAL" ||
+    d.type === "TACKLE" && d.tags.includes("BALL_RECOVERED") ||
     (d.type === "PASS" && d.outcome === "FAILED") ||
     d.tags.includes("POSSESSION_LOST") ||
     [
@@ -314,7 +336,7 @@ export function recordPreciseAction(
       "RECOVERY",
       "INTERCEPTION",
     ].includes(d.type) ||
-    (d.type === "SHOT" && d.outcome === "GOAL");
+    d.type === "SHOT";
   const nextSequence = !editing && ended ? crypto.randomUUID() : sequenceId;
   const next = beginAnalysis({ ...match, events });
   return {
@@ -375,6 +397,8 @@ export function restoreCaptureDraft(
       opponent: builder.opponent,
       tags: builder.tags,
       participantChosen: builder.participantChosen ?? !!builder.editing,
+      captureRevision:builder.captureRevision,
+      passTypeChosen: builder.passTypeChosen,lossChosen:builder.lossChosen,pressureChosen:builder.pressureChosen,pressurePlayerId:builder.pressurePlayerId,
       precisionChosen: builder.precisionChosen,
       positionPending: builder.positionPending,
       detailChosen: builder.detailChosen ?? !!builder.editing,
@@ -398,6 +422,8 @@ export function restoreCaptureDraft(
     mate: event.relatedPlayerId ?? "",
     opponent: String(event.metadata.opponentPlayerId ?? ""),
     tags: (event.metadata.tags as string[]) ?? [],
+    captureRevision:event.metadata.captureRevision===3?3:undefined,
+    pressurePlayerId:String(event.metadata.pressurePlayerId??""),pressureChosen:true,
     participantChosen: true,
     detailChosen: true,
     position: (event.metadata.position as Point) ?? null,
@@ -459,7 +485,7 @@ export function retargetCapture(d: CaptureDraft): CaptureDraft {
 export function nextAnnotationActor(d:CaptureDraft, author:string):string {
  if(d.type==='PASS')return d.outcome==='COMPLETED'?d.mate:d.opponent;
  if(['DUEL','TACKLE'].includes(d.type))return d.outcome==='LOST'?d.opponent:author;
- if(['RECOVERY','INTERCEPTION'].includes(d.type))return author;
+ if(['RECOVERY','INTERCEPTION'].includes(d.type)||d.captureRevision===3&&(d.type==='DRIBBLE'&&d.outcome==='COMPLETED'||d.type==='SAVE'&&d.outcome==='SAVED_HELD'))return author;
  return '';
 }
 
@@ -509,6 +535,8 @@ export function prepareActionCorrection(
     mate: event.relatedPlayerId ?? "",
     opponent: String(event.metadata.opponentPlayerId ?? ""),
     tags: [...((event.metadata.tags as string[]) ?? [])],
+    captureRevision:event.metadata.captureRevision===3?3:undefined,
+    pressurePlayerId:String(event.metadata.pressurePlayerId??""),pressureChosen:true,
     participantChosen: true,
     detailChosen: true,
     position: (event.metadata.position as CaptureDraft["position"]) ?? null,

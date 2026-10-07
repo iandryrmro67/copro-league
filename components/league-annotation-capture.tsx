@@ -1,4 +1,5 @@
 "use client";
+import { passTypes } from "@/lib/actions";
 import {
   ArrowRight,
   Check,
@@ -36,7 +37,7 @@ const groups = [
   },
   {
     label: "Défendre & récupérer",
-    types: ["DUEL", "TACKLE", "INTERCEPTION", "RECOVERY", "BLOCK", "CLEARANCE"],
+    types: ["DUEL", "TACKLE", "INTERCEPTION", "RECOVERY", "PRESSURE", "BLOCK", "CLEARANCE"],
   },
   { label: "Fautes & gardien", types: ["FOUL", "SAVE"] },
 ];
@@ -51,6 +52,7 @@ const icons: Record<string, typeof Target> = {
   TACKLE: Shield,
   INTERCEPTION: Waypoints,
   RECOVERY: ShieldCheck,
+  PRESSURE: Shield,
   BLOCK: Shield,
   CLEARANCE: CornerUpRight,
   FOUL: Hand,
@@ -80,13 +82,11 @@ type Props = {
   draft: CaptureDraft | null;
   editing: MatchEvent | null;
   busy?: boolean;
-  positionCapture: boolean;
-  onPositionCapture: (enabled:boolean) => void;
   chainTeam: "A" | "B" | null;
   onChain: (team: "A" | "B") => void;
   onFailedChain: () => void;
   onPlayer: (id: string) => void;
-  onStart: (type: string) => void;
+  onStart: (type: string, initial?:Partial<CaptureDraft>) => void;
   onDraft: (draft: CaptureDraft) => void;
   onCancel: () => void;
   onSaveEdit: () => void;
@@ -99,8 +99,6 @@ export function AnnotationCapture({
   editing,
   busy,
   chainTeam,
-  positionCapture,
-  onPositionCapture,
   onChain,
   onFailedChain,
   onPlayer,
@@ -110,7 +108,8 @@ export function AnnotationCapture({
   onSaveEdit,
 }: Props) {
   const [playersOpen, setPlayersOpen] = useState(false),
-    [actionsOpen, setActionsOpen] = useState(false);
+    [actionsOpen, setActionsOpen] = useState(false),[combinePass,setCombinePass]=useState(false),[placeArrival,setPlaceArrival]=useState(false);
+
   const name = (id: string) =>
     data.players.find((p) => p.id === id)?.name ?? id;
   const side = m.participants.find((p) => p.playerId === actor)?.team;
@@ -154,7 +153,7 @@ export function AnnotationCapture({
                 ? "Quel adversaire a perdu le ballon ?"
                 : "Quel adversaire est impliqué ?";
   const counterpartHint =
-    d?.type === "PASS" && d.outcome === "FAILED"
+    d?.type === "PASS" && d.outcome === "FAILED" && d.tags.includes("INTERCEPTED")
       ? "Le joueur choisi reçoit une interception et une récupération."
       : d?.type === "SHOT" && d.outcome === "ON_TARGET"
         ? "Le gardien choisi reçoit un arrêt."
@@ -191,7 +190,7 @@ export function AnnotationCapture({
         x <= 100 &&
         y >= 0 &&
         y <= 100;
-    onDraft({ ...d, positionPending: valid ? false : d.positionPending, positionInput: input, position: valid ? { x, y } : null });
+    onDraft({ ...d, positionPending: true, positionInput: input, position: valid ? { x, y } : null });
   }
   function selectResult(outcome: string) {
     if (d)
@@ -201,7 +200,11 @@ export function AnnotationCapture({
         tags:
           outcome === "FAILED"
             ? d.tags.filter((tag) => tag !== "ASSIST")
-            : d.tags,
+            : d.tags.filter(tag=>(tag!=="GOLAZO"||outcome==="GOAL")&&
+              !(d.type==="PASS"&&outcome==="COMPLETED"&&["INTERCEPTED","OUT_OF_PLAY","TEAM_RETAINS","POSSESSION_LOST"].includes(tag))&&
+              !(d.type==="TACKLE"&&outcome!=="WON"&&["BALL_RECOVERED","BALL_OUT","OPPONENT_KEEPS_BALL"].includes(tag))),
+        detailChosen: d.type==="PASS"&&outcome==="FAILED"||d.type==="TACKLE"&&outcome==="WON"?false:d.detailChosen,
+        lossChosen:d.type==="DRIBBLE"&&outcome==="FAILED"?false:d.lossChosen,
         precisionChosen: false,
         mate: "",
         opponent: "",
@@ -227,7 +230,7 @@ export function AnnotationCapture({
           <summary>{definitions[type]?.label}</summary><p>{criteria.definition}</p><p className="muted">{criteria.choices}</p>
         </details>)}
       </details>
-      {!d && !editing && <label className="checklabel"><input type="checkbox" checked={positionCapture} onChange={e=>onPositionCapture(e.target.checked)}/>Renseigner la position pendant la saisie</label>}
+      {!d && !editing && <p className="capture-help">Position proposée à la fin de chaque action · terrain de foot à 5.</p>}
       {actor && <button type="button" className="textbutton" onClick={()=>onPlayer(actor)}>Désélectionner le joueur</button>}
       {d && (
         <div className="capture-compact-actions">
@@ -267,7 +270,7 @@ export function AnnotationCapture({
       {chainTeam && (
         <p className="chain-guide">
           {actor
-            ? `${name(actor)} a le ballon. Clique sur le prochain receveur : une passe réussie est enregistrée.`
+            ? `${name(actor)} a le ballon. Clique sur le prochain receveur : puis choisis le type de passe.`
             : "Choisis d’abord le joueur qui a le ballon."}
           <button
             type="button"
@@ -303,6 +306,7 @@ export function AnnotationCapture({
                   <div className="capture-player-grid">
                     {m.participants
                       .filter((p) => p.team === team)
+                      .sort((a,b)=>name(a.playerId).localeCompare(name(b.playerId),"fr"))
                       .map((p) => {
                         const player = data.players.find(
                             (x) => x.id === p.playerId,
@@ -357,6 +361,10 @@ export function AnnotationCapture({
             <small>
               {actor ? "Pour " + name(actor) : "Sélectionne d’abord un joueur"}
             </small>
+          </div>
+          <div className="precise-choice-buttons" aria-label="Issues rapides">
+            {([["But","GOAL"],["Tir cadré arrêté","ON_TARGET"],["Tir non cadré","OFF_TARGET"],["Tir bloqué","BLOCKED"],["Montant","WOODWORK"]] as const).map(([label,outcome])=><button type="button" className="button" key={outcome} disabled={busy||!side} onClick={()=>onStart("SHOT",{outcome,precisionChosen:true})}>{label}</button>)}
+            <button type="button" className="button" disabled={busy||!side} onClick={()=>onStart("PASS",{outcome:"FAILED",tags:["INTERCEPTED","POSSESSION_LOST"],detailChosen:true})}>Passe interceptée</button>
           </div>
           <div className="precise-action-groups">
             {groups.map((group) => (
@@ -417,16 +425,16 @@ export function AnnotationCapture({
                 )}
               </h4>
             </div>
-            <button type="button" className="textbutton" onClick={onCancel}>
+            <button type="button" className="textbutton" onClick={()=>{setCombinePass(false);setPlaceArrival(false);onCancel();}}>
               <X size={14} aria-hidden="true" />
               Annuler la saisie
             </button>
           </div>
-          {d && <details className="precise-position-inline" open={positionCapture || step === "position"}>
-            <summary>Position de l’action · {d.position ? "renseignée" : "facultative"}</summary>
+          {d && (step === "position" || editing) && <details className="precise-position-inline" open>
+            <summary>Dernière étape · position {d.type==="PASS"?"de départ de la passe":"de l’action"}</summary>
               <div className="precise-position-board">
                 <div className="split">
-                  <strong>Position observée</strong>
+                  <strong>Terrain de foot à 5 · position observée</strong>
                   <button
                     type="button"
                     className="textbutton"
@@ -442,12 +450,16 @@ export function AnnotationCapture({
                     Effacer
                   </button>
                 </div>
+                {d.type==="PASS"&&<button type="button" className="button" onClick={()=>setPlaceArrival(!placeArrival)}>{placeArrival?"Revenir au départ":"Placer l’arrivée · facultatif"}</button>}
+                <p className="capture-help">{placeArrival?"Clique sur l’arrivée observée, puis place le départ pour enregistrer.":"Clique sur la position observée pour enregistrer. Aucune position de joueur n’est présumée."}</p>
                 <div
                   className="precise-pitch"
                   role="img"
                   aria-label="Terrain pour placer la position observée, attaque vers la droite"
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
+                    const point={x:Math.round(((e.clientX-rect.left)/rect.width)*100),y:Math.round(((e.clientY-rect.top)/rect.height)*100)};
+                    if(placeArrival){onDraft({...d,endPosition:point});setPlaceArrival(false);return;}
                     onDraft({
                       ...d,
                       positionPending: false,
@@ -506,6 +518,7 @@ export function AnnotationCapture({
                   />
                 </label>
               </div>
+              {d.position&&<button type="button" className="button" onClick={()=>onDraft({...d,positionPending:false})}>Confirmer la position observée</button>}
               <p className="capture-help">
                 {incompletePosition
                   ? "Renseigne X et Y pour enregistrer une position observée. "
@@ -514,7 +527,7 @@ export function AnnotationCapture({
                 est observée.
               </p>
               </details>
-            {!editing && step === "position" && <button type="button" className="button" disabled={busy} onClick={()=>onDraft({...d,positionPending:false,position:null,positionInput:undefined})}>Enregistrer sans position</button>}
+            {!editing && step === "position" && <button type="button" className="button" disabled={busy} onClick={()=>onDraft({...d,positionPending:false,position:null,positionInput:undefined})}>Position inconnue · enregistrer</button>}
           </details>}
           {legacy && (
             <p>
@@ -523,12 +536,12 @@ export function AnnotationCapture({
             </p>
           )}
           {d &&
-            (["PASS", "SHOT", "DRIBBLE", "DUEL", "TACKLE"].includes(d.type) ||
-              (editing && definitions[d.type].tags.length > 0)) && (
+            (["SHOT", "DRIBBLE", "DUEL", "TACKLE"].includes(d.type) ||
+              (editing && d.type!=="PASS" && definitions[d.type].tags.length > 0)) && (
               <div className="capture-immediate-tags">
                 <strong>Précisions · facultatives</strong>
                 <div className="precise-choice-buttons">
-                  {definitions[d.type].tags.map((tag) => (
+                  {definitions[d.type].tags.filter(tag=>(tag!=="GOLAZO"||d.outcome==="GOAL")&&!["TEAM_RETAINS","LOSS_UNKNOWN"].includes(tag)).map((tag) => (
                     <button
                       type="button"
                       key={tag}
@@ -568,6 +581,12 @@ export function AnnotationCapture({
                 </div>
               </div>
             )}
+          {d && (step==="pass-type" || editing && d.type==="PASS") && <div className="precise-choice"><strong>Type de passe · obligatoire</strong><p className="capture-help">Choisis Normale ou les critères observés. Une direction et plusieurs caractéristiques peuvent se combiner. Passe clé et assist sont déduites de la suite.</p><div className="precise-choice-buttons">{passTypes.map(tag=><button key={tag} type="button" className={"button "+(d.tags.includes(tag)?"primary":"")} aria-pressed={d.tags.includes(tag)} onClick={()=>{
+ const directions=["LATERAL","BACKWARD","FORWARD"];
+ const remove=["NORMAL","PASS_UNKNOWN"].includes(tag)?passTypes:directions.includes(tag)?["NORMAL","PASS_UNKNOWN",...directions]:["NORMAL","PASS_UNKNOWN"];
+ onDraft({...d,passTypeChosen:editing||combinePass?d.passTypeChosen:true,tags:d.tags.includes(tag)?d.tags.filter(t=>t!==tag):[...d.tags.filter(t=>!remove.includes(t)),tag]});
+ }}>{actionLabels[tag]}</button>)}</div>{!editing&&!combinePass&&<button type="button" className="button" onClick={()=>setCombinePass(true)}>Combiner plusieurs critères</button>}{!editing&&combinePass&&<button type="button" className="button primary" disabled={!d.tags.some(t=>passTypes.includes(t))} onClick={()=>{setCombinePass(false);onDraft({...d,passTypeChosen:true});}}>Continuer avec ce type</button>}</div>}
+          {d && step==="pressure" && <div className="precise-choice"><strong>Qui a provoqué la récupération par son pressing ?</strong><div className="precise-choice-buttons">{m.participants.filter(p=>p.team===side).sort((a,b)=>name(a.playerId).localeCompare(name(b.playerId),"fr")).map(p=><button className="button" type="button" key={p.playerId} onClick={()=>onDraft({...d,pressurePlayerId:p.playerId,pressureChosen:true})}>{name(p.playerId)}</button>)}<button className="button" type="button" onClick={()=>onDraft({...d,pressurePlayerId:"",pressureChosen:true})}>Presseur inconnu</button></div></div>}
           {showOutcome && (
             <div className="precise-choice">
               <strong>{prompts[d!.type]}</strong>
@@ -597,12 +616,12 @@ export function AnnotationCapture({
                 <strong>
                   {d.type === "RECOVERY"
                     ? "Comment le ballon est-il récupéré ?"
-                    : d.type === "CLEARANCE"
+                    : d.type==="PASS"?"Pourquoi la passe est-elle ratée ?":d.type==="DRIBBLE"?"L’équipe perd-elle la possession ?":d.type==="TACKLE"?"Quel résultat après le tacle ?":d.type === "CLEARANCE"
                       ? "Comment le joueur dégage-t-il ?"
                       : "Comment le ballon est-il perdu ?"}
                 </strong>
                 <div className="precise-choice-buttons">
-                  {definitions[d.type].tags.map((tag) => (
+                  {(d.type==="PASS"?["INTERCEPTED","OUT_OF_PLAY","TEAM_RETAINS"]:d.type==="DRIBBLE"?["POSSESSION_LOST","TEAM_RETAINS","LOSS_UNKNOWN"]:d.type==="TACKLE"?["BALL_RECOVERED","BALL_OUT","OPPONENT_KEEPS_BALL"]:definitions[d.type].tags).map((tag) => (
                     <button
                       type="button"
                       disabled={busy}
@@ -614,7 +633,8 @@ export function AnnotationCapture({
                       onClick={() =>
                         onDraft({
                           ...d,
-                          tags: [tag],
+                          tags: d.type==="PASS"?[...d.tags.filter(t=>!["INTERCEPTED","OUT_OF_PLAY","TEAM_RETAINS","POSSESSION_LOST"].includes(t)),tag,...(tag==="INTERCEPTED"||tag==="OUT_OF_PLAY"?["POSSESSION_LOST"]:[])]:d.type==="DRIBBLE"?[...d.tags.filter(t=>!["POSSESSION_LOST","TEAM_RETAINS","LOSS_UNKNOWN"].includes(t)),tag]:[tag],
+                          lossChosen:true,pressureChosen:tag!=="PRESSING",
                           opponent: "",
                           linkedEventId: undefined,
                           detailChosen: true,
@@ -625,7 +645,7 @@ export function AnnotationCapture({
                       {actionLabels[tag]}
                     </button>
                   ))}
-                  <button
+                  {!["PASS","DRIBBLE","TACKLE"].includes(d.type)&&<button
                     type="button"
                     disabled={busy}
                     className="button"
@@ -640,8 +660,8 @@ export function AnnotationCapture({
                       })
                     }
                   >
-                    Sans précision
-                  </button>
+                    Origine inconnue
+                  </button>}
                 </div>
               </div>
             )}
@@ -664,6 +684,7 @@ export function AnnotationCapture({
                       ? p.team === side && p.playerId !== actor
                       : p.team && p.team !== side,
                   )
+                  .sort((a,b)=>name(a.playerId).localeCompare(name(b.playerId),"fr"))
                   .map((p) => (
                     <button
                       type="button"
@@ -728,7 +749,7 @@ export function AnnotationCapture({
                   : step === "precision"
                     ? "Ajoute les précisions utiles puis enregistre le tir."
                     : d?.positionPending ? "Choisis le joueur impliqué, puis place l’action sur le terrain." : "Ce dernier choix enregistre l’action dans le brouillon."}{" "}
-              {d?.type === "PASS" ? "La sélection suivra le receveur ou l’intercepteur." : d && ["DUEL","TACKLE"].includes(d.type) ? "La sélection suivra le gagnant." : d && ["RECOVERY","INTERCEPTION"].includes(d.type) ? "Le récupérateur restera sélectionné." : "La sélection du joueur sera effacée après l’enregistrement."}
+              {d?.type === "PASS" ? "La sélection suivra le receveur ou l’intercepteur." : d && ["DUEL","TACKLE"].includes(d.type) ? "La sélection suivra le gagnant." : d && (["RECOVERY","INTERCEPTION"].includes(d.type)||d.type==="DRIBBLE"&&d.outcome==="COMPLETED"||d.type==="SAVE"&&d.outcome==="SAVED_HELD") ? "Le récupérateur restera sélectionné." : "La sélection du joueur sera effacée après l’enregistrement."}
             </p>
           )}
           {editing && d && ["SHOT", "SAVE", "BLOCK", "TURNOVER"].includes(d.type) && (

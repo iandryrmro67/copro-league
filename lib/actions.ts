@@ -1,23 +1,25 @@
+export const passTypes=['NORMAL','LATERAL','BACKWARD','FORWARD','BREAK_LINES','SWITCH','CROSS','LONG_PASS','THROUGH_BALL','PASS_UNKNOWN'];
 import type {MatchEvent} from './model.ts';
 export type Point={x:number;y:number};
 export type Scene={players:Record<string,Point>;ball:Point|null};
 export const actionDefinitions:Record<string,{label:string;outcomes:string[];tags:string[];shortcut?:string}>={
 OWN_GOAL:{label:'CSC',outcomes:[],tags:[]},
-SHOT:{label:'Tir',outcomes:['GOAL','ON_TARGET','OFF_TARGET','BLOCKED','WOODWORK'],tags:['PENALTY','FREE_KICK','RIGHT_FOOT','LEFT_FOOT','HEADER'],shortcut:'s'},
-PASS:{label:'Passe',outcomes:['COMPLETED','FAILED'],tags:['KEY_PASS','ASSIST','LONG_PASS','CROSS','THROUGH_BALL','POSSESSION_LOST'],shortcut:'p'},
-DRIBBLE:{label:'Dribble',outcomes:['COMPLETED','FAILED'],tags:['FOUL_WON','POSSESSION_LOST'],shortcut:'d'},
+SHOT:{label:'Tir',outcomes:['GOAL','ON_TARGET','OFF_TARGET','BLOCKED','WOODWORK'],tags:['PENALTY','FREE_KICK','RIGHT_FOOT','LEFT_FOOT','HEADER','GOLAZO'],shortcut:'s'},
+PASS:{label:'Passe',outcomes:['COMPLETED','FAILED'],tags:[...passTypes,'KEY_PASS','ASSIST','POSSESSION_LOST','INTERCEPTED','OUT_OF_PLAY','TEAM_RETAINS'],shortcut:'p'},
+DRIBBLE:{label:'Dribble',outcomes:['COMPLETED','FAILED'],tags:['FOUL_WON','POSSESSION_LOST','ESCAPE_PRESSURE','TEAM_RETAINS','LOSS_UNKNOWN'],shortcut:'d'},
 DUEL:{label:'Duel',outcomes:['WON','LOST'],tags:['GROUND','AERIAL','POSSESSION_LOST'],shortcut:'u'},
 TACKLE:{label:'Tacle',outcomes:['WON','LOST','FOUL'],tags:['BALL_RECOVERED','BALL_OUT','OPPONENT_KEEPS_BALL'],shortcut:'t'},
-INTERCEPTION:{label:'Interception',outcomes:[],tags:[],shortcut:'i'},RECOVERY:{label:'Récupération',outcomes:[],tags:['LOOSE_BALL','OPPONENT_ERROR','AFTER_DUEL','PRESSING'],shortcut:'r'},
+INTERCEPTION:{label:'Interception',outcomes:[],tags:[],shortcut:'i'},RECOVERY:{label:'Récupération',outcomes:[],tags:['LOOSE_BALL','OPPONENT_ERROR','AFTER_DUEL','PRESSING','SECOND_BALL'],shortcut:'r'},
+PRESSURE:{label:'Pressing',outcomes:[],tags:[]},
 BLOCK:{label:'Tir bloqué',outcomes:[],tags:[]},CLEARANCE:{label:'Dégagement',outcomes:[],tags:['FOOT','HEADER']},TURNOVER:{label:'Perte de balle',outcomes:[],tags:['BAD_PASS','BAD_TOUCH','LOST_DRIBBLE','DISPOSSESSED','OUT_OF_PLAY']},
 FOUL:{label:'Faute',outcomes:['SIMPLE'],tags:[],shortcut:'f'},TOUCH:{label:'Touche',outcomes:[],tags:[]},SAVE:{label:'Arrêt',outcomes:['SAVED_HELD','SAVED_PARRIED'],tags:[]}};
-export const actionLabels:Record<string,string>={GOAL:'But',ON_TARGET:'Cadré',OFF_TARGET:'Non cadré',BLOCKED:'Bloqué',WOODWORK:'Montant',COMPLETED:'Réussie',FAILED:'Ratée',WON:'Gagné',LOST:'Perdu',FOUL:'Faute',SIMPLE:'Simple',SAVED_HELD:'Capté',SAVED_PARRIED:'Repoussé',PENALTY:'Penalty',FREE_KICK:'Coup franc',RIGHT_FOOT:'Pied droit',LEFT_FOOT:'Pied gauche',HEADER:'Tête',KEY_PASS:'Passe clé',ASSIST:'Décisive',LONG_PASS:'Longue',CROSS:'Centre',THROUGH_BALL:'En profondeur',FOUL_WON:'Faute subie',GROUND:'Au sol',AERIAL:'Aérien',BALL_RECOVERED:'Ballon récupéré',BALL_OUT:'Ballon sorti',OPPONENT_KEEPS_BALL:'Adversaire conserve',LOOSE_BALL:'Ballon libre',OPPONENT_ERROR:'Erreur adverse',AFTER_DUEL:'Après duel',PRESSING:'Pressing',FOOT:'Pied',BAD_PASS:'Mauvaise passe',BAD_TOUCH:'Mauvais contrôle',LOST_DRIBBLE:'Dribble perdu',DISPOSSESSED:'Dépossédé',OUT_OF_PLAY:'Sortie',POSSESSION_LOST:'Possession perdue'};
+export const actionLabels:Record<string,string>={NORMAL:'Normale',LATERAL:'Latérale',BACKWARD:'En retrait',FORWARD:'Vers l’avant',BREAK_LINES:'Casse les lignes',SWITCH:'Renversement',PASS_UNKNOWN:'Type inconnu',GOLAZO:'★ Golazo',SECOND_BALL:'Second ballon',ESCAPE_PRESSURE:'Sortie de pression',INTERCEPTED:'Interceptée',TEAM_RETAINS:'Équipe conserve',LOSS_UNKNOWN:'Issue inconnue',GOAL:'But',ON_TARGET:'Cadré',OFF_TARGET:'Non cadré',BLOCKED:'Bloqué',WOODWORK:'Montant',COMPLETED:'Réussie',FAILED:'Ratée',WON:'Gagné',LOST:'Perdu',FOUL:'Faute',SIMPLE:'Simple',SAVED_HELD:'Capté',SAVED_PARRIED:'Repoussé',PENALTY:'Penalty',FREE_KICK:'Coup franc',RIGHT_FOOT:'Pied droit',LEFT_FOOT:'Pied gauche',HEADER:'Tête',KEY_PASS:'Passe clé',ASSIST:'Décisive',LONG_PASS:'Longue',CROSS:'Centre',THROUGH_BALL:'En profondeur',FOUL_WON:'Faute subie',GROUND:'Au sol',AERIAL:'Aérien',BALL_RECOVERED:'Ballon récupéré',BALL_OUT:'Ballon sorti',OPPONENT_KEEPS_BALL:'Adversaire conserve',LOOSE_BALL:'Ballon libre',OPPONENT_ERROR:'Erreur adverse',AFTER_DUEL:'Après duel',PRESSING:'Pressing',FOOT:'Pied',BAD_PASS:'Mauvaise passe',BAD_TOUCH:'Mauvais contrôle',LOST_DRIBBLE:'Dribble perdu',DISPOSSESSED:'Dépossédé',OUT_OF_PLAY:'Sortie',POSSESSION_LOST:'Possession perdue'};
 export const annotationRules={interceptionIsRecovery:true,boxStart:85,boxLeft:25,boxRight:75,finalThird:200/3,pitchLength:40,pitchWidth:20};
 export const isV2=(e:MatchEvent)=>e.metadata.schemaVersion===2;
 export const isOwnGoal=(e:MatchEvent)=>e.type==='OWN_GOAL';
 export const scoringTeam=(e:MatchEvent)=>isOwnGoal(e)?(e.team==='A'?'B':'A'):e.team;
 export const isGoal=(e:MatchEvent)=>isOwnGoal(e)||e.type==='GOAL'||(isV2(e)&&e.type==='SHOT'&&e.metadata.outcome==='GOAL');
-export function eventLabel(e:MatchEvent){return isV2(e)?`${actionDefinitions[e.type]?.label??e.type}${e.metadata.outcome?' · '+(actionLabels[String(e.metadata.outcome)]??e.metadata.outcome):''}`:e.type.replaceAll('_',' ')}
+export function eventLabel(e:MatchEvent){const detail=e.metadata.captureRevision===3?((e.metadata.tags??[]) as string[]).filter(t=>[...passTypes,'GOLAZO','ESCAPE_PRESSURE','SECOND_BALL'].includes(t)).map(t=>actionLabels[t]??t).join(' · '):'';return isV2(e)?`${actionDefinitions[e.type]?.label??e.type}${e.metadata.outcome?' · '+(actionLabels[String(e.metadata.outcome)]??e.metadata.outcome):''}${detail?' · '+detail:''}`:e.type.replaceAll('_',' ')}
 export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,string][]{
  const out:[string,string][]=[],a=e.playerId,b=String(e.metadata.opponentPlayerId??''),mate=e.relatedPlayerId,o=e.metadata.outcome,t=(e.metadata.tags??[]) as string[],has=(s:string)=>t.includes(s),add=(k:string,id=a)=>{if(id)out.push([id,k])};
  const linked=events.find(x=>x.id===e.metadata.linkedEventId);const pos=e.metadata.position as Point|undefined;
@@ -30,25 +32,26 @@ export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,strin
  ).length===1&&!events.some(x=>x.id!==e.id&&isV2(x)&&x.type===e.type&&
    x.playerId===a&&x.team===e.team&&x.metadata.opponentPlayerId===b&&
    x.timestamp===e.timestamp&&x.metadata.outcome===e.metadata.outcome);
- const counterpart=e.metadata.counterpartStats===true;
+ const counterpart=e.metadata.counterpartStats===true;const revised=e.metadata.captureRevision===3;
  switch(e.type){
  case'OWN_GOAL':add('ownGoals');break;
  case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);if(o==='ON_TARGET'&&counterpart&&!hasCounterpart('SAVE'))add('saves',b);break;
- case'PASS':if(o==='FAILED'&&counterpart&&!hasCounterpart('INTERCEPTION')){add('interceptions',b);if(annotationRules.interceptionIsRecovery)add('recoveries',b)}add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')||events.some(x=>isV2(x)&&x.type==='SHOT'&&x.metadata.linkedEventId===e.id)){add('keyPasses');add('chancesCreated')}break;
+ case'PASS':if(o==='FAILED'&&(!revised||has('INTERCEPTED'))&&counterpart&&!hasCounterpart('INTERCEPTION')){add('interceptions',b);if(annotationRules.interceptionIsRecovery)add('recoveries',b)}add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')||events.some(x=>isV2(x)&&x.type==='SHOT'&&x.metadata.linkedEventId===e.id)){add('keyPasses');add('chancesCreated')}break;
  case'DRIBBLE':add('dribblesAttempted');if(o==='COMPLETED'){add('dribblesCompleted');add('dribbledPast',b)}if(has('FOUL_WON')){add('foulsWon');add('fouls',b)}break;
  case'DUEL':add('duelsAttempted');add('duelsAttempted',b);add('duelsWon',o==='WON'?a:b);if(has('AERIAL')){add('aerialDuelsAttempted');add('aerialDuelsAttempted',b);add('aerialDuelsWon',o==='WON'?a:b)}break;
- case'TACKLE':add('tackles');if(o==='FOUL'){add('fouls');add('foulsWon',b)}if(has('BALL_RECOVERED'))recovery();break;
+ case'TACKLE':if(revised){add('tacklesAttempted');if(o==='WON')add('tacklesWon');}if(!revised||o==='WON')add('tackles');if(o==='FOUL'){add('fouls');add('foulsWon',b)}if(has('BALL_RECOVERED'))recovery();break;
  case'INTERCEPTION':if(counterpart&&!hasCounterpart('PASS','FAILED'))add('passesAttempted',b);add('interceptions');if(annotationRules.interceptionIsRecovery)recovery();break;
- case'RECOVERY':if(counterpart&&has('OPPONENT_ERROR')&&!hasCounterpart('TURNOVER'))add('turnovers',b);recovery();break;
+ case'PRESSURE':add('pressuresObserved');break;
+ case'RECOVERY':if(counterpart&&has('OPPONENT_ERROR')&&!hasCounterpart('TURNOVER'))add('turnovers',b);recovery();if(has('SECOND_BALL'))add('secondBallRecoveries');if(has('PRESSING'))add('pressuresWithRecovery',String(e.metadata.pressurePlayerId??''));break;
  case'BLOCK':if(counterpart&&!hasCounterpart('SHOT','BLOCKED'))add('shots',b);if(!(linked&&isV2(linked)&&linked.type==='SHOT'&&linked.metadata.outcome==='BLOCKED'&&linked.metadata.opponentPlayerId===a))add('blocks');break;
  case'CLEARANCE':add('clearances');break;case'TURNOVER':if(counterpart&&has('DISPOSSESSED')&&!hasCounterpart('RECOVERY'))add('recoveries',b);if(!(linked&&linked.playerId===a&&(linked.metadata.tags as string[]??[]).includes('POSSESSION_LOST')))add('turnovers');break;
  case'FOUL':add('fouls');add('foulsWon',b);break;
  case'TOUCH':add('touches');if(pos&&pos.x>=85&&pos.y>=25&&pos.y<=75)add('boxTouches');break;
  case'SAVE':if(counterpart&&!hasCounterpart('SHOT','ON_TARGET')){add('shots',b);add('shotsOnTarget',b)}add('saves');break;
- }if(has('POSSESSION_LOST'))add('turnovers');return out;
+ }if(revised&&e.type==='TACKLE'&&o==='WON'&&has('BALL_RECOVERED')&&!hasCounterpart('TURNOVER'))add('turnovers',b);if(has('POSSESSION_LOST'))add('turnovers');return out;
 }
 // Zero-valued result families remain tracked after edits and deletions.
-export function canonicalKeys(e:MatchEvent,events:MatchEvent[]){const keys=canonicalEffects(e,events).map(([,k])=>k);for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes(tag))keys.push(k+'Attempted',k+'Completed');const families:Record<string,string[]>={SHOT:['shots','shotsOnTarget','goals'],PASS:['passesAttempted','passesCompleted'],DRIBBLE:['dribblesAttempted','dribblesCompleted'],DUEL:['duelsAttempted','duelsWon'],RECOVERY:['recoveries',...(e.metadata.position?['highRecoveries']:[])],INTERCEPTION:['interceptions',...(annotationRules.interceptionIsRecovery?['recoveries',...(e.metadata.position?['highRecoveries']:[])]:[])],TOUCH:['touches',...(e.metadata.position?['boxTouches']:[])]};return [...new Set([...keys,...(families[e.type]??[]),...(keys.includes('passesAttempted')?families.PASS:[]),...(keys.includes('shots')?families.SHOT:[])])]}
+export function canonicalKeys(e:MatchEvent,events:MatchEvent[]){const keys=canonicalEffects(e,events).map(([,k])=>k);for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(e.type==='PASS'&&(e.metadata.tags as string[]??[]).includes(tag))keys.push(k+'Attempted',k+'Completed');const families:Record<string,string[]>={TACKLE:e.metadata.captureRevision===3?['tackles','tacklesAttempted','tacklesWon']:['tackles'],SHOT:['shots','shotsOnTarget','goals'],PASS:['passesAttempted','passesCompleted'],DRIBBLE:['dribblesAttempted','dribblesCompleted'],DUEL:['duelsAttempted','duelsWon'],RECOVERY:['recoveries',...(e.metadata.position?['highRecoveries']:[])],INTERCEPTION:['interceptions',...(annotationRules.interceptionIsRecovery?['recoveries',...(e.metadata.position?['highRecoveries']:[])]:[])],TOUCH:['touches',...(e.metadata.position?['boxTouches']:[])]};return [...new Set([...keys,...(families[e.type]??[]),...(keys.includes('passesAttempted')?families.PASS:[]),...(keys.includes('shots')?families.SHOT:[])])]}
 
 /** Credit only the two most recent passes in an uninterrupted, explicitly named sequence. */
 export function secondaryAssistCredits(events:MatchEvent[]):{goalId:string;playerId:string;passId:string}[]{

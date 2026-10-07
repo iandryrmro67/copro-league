@@ -12,6 +12,7 @@ export const coverageFamilies:Record<string,string[]>={
  'Duels':['duelsAttempted','duelsWon','aerialDuelsAttempted','aerialDuelsWon'],
  'Défense':['tackles','interceptions','recoveries','blocks','clearances'],
  'Récupérations dans le dernier tiers':['highRecoveries'], 'Touches dans la surface adverse':['boxTouches'], 'Pertes de balle':['turnovers'], 'Fautes':['fouls','foulsWon'],
+ 'Tacles détaillés':['tacklesAttempted','tacklesWon'], 'Pressing et second ballon':['pressuresObserved','pressuresWithRecovery','secondBallRecoveries'],
  'Arrêts':['saves'], 'Touches':['touches'],
 };
 export const analysisLabels={not_started:'Non commencée',in_progress:'En cours',review:'À vérifier',validated:'Validée'};

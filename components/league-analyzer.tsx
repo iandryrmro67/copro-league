@@ -1,4 +1,6 @@
 "use client";
+import { AnnotationWorkflow } from "./annotation-workflow";
+import { contactEpisodes } from "@/lib/contact-episodes";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Eye,
@@ -15,6 +17,7 @@ import {
   analysisCounts,
   beginAnalysis,
   annotatedScore,
+  previousPass,
 } from "@/lib/match-analysis";
 import { actionDefinitions, eventLabel } from "@/lib/actions";
 import { youtubeId } from "@/lib/engine";
@@ -43,7 +46,7 @@ import {
   retargetCapture,
   correctHistoricalAction,
   recordPreciseAction,
-  recordCirculationPass,
+
   prepareActionCorrection,
   reconcileActionLinks,
   type CaptureDraft,
@@ -54,6 +57,8 @@ const clock = (s: number | null) =>
     : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const blank = (type: string): CaptureDraft => ({
   type,
+  captureRevision:3,
+  passTypeChosen:type==="PASS"?false:undefined,lossChosen:type==="DRIBBLE"?false:undefined,pressureChosen:false,
   outcome: "",
   mate: "",
   opponent: "",
@@ -104,7 +109,6 @@ export function Analyzer({
     [future, setFuture] = useState<Match[]>([]),
     [message, setMessage] = useState(recoveredCorrection ? "Ancienne correction rechargée depuis l’action enregistrée. Vérifie les choix avant de sauvegarder." : ""),
     [lastId, setLastId] = useState<string | null>(null);
-  const [positionCapture, setPositionCapture] = useState(false);
   const [chainTeam, setChainTeam] = useState<"A" | "B" | null>(null);
   const resumePlayback = useRef(false);
   const video = useRef<VideoPlayerHandle>(null),
@@ -184,6 +188,8 @@ export function Analyzer({
       captureActive: !!draft,
       participantChosen: draft?.participantChosen ?? false,
       detailChosen: draft?.detailChosen ?? false,
+      captureRevision:draft?.captureRevision,
+      passTypeChosen:draft?.passTypeChosen,lossChosen:draft?.lossChosen,pressureChosen:draft?.pressureChosen,pressurePlayerId:draft?.pressurePlayerId,
       precisionChosen: draft?.precisionChosen,
       positionPending: draft?.positionPending,
       correctionVersion: editing ? 1 as const : undefined,
@@ -288,6 +294,7 @@ export function Analyzer({
       remember(result.match);
       setSequence(result.sequenceId);
       setActor(result.nextActor);
+      if(value.type==="PASS"&&result.nextActor)setChainTeam(m.participants.find(p=>p.playerId===result.nextActor)?.team??null);
       setDraft(null);
       setEditing(null);
       setManual(false);
@@ -334,7 +341,10 @@ export function Analyzer({
       setManual(true);
       committed.current = false;
       setMessage("");
-      const next = { ...blank(type), positionPending: positionCapture, ...initial };
+      const linkedPass=type==="SHOT"?previousPass(m,actor,sequence,marked.timestamp):null;
+      const next = { ...blank(type), positionPending: true, ...initial,
+        ...(type==="SHOT"&&initial.outcome==="GOAL"&&linkedPass?{mate:linkedPass.playerId,participantChosen:true}:{}),
+      };
       setDraft(next);
       if (!editing && captureStep(next) === "ready") commit(next, marked);
     } catch (error) {
@@ -342,6 +352,10 @@ export function Analyzer({
     }
   }
   function update(value: CaptureDraft) {
+    if(value.type==="SHOT" && value.outcome==="GOAL" && !value.participantChosen && !editing){
+      const pass=previousPass(m,actor,sequence,(frozen.current??moment()).timestamp);
+      if(pass)value={...value,mate:pass.playerId,participantChosen:true,linkedEventId:pass.id};
+    }
     setDraft(value);
     if (!editing && captureStep(value) === "ready") commit(value);
   }
@@ -372,24 +386,7 @@ export function Analyzer({
         return;
       }
       try {
-        const result = recordCirculationPass(m, {
-          from: actor,
-          to: id,
-          sequenceId: sequence,
-          moment: moment(),
-        });
-        remember(result.match);
-        setActor(result.nextActor);
-        setSequence(result.sequenceId);
-        setLastId(result.event.id);
-        setStamp(clock(result.event.timestamp));
-        if (!showVideo)
-          setPlayhead(result.event.metadata.videoTimestamp as number);
-        setMessage(
-          `${name(actor)} → ${name(id)} · passe ajoutée. ${name(id)} a le ballon.`,
-        );
-        frozen.current = null;
-        committed.current = false;
+        start("PASS",{outcome:"COMPLETED",mate:id,participantChosen:true});
       } catch (e) {
         setMessage((e as Error).message);
       }
@@ -796,8 +793,6 @@ export function Analyzer({
           draft={draft}
           editing={edited}
           busy={busy}
-          positionCapture={positionCapture}
-          onPositionCapture={setPositionCapture}
           chainTeam={chainTeam}
           onChain={toggleChain}
           onFailedChain={() => start("PASS", { outcome: "FAILED" })}
@@ -821,6 +816,10 @@ export function Analyzer({
               Annuler
             </button>
           )}
+          {lastId && m.events.some(e=>e.id===lastId&&e.type==="SHOT"&&e.metadata.outcome==="GOAL") && <button type="button" className="button" onClick={()=>{
+            const last=m.events.find(e=>e.id===lastId)!;const tags=(last.metadata.tags??[]) as string[];
+            remember({...m,events:m.events.map(e=>e.id===lastId?{...e,metadata:{...e.metadata,tags:tags.includes("GOLAZO")?tags.filter(t=>t!=="GOLAZO"):[...tags,"GOLAZO"]}}:e)});
+          }}>★ Golazo · décoratif</button>}
           {lastId && m.events.some((e) => e.id === lastId) && (
             <button
               type="button"
@@ -832,6 +831,9 @@ export function Analyzer({
           )}
         </div>
       )}
+          <AnnotationWorkflow/>
+          <details><summary>Contacts observés ≈ · indicateur partiel</summary><p>Épisodes déduits des actions saisies, séparés des touches exactes et hors note.</p>{Object.entries(contactEpisodes(m.events)).map(([id,n])=><p key={id}>{name(id)} : {n}</p>)}</details>
+
       <EventTimeline
         match={m}
         data={data}

@@ -70,3 +70,37 @@ La sauvegarde d’une analyse ne compare plus son ancienne feuille manuelle avec
 Le réglage « Animations » propose selon l’appareil, activées ou réduites. Le choix explicite est conservé sur cet appareil ; le mode automatique respecte la préférence d’accessibilité du système. Les effets détectent aussi les souris connectées aux PC tactiles. Le curseur natif reste actif dans les champs, vidéos, fenêtres modales et l’atelier de précision.
 
 Les corrections anciennes laissées ouvertes avec un auteur différent sont rechargées depuis l’événement enregistré, avec message explicite. Aucun événement n’est réécrit pendant la reprise. Les corrections de cette version portent un marqueur de session qui permet de conserver un changement d’auteur volontaire après rechargement.
+
+## Saisie révisée — 7 octobre 2026
+
+Joueurs par équipe et ordre alphabétique français. Chaque passe doit avoir un type
+explicite (normale, latérale, retrait, avant, casse lignes, renversement, centre,
+longue, profondeur ou inconnu). Les caractéristiques peuvent se combiner ; une
+seule direction. Passe clé et assist se déduisent des tirs/buts compatibles.
+La chaîne conserve le receveur et ouvre le type de sa prochaine passe.
+
+Chaque nouvelle action attend sa dernière étape : position réellement observée
+sur le terrain schématique de foot à 5, ou Position inconnue. Cliquer le terrain
+enregistre ; au clavier, confirmer les coordonnées évite un enregistrement
+pendant la frappe du premier chiffre. Une passe peut aussi avoir une arrivée
+observée, choisie avant le départ. Rien n’est repris d’une scène approximative.
+Les cartes existantes lisent ces coordonnées ; une absence de position reste
+absente. Les positions suivent le sens d’attaque de l’équipe de l’auteur.
+
+Sortie de pression qualifie un dribble éliminant un adversaire sans exiger un
+gain vers le but. Second ballon qualifie une récupération, sans crédit en plus.
+Pressing est un contexte autonome ou lié au récupérateur, avec un presseur
+distinct si identifié. Golazo est décoratif ; CSC conserve le score adverse
+sans tir ou assist. Le guide Workflow explique les conditions des liens.
+
+Les nouvelles observations portent captureRevision=3. Les passes ratées ne
+créent une interception que si explicitement qualifiées ainsi ; une équipe qui
+conserve n’a pas de perte automatique. Les tacles ont tentatives et réussites
+séparées, et seuls les réussis alimentent le compteur défensif des nouveaux
+événements. Les anciens événements gardent leur interprétation et leurs tags.
+Aucun bonus supplémentaire pour les nouveaux types, pressing ou Golazo.
+Les contacts observés ≈ sont des épisodes partiels déduits, séparés des touches
+exactes et hors notes. Aucun schéma SQL modifié.
+
+Vérification : tests de flux, sauvegarde/validation, compteurs et estimations ;
+essais navigateur sur fixture sans écrire dans les données réelles.
