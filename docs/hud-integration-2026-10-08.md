@@ -16,18 +16,24 @@ Le document est une référence de conception ; ses scripts et instructions emba
 - Awards majeurs dorés, distinctions négatives en rouge pointillé ; règle MENACE II SOCIETY corrigée : dribbles réussis et fautes subies ≥ P75 tous deux requis, comme dans la référence.
 - Replays avec miniature YouTube uniquement pour une vidéo YouTube ; autre vidéo avec placeholder. Authentification Supabase, édition administrateur et stockage existants conservés.
 
-## À reprendre / décisions nécessaires
+## Choix confirmés
 
-- Inscription/désinscription par le joueur, liste d’attente, limite d’inscription et rappels : nécessitent un lien compte/joueur et une politique de gestion des places. Le bouton ouvre actuellement la fiche du match.
+- Pas d’inscription sur le site, ni de liste d’attente : les participants sont choisis à partir du sondage WhatsApp et ajoutés par un administrateur.
+- Mode capitaine : 60 secondes par choix, puis tirage au sort d’un joueur encore disponible. Le compteur repart à chaque tour. Les équipes ne sont enregistrées qu’après validation.
+
+## Travail restant / choix non précisés
+
 - Réglage des seuils de division depuis l’administration : les seuils du document sont appliqués en code. La référence ne tranche pas la division affichée en mode Carrière ; le même calcul sur la population Carrière est utilisé.
 - Nouveau wizard complet de timeline, questions conditionnelles, brouillon/publication et historique des réponses : la saisie existante reçoit les styles HUD, mais ce parcours complet reste à construire.
 - Axe « collectif » supplémentaire du radar et scores composites des nouvelles cartes : pas de nouvelle formule inventée. Le radar existant à six axes et les statistiques observées sont conservés.
-- Décompte des capitaines, sélection automatique à expiration et scène cinématique complète du tirage : règles de délai et de secours à décider. Le tirage fonctionne sans délai automatique.
+- Scène cinématique complète du tirage : animation plus poussée restant à réaliser. Le mode capitaine dispose du compteur et du choix automatique confirmés ci-dessus.
 - Réplique exacte de chaque graphe et de toutes les micro-animations des 30 planches : intégration des composants principaux, pas une reproduction exhaustive de toutes les variantes.
 - `RTK.md`, référencé par les instructions locales, est introuvable dans les dossiers de travail et leurs parents.
 
 ## Vérification
 
-Tests métier, PostgreSQL local et permissions : 76 tests réussis. Types et compilation de production vérifiés. Vérification visuelle locale sur ordinateur (1440 px) et mobile (390 px), avec un jeu de données local et une API d’aperçu temporaire en lecture seule. Aucune écriture de données de production pendant cette vérification.
+Tests métier, PostgreSQL local et permissions : 81 tests réussis, dont 5 tests du délai capitaine (expiration, alternance, doublons, fin du tirage). Types et compilation de production vérifiés. Vérification visuelle locale sur ordinateur (1440 px) et mobile (390 px), avec un jeu de données local et une API d’aperçu temporaire en lecture seule. Aucune écriture de données de production pendant cette vérification.
 
 Base : dernière version distante Vercel/Supabase, commit `6074806`. Le checkout initial Cloudflare avait un historique distinct ; les changements ont été reportés sur cette base récente pour préserver la migration.
+
+Mise à jour : compteur capitaine vérifié dans le navigateur sur ordinateur et mobile, expiration réelle après 60 secondes avec choix automatique, remise à 60 secondes après un choix manuel et arrêt à la fin du tirage.

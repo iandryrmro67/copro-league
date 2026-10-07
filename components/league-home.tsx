@@ -30,8 +30,8 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
   const active = data.players.filter(p => !p.archived && summaries.some(s => s.player.id === p.id));
   const weekday = next ? new Date(next.date).toLocaleDateString('fr-FR', { weekday: 'long', timeZone: 'Europe/Paris' }) : 'On joue';
   const questions = [
-    ['Comment préparer un match ?', 'Un administrateur crée le match et sélectionne ses participants. La fiche du match rassemble la date, le lieu et les équipes.'],
-    ['Comment sont tirées les équipes ?', 'Trois modes sont disponibles : cartes, équilibré par ELO ou capitaine. Sélectionne les participants puis lance le tirage.'],
+    ['Comment préparer un match ?', 'Les joueurs sont choisis à partir du sondage WhatsApp, puis ajoutés au match par un administrateur. La fiche rassemble la date, le lieu et les équipes. Il n’y a pas d’inscription ni de liste d’attente sur le site.'],
+    ['Comment sont tirées les équipes ?', 'Trois modes sont disponibles : cartes, équilibré par ELO ou capitaine. En mode capitaine, chaque choix dure 60 secondes ; à zéro, un joueur disponible est tiré au sort.'],
     ['Comment marche l’ELO ?', 'Les victoires, nuls et défaites font évoluer l’ELO selon la force des équipes. Battre une équipe plus forte rapporte davantage de points.'],
     ['Où revoir les matchs ?', 'Ouvre les replays ou l’onglet Vidéo d’un match. Les actions horodatées de la timeline permettent de rejoindre le passage correspondant.'],
     ['Que signifient les divisions ?', 'Régional, National, Ligue 2 et Ligue 1 sont calculés par percentile d’ELO dans la saison : moitié basse, top 50 %, top 20 % et top 5 %. Les ex æquo partagent la même division.'],

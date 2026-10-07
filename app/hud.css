@@ -123,3 +123,6 @@ h3 { font-size: 24px; line-height: 1.1; }
 
 .recognition-award .award-icon,.palmares-item>span { color:var(--gold); }.recognition-award.banter .award-icon,.recognition-award.banter h2,.palmares-item.banter>span,.badge-card.allegation .badge-icon { color:var(--danger); }
 @media(max-width:1000px) and (min-width:601px) { .homegrid,.leadersgrid,.playersgrid { gap:16px; } }
+
+.captain-turn { align-items:center; gap:24px; margin:24px 0; }.captain-clock { min-width:110px; text-align:right; color:var(--trichome); }.captain-clock strong { display:block; font:900 48px/1 var(--font-display); }.captain-clock small { font:400 12px var(--font-hud); }.captain-clock-track { height:3px; margin-top:8px; background:var(--graphite); }.captain-clock-track i { display:block; height:100%; background:currentColor; transition:width .25s linear; }.captain-clock.urgent { color:var(--danger); }.captain-auto { padding:12px 16px; margin-top:16px; border-left:2px solid var(--kush); background:var(--resin); font-size:13px; }
+@media(max-width:600px) { .captain-turn { flex-wrap:wrap; }.captain-clock { text-align:left; }.captain-turn h3 { flex:1; min-width:180px; } }
