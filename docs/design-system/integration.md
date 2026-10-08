@@ -14,9 +14,12 @@ Les structures, classes, styles et SVG des planches suivantes sont réutilisés,
 | `efe76521` | Saisie guidée de timeline : étapes, question, choix, heure et validation | `league-action-wizard.tsx`, `league-analyzer.tsx` |
 | `87cd14e7` | Cartes de badges et SVG originaux | `league-recognition.tsx`, `source-recognition-glyphs.json` |
 | `dc3e69d1` | Cartes awards, SVG des trophées et grand bandeau du Copro d’Or | `league-recognition.tsx`, `source-recognition-glyphs.json` |
+| `ba954663` | Révélation de carte, distribution ELO et balance, déplacements des choix capitaine | `league-draft-motion.tsx`, `league-draft.tsx` |
+| `fa5d28eb` | Profil complet : KPI, insights, sept domaines, mesures, forces, rating, contributions, scatterplot, heatmap, division et collectif | `league-player-source.tsx`, `hud-source-templates.json` |
+| `3d6c36e1` | Tracé et remplissage du monogramme, chargement, rideaux verts et noirs lors des navigations | `league-motion.tsx`, `app/hud-motion-profile.css` |
 | `08524bd4` | Barres de comparaison par domaine | `league-source-modules.tsx` |
 
-Les styles copiés sont isolés dans `app/hud-modules.css`. Les adaptations concernent la largeur disponible, les téléphones, les libellés français complets, les aides aux statistiques et les boutons reliés aux fonctions du site. Les polices locales, logos et écrans d’accueil déjà intégrés sont conservés.
+Les styles copiés sont isolés dans `app/hud-modules.css` et `app/hud-motion-profile.css`. Les nouveaux blocs sont rendus à partir des nœuds du HTML exporté, conservés dans `hud-source-templates.json`. Les adaptations concernent la largeur disponible, les téléphones, les libellés français complets, les aides aux statistiques et les boutons reliés aux fonctions du site. Les polices locales, logos et écrans d’accueil déjà intégrés sont conservés.
 
 Les exemples de données et les compteurs de démonstration qui remettent les valeurs à zéro dans le fichier exporté sont remplacés par les données réelles. Les animations d’entrée et de survol restent présentes, avec respect de la réduction des animations.
 
@@ -34,10 +37,10 @@ Les exemples de données et les compteurs de démonstration qui remettent les va
 
 Conformément à la demande de noter les points incertains sans bloquer l’intégration :
 
-- Le profil complet `fa5d28eb` (graphiques, sept domaines et toutes ses sous-sections) et le module duo `3970e469` ne sont pas encore repris intégralement. La comparaison utilise les six domaines calculés actuellement par le site.
+- Le module duo `3970e469` reste à reprendre intégralement. La comparaison utilise les six domaines calculés actuellement par le site.
 - Le domaine « Progression », certaines variantes de passes du wizard et la nouvelle définition de « Collectif » nécessitent des champs et règles supplémentaires. Aucune valeur fictive ni nouvelle formule n’a été ajoutée.
 - La planche de profil propose cinq divisions à seuils ELO fixes, tandis que les autres écrans et le site utilisent une autre échelle. Les seuils et calculs existants sont conservés dans cette livraison.
-- Les kits complets de formulaires, chargement et retours d’action ne sont pas encore tous remplacés par leurs modules sources.
+- Les kits complets de formulaires et retours d’action ne sont pas encore tous remplacés par leurs modules sources. Le chargement et les transitions sont désormais reliés aux actions réelles : séquence originale de 8 secondes à l’ouverture, rideaux de transition sur les liens internes, chargement sans pourcentage fictif pendant une requête, réduction des animations respectée.
 - Les barres du bandeau Copro d’Or montrent explicitement la pondération réelle des composantes disponibles. Les palmarès déjà figés conservent leurs scores enregistrés.
 
 ## Vérification
@@ -46,4 +49,6 @@ Vérification visuelle sur ordinateur et téléphone, avec les données publique
 
 Les régressions de sélection de saison, terrain de remplacement, liens directs et heures historiques sont couvertes par `tests/league-selection.test.ts`.
 
-Validation finale : 88 tests réussis, compilation de production réussie, contrôle TypeScript et lint des nouveaux modules réussis. Le lint global des anciens composants contient encore des erreurs préexistantes ; elles sont comparées à la version précédente avant publication.
+Validation finale : 91 tests réussis, compilation de production réussie, contrôle TypeScript et lint des nouveaux modules réussis. Le lint global des anciens composants contient encore des erreurs préexistantes ; elles sont comparées à la version précédente avant publication.
+
+Le profil affiche les données réellement observées. Le graphique volume/efficacité utilise les passes tentées et réussies, car le taux de passes clés menant à un tir n’est pas disponible. Les domaines incomplets restent inconnus ; le radar garde des interruptions plutôt que des zéros fictifs. La composition du rating conserve le calcul actuel, y compris bonus non linéaire, pénalités, arrondis et ajustements administrateur. Les animations de draft tournent une fois par action, avec les noms, équipes et sommes ELO réels.
