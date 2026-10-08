@@ -132,3 +132,10 @@ input:not([type=checkbox]):not([type=range]):not([type=hidden]), textarea, selec
   .html-shortcuts, .html-locker-wall { gap: var(--grid-gap); }
   .html-room-match { padding: var(--sp-6); }
 }
+@media (max-width: 639px) {
+  /* Keep the division label, threshold and player marker within the card inset. */
+  .ds-profile-page [data-source-template=division] > section:first-child .prow {
+    grid-template-columns: 140px minmax(0, 1fr) auto !important;
+    gap: var(--sp-2) !important;
+  }
+}

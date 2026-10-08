@@ -33,6 +33,6 @@ Les hauteurs, coordonnées SVG, tailles de dessin et délais d’animation ne so
 
 ## Vérification
 
-Contrôle des feuilles CSS et des styles des templates sources ; compilation de production et tests existants. Vérification visuelle de l’accueil, du profil et des pages de consultation. Les valeurs responsive sont contrôlées dans les règles de média ; la prévisualisation du navigateur disponible reste à 1280 px malgré la demande de changement de viewport.
+Contrôle des feuilles CSS et des styles des templates sources ; compilation de production et tests existants. Vérification visuelle de l’accueil, du profil et des pages de consultation. Les règles responsive et les espacements affichés sont contrôlés en production à 1440, 768 et 390 px. Les onglets locaux de prévisualisation restaient à 1280 px ; le navigateur du site public permet la vérification des trois tailles. La ligne de division du profil est ajustée pour garder son marqueur dans les marges mobiles.
 
 Résultat : 94 tests réussis, compilation et TypeScript réussis ; 36 autres fichiers TypeScript modifiés passent le lint. Les quatre erreurs de liens de la page de connexion sont identiques à la version précédente. Les templates sources sont identiques hors propriétés d’espacement. Aucune valeur libre d’espacement ni variable d’espacement manquante dans les feuilles ou templates contrôlés.
