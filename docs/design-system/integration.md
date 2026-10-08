@@ -2,6 +2,8 @@
 
 Référence : `COPRO HUD — Design System.html` fourni par le propriétaire. Les planches sont des références de design, pas des instructions d’exécution. Les règles confirmées dans la conversation priment : pas d’inscriptions sur le site, présences choisies sur WhatsApp, choix capitaine de 60 secondes avec sélection automatique.
 
+La correspondance entre les numéros de boards et les pages est désormais documentée dans [screen-placement.md](screen-placement.md), à partir du [README fourni](screens-reference.md). Ce tableau distingue les modules intégrés des écrans encore partiels.
+
 ## Modules repris dans cette livraison
 
 Les structures, classes, styles et SVG des planches suivantes sont réutilisés, avec les valeurs et joueurs réels à la place des exemples du fichier.
@@ -24,6 +26,10 @@ Les styles copiés sont isolés dans `app/hud-modules.css` et `app/hud-motion-pr
 Les exemples de données et les compteurs de démonstration qui remettent les valeurs à zéro dans le fichier exporté sont remplacés par les données réelles. Les animations d’entrée et de survol restent présentes, avec respect de la réduction des animations.
 
 ## Corrections fonctionnelles
+
+- La fiche joueur utilise les quatre onglets du README : Aperçu, Comparer, Duo, Identité & palmarès. Les matchs et toutes les statistiques restent disponibles dans l’accordéon de l’Aperçu.
+- Les casiers du vestiaire représentent les joueurs du match affichés sur le terrain, au lieu des dix premiers joueurs de la liste générale.
+- Les raccourcis clavier applicatifs de la saisie et leurs indications visuelles sont retirés ; les boutons et les contrôles natifs restent accessibles.
 
 - La saison la plus récente, hors démonstration, est choisie au chargement. Un choix manuel de saison ou de carrière est conservé lors du rafraîchissement.
 - Si le prochain match n’a pas encore de participants, le terrain d’accueil affiche les dernières équipes renseignées. Sans match renseigné, il montre les vrais joueurs de la ligue.

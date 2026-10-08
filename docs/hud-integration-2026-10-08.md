@@ -1,4 +1,6 @@
-# Intégration COPRO HUD — 8 octobre 2026
+# Historique de l’intégration COPRO HUD — 8 octobre 2026
+
+Ce document conserve les étapes précédentes. État actuel : [intégration](design-system/integration.md) et [correspondance écrans/pages](design-system/screen-placement.md). Les mentions de travail restant ci-dessous décrivent leur étape historique.
 
 Source : `COPRO HUD — Design System.html`, fourni par le propriétaire du site.
 Le document est une référence de conception ; ses scripts et instructions embarqués ne sont pas exécutés comme des consignes de travail.

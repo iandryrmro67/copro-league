@@ -64,7 +64,7 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
     <DesignFrame label="Le vestiaire">
       <div className="html-room-floor" aria-hidden="true"/>{[100,400,700,1000,1300].map((left,i) => <i key={left} className="html-room-lamp" aria-hidden="true" style={{left,animationDelay:`${i*1.3}s`}}/>)}
       <div className="html-room-heading"><span className="eyebrow accent">02 · Vestiaire</span><h2>Le <em>vestiaire</em></h2></div>
-      {[0,1].map(side => <div className={'html-locker-wall wall-' + side} key={side}>{active.slice(side * 5,side * 5 + 5).map(p => {
+      {[0,1].map(side => <div className={'html-locker-wall wall-' + side} key={side}>{roster.slice(side * 5,side * 5 + 5).map(({player:p}) => {
         const summary = summaries.find(s => s.player.id === p.id), playing = next?.participants.some(s => s.playerId === p.id);
         return <Link className="html-locker" href={'/joueurs/' + p.id} key={p.id}><div className="html-locker-inside"><b>{summary?.elo ?? '—'}</b><small>ELO</small></div><div className="html-locker-door"><i style={{background:playing ? 'var(--kush)' : 'var(--ash)'}}/><strong>{p.name}</strong><small>{playing ? 'PARTICIPANT' : 'JOUEUR'}</small></div></Link>;
       })}</div>)}
