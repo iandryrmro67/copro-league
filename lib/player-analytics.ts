@@ -7,7 +7,7 @@ export const profileDomains = [
   { name: 'Finition', axis: 'Finition', keys: ['goals', 'shots', 'conversion', 'shotsOnTarget'] },
   { name: 'Création', axis: 'Création', keys: ['keyPasses', 'assists', 'secondaryAssists', 'chancesCreated', 'keyPassShotPct'] },
   { name: 'Passes', axis: 'Passe', keys: ['passPct', 'passesAttempted', 'passPressurePct', 'longPassPct', 'crossPct'] },
-  { name: 'Progression', axis: '', keys: ['lineBreakingPasses', 'receivedLastThird', 'forwardCarries', 'dribblesCompleted', 'dribblePct'] },
+  { name: 'Progression', axis: 'Percussion', keys: ['lineBreakingPasses', 'receivedLastThird', 'forwardCarries', 'dribblesCompleted', 'dribblePct', 'boxTouches', 'foulsWon'] },
   { name: 'Défense', axis: 'Défense', keys: ['interceptions', 'recoveries', 'defensiveDuelPct', 'successfulTackles', 'tackles', 'blocks'] },
   { name: 'Duels', axis: 'Duels', keys: ['duelsAttempted', 'duelPct', 'offensiveDuelPct', 'aerialPct'] },
   { name: 'Collectif', axis: '', keys: ['appearances', 'ratingStd', 'winRate', 'unmarkedPassPct'] },

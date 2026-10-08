@@ -20,6 +20,19 @@ export function homePitch(data: League, matches: Match[], now: number) {
   }).sort((a, b) => (a.side === 'A' ? 0 : a.side === 'B' ? 1 : 2) - (b.side === 'A' ? 0 : b.side === 'B' ? 1 : 2)) : data.players.filter(p => !p.archived && !p.demo).slice(0, 10).map(player => ({ player, side: null }));
   return { match, roster };
 }
+
+const homePositions = [[356,553],[455,553],[591,501],[651,553],[489,647],[1084,553],[985,553],[849,501],[789,553],[951,647]];
+/** One shared visible lineup for the pitch and lockers. Positions never cross teams. */
+export function homeLineup(roster: ReturnType<typeof homePitch>['roster'], round = 0) {
+  const teams = [roster.filter(p => p.side === 'A').slice(0,5), roster.filter(p => p.side === 'B').slice(0,5)];
+  const unassigned = roster.filter(p => p.side == null);
+  for (const team of teams) while (team.length < 5 && unassigned.length) team.push(unassigned.shift()!);
+  return teams.flatMap((team, side) => team.map((entry, index) => {
+    const slot = side * 5 + ((index + round) % team.length + team.length) % team.length;
+    const [left, top] = homePositions[slot];
+    return { ...entry, fieldSide: side === 0 ? 'A' : 'B', slot, left, top, width: top > 600 ? 68 : top < 520 ? 51 : 57 };
+  }));
+}
 export function matchTabFromQuery(value: string | null) {
   return ['summary', 'teams', 'stats', 'video', 'timeline'].includes(value ?? '') ? value! : 'summary';
 }

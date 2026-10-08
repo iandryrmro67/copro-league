@@ -4,7 +4,7 @@ Référence de conception : [README des écrans fourni le 8 octobre 2026](screen
 
 | Destination | Boards du README | Sources HTML identifiées | État actuel |
 | --- | --- | --- | --- |
-| Accueil `/` | 42, 43 ; terrain 20 | `134781fd`, `ec2816df`, `2ebecbd2` | Quatre sections issues de la version à plat ; terrain toujours peuplé. Vestiaire lié aux joueurs affichés du match. Comportements de scroll du board 42 à terminer. |
+| Accueil `/` | 42, 43 ; terrain 20 | `134781fd`, `ec2816df`, `2ebecbd2` | Quatre sections issues de la version à plat ; terrain toujours peuplé. Terrain et vestiaire partagent la même composition, groupée par équipe. Les positions varient toutes les 12 secondes dans le même camp. Comportements de scroll du board 42 à terminer. |
 | Chargement et navigation | 29 | `3d6c36e1` | Logo et rideaux reliés au chargement et aux liens internes. |
 | Consultation d’un match `/matchs/:id` | 31 | `27c82ce1` | Bandeau repris ; consultation des résultats et timeline conservée. Dashboard complet à poursuivre. |
 | Draft `/draft` | 37, 28, 04 | `ba954663`, `6e94c8fd`, `d311690e` | Trois modes, révélation et déplacements animés. Choix capitaine de 60 secondes puis tirage automatique. |
@@ -26,7 +26,7 @@ Le board 05 est ancien. Les boards supprimés 10–16, 32–35 et 38–40 ne ser
 
 - « Retenu » indique les versions à privilégier ; « Proposé » désigne une référence conçue dont le README ne prétend pas qu’elle a été validée. L’intégration déjà demandée par le propriétaire continue sans créer une nouvelle procédure de validation.
 - La consigne humaine « pas d’inscription » prime sur le bouton « Je suis partant » décrit dans le README. Les joueurs du match sont sélectionnés depuis le sondage WhatsApp.
-- Les chiffres des exemples ne sont pas utilisés pour compléter les observations manquantes. Progression et certaines mesures avancées restent inconnues ; les règles de division et de rating existantes sont conservées.
+- Les chiffres des exemples ne sont pas utilisés pour compléter les observations manquantes. Les mesures avancées de progression restent inconnues ; le domaine Progression utilise la percussion déjà observée (dribbles, touches dans la surface, fautes subies) ; les règles de division et de rating existantes sont conservées.
 - Les adaptations mobile réorganisent les composants existants : aucun écran mobile d’accueil ou de timeline n’est présenté comme fourni dans le document.
 
 Ce tableau est l’état de l’intégration, pas une déclaration que tous les écrans sont reproduits intégralement.

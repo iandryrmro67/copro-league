@@ -6,7 +6,7 @@ import { teamName } from '@/lib/model';
 import { youtubeId, type Summary } from '@/lib/engine';
 import { divisionFor } from '@/lib/divisions';
 import { Calendar, Empty, date, fmt, time } from './league-ui';
-import { homePitch } from '@/lib/league-selection';
+import { homePitch, homeLineup } from '@/lib/league-selection';
 import { homeScenery } from './home-scenery';
 import { ArrowRight, Play } from 'lucide-react';
 
@@ -20,6 +20,11 @@ export function Replays({ matches }: { matches: Match[] }) {
 
 export function Home({ data, summaries, matches, seasonName, filters, divisionPopulation }: { data: League; summaries: Summary[]; matches: Match[]; seasonName: string; filters: React.ReactNode; divisionPopulation: Summary[] }) {
   const [now] = useState(() => Date.now());
+  const [positionRound, setPositionRound] = useState(() => Math.floor(Date.now() / 1000) % 5);
+  useEffect(() => {
+    const timer = window.setInterval(() => setPositionRound(round => round + 1), 12000);
+    return () => window.clearInterval(timer);
+  }, []);
   const next = [...matches].filter(m => m.status === 'scheduled' && new Date(m.date).getTime() > now).sort((a, b) => a.date.localeCompare(b.date))[0];
   const done = matches.filter(m => m.status === 'finished');
   const eloLeaders = summaries.filter(s => s.appearances > 0 && !s.player.archived).sort((a, b) => b.elo - a.elo).slice(0, 5);
@@ -27,6 +32,7 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
   const scorer = [...summaries].filter(s => s.stats.assists != null).sort((a, b) => (b.stats.assists ?? 0) - (a.stats.assists ?? 0))[0];
   const wildest = [...done].sort((a, b) => (b.scoreA ?? 0) + (b.scoreB ?? 0) - (a.scoreA ?? 0) - (a.scoreB ?? 0))[0];
   const { match: pitchMatch, roster } = homePitch(data, matches, now);
+  const lineup = homeLineup(roster, positionRound);
   const active = data.players.filter(p => !p.archived && summaries.some(s => s.player.id === p.id));
   const weekday = next ? new Date(next.date).toLocaleDateString('fr-FR', { weekday: 'long', timeZone: 'Europe/Paris' }) : 'On joue';
   const questions = [
@@ -39,7 +45,6 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
   ];
   const kickoff = next ? time(next.date).replace(':', 'h') : '';
   const record = [...summaries].filter(s => s.appearances > 0).flatMap(s => [{ name: s.player.name, elo: s.elo }, ...s.history.filter(h => done.some(m => m.id === h.matchId)).map(h => ({ name: s.player.name, elo: h.elo }))]).sort((a, b) => b.elo - a.elo)[0];
-  const pitchPositions = [[356,553],[455,553],[591,501],[651,553],[489,647],[1084,553],[985,553],[849,501],[789,553],[951,647]];
   const numberTiles = [
     [String(goals), 'Buts marqués', `en ${done.length} matchs de la saison, soit ${fmt(done.length ? goals / done.length : null)} par soirée`],
     [wildest ? `${wildest.scoreA}–${wildest.scoreB}` : '—', 'Score le plus fou', wildest ? `Match #${wildest.number} · ${date(wildest.date)}` : 'En attente du premier résultat'],
@@ -57,16 +62,16 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
       })}{!eloLeaders.length && <Empty>Le classement commence après le premier match.</Empty>}<Link className="html-text-link" href="/stats">Voir tout →</Link></section>
       <section className="html-fixture"><span className="eyebrow accent">Prochain match{next ? ' · #' + next.number : ''}</span><h1>{next ? weekday : 'On joue'}<br/><em>{next ? kickoff : 'quand ?'}</em></h1>{next ? <><p className="html-teams"><span>{teamName(next, 'A')}</span><b>VS</b><span>{teamName(next, 'B')}</span></p><p className="html-fixture-context">{date(next.date)} · {next.participants.length} joueurs</p><Link className="html-primary" href={'/matchs/' + next.id}>Voir le match <ArrowRight size={26}/></Link></> : <><p className="html-fixture-context">Le prochain rendez-vous reste à programmer.</p><Link className="html-primary" href={data.admin ? '/admin' : '/matchs'}>{data.admin ? 'Créer un match' : 'Voir les matchs'}<ArrowRight size={26}/></Link></>}</section>
       {pitchMatch && <><div className="html-team-label team-a">{teamName(pitchMatch, 'A')}</div><div className="html-team-label team-b">{teamName(pitchMatch, 'B')}</div><Link className="html-pitch-context" href={'/matchs/' + pitchMatch.id}>{pitchMatch.status === 'scheduled' && Date.parse(pitchMatch.date) > now ? 'Prochain match' : 'Dernières équipes'} · #{pitchMatch.number}</Link></>}
-      {!pitchMatch && <span className="html-pitch-context">Joueurs de la ligue</span>}<div className="html-pitch-players">{roster.slice(0, 10).map(({ player, side }, i) => <Link href={'/joueurs/' + player!.id} className={'html-pitch-player ' + (side === 'B' ? 'white' : side === 'A' ? '' : 'unassigned-player')} key={player!.id} style={{ left: pitchPositions[i][0], top: pitchPositions[i][1], width: pitchPositions[i][1] > 600 ? 68 : pitchPositions[i][1] < 520 ? 51 : 57, animationDelay: `${i * .23}s` }}><span className="html-pitch-tooltip"><b>{player!.name}</b><small>{summaries.find(s => s.player.id === player!.id)?.elo ?? '—'} ELO</small></span><span className="html-player-hex"><span>{player!.name.charAt(0).toUpperCase()}</span></span><span className="html-pitch-name">{player!.name}</span></Link>)}</div>
+      {!pitchMatch && <span className="html-pitch-context">Joueurs de la ligue</span>}<div className="html-pitch-players">{lineup.map(({ player, side, fieldSide, slot, left, top, width }, i) => <Link href={'/joueurs/' + player!.id} className={'html-pitch-player ' + (side === 'B' ? 'white' : side === 'A' ? '' : 'unassigned-player')} key={player!.id} data-team={fieldSide} data-pitch-slot={slot} style={{ left, top, width, animationDelay: `${i * .23}s` }}><span className="html-pitch-tooltip"><b>{player!.name}</b><small>{summaries.find(s => s.player.id === player!.id)?.elo ?? '—'} ELO</small></span><span className="html-player-hex"><span>{player!.name.charAt(0).toUpperCase()}</span></span><span className="html-pitch-name">{player!.name}</span></Link>)}</div>
       <div className="html-shortcuts">{[['Matchs', '/matchs', `${done.length} joués`], ['Draft', '/draft', next ? weekday : '3 modes'], ['Joueurs', '/joueurs', String(active.length)], ['Stats', '/stats', `${goals} buts`], ['Awards', '/awards', '25 à gagner']].map(([name, href, value]) => <Link href={href} key={href}><span>{name}</span><strong>{value}</strong></Link>)}</div>
       <div className="html-season-bar"><div className="controls">{filters}</div><span><i/> {seasonName} · {active.length} joueurs</span></div>
     </DesignFrame>
     <DesignFrame label="Le vestiaire">
       <div className="html-room-floor" aria-hidden="true"/>{[100,400,700,1000,1300].map((left,i) => <i key={left} className="html-room-lamp" aria-hidden="true" style={{left,animationDelay:`${i*1.3}s`}}/>)}
       <div className="html-room-heading"><span className="eyebrow accent">02 · Vestiaire</span><h2>Le <em>vestiaire</em></h2></div>
-      {[0,1].map(side => <div className={'html-locker-wall wall-' + side} key={side}>{roster.slice(side * 5,side * 5 + 5).map(({player:p}) => {
-        const summary = summaries.find(s => s.player.id === p.id), playing = next?.participants.some(s => s.playerId === p.id);
-        return <Link className="html-locker" href={'/joueurs/' + p.id} key={p.id}><div className="html-locker-inside"><b>{summary?.elo ?? '—'}</b><small>ELO</small></div><div className="html-locker-door"><i style={{background:playing ? 'var(--kush)' : 'var(--ash)'}}/><strong>{p.name}</strong><small>{playing ? 'PARTICIPANT' : 'JOUEUR'}</small></div></Link>;
+      {[0,1].map(side => <div className={'html-locker-wall wall-' + side} key={side}>{lineup.filter(p => p.fieldSide === (side === 0 ? 'A' : 'B')).map(({player:p,side:team}) => {
+        const summary = summaries.find(s => s.player.id === p.id), playing = pitchMatch?.participants.some(s => s.playerId === p.id);
+        return <Link className="html-locker" href={'/joueurs/' + p.id} key={p.id} data-team={team ?? 'unassigned'}><div className="html-locker-inside"><b>{summary?.elo ?? '—'}</b><small>ELO</small></div><div className="html-locker-door"><i style={{background:team === 'B' ? 'var(--bone)' : playing ? 'var(--kush)' : 'var(--ash)'}}/><strong>{p.name}</strong><small>{playing && pitchMatch && team ? teamName(pitchMatch, team) : 'JOUEUR'}</small></div></Link>;
       })}</div>)}
       <section className="html-room-match"><span className="eyebrow accent">{next ? `PROCHAIN MATCH · MATCH ${next.number}` : 'LE RENDEZ-VOUS'}</span><h3>{next ? <>{weekday} <em>{kickoff}</em></> : 'À programmer'}</h3>{next ? <><div className="html-room-detail"><span>Date</span><b>{date(next.date)}</b></div><div className="html-room-detail"><span>Lieu</span><b>{next.location || 'À préciser'}</b></div><div className="html-room-detail"><span>Participants</span><b>{next.participants.length} joueurs</b></div><div className="html-match-schedule"><div><b>{time(next.date)}</b><span>Coup d’envoi</span></div><div><b>{time(new Date(new Date(next.date).getTime() + next.duration * 60000).toISOString())}</b><span>Coup de sifflet final</span></div></div></> : <p className="muted">Les disponibilités sont choisies sur WhatsApp. Le rendez-vous apparaîtra ici une fois ajouté par un administrateur.</p>}</section>
       <div className="html-room-bench" aria-hidden="true"/>

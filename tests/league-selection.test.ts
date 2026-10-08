@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { League, Match, Player, Season } from '../lib/model.ts';
-import { defaultSeason, homePitch, matchTabFromQuery, editorStepFromQuery, annotationTimestamp } from '../lib/league-selection.ts';
+import { defaultSeason, homePitch, homeLineup, matchTabFromQuery, editorStepFromQuery, annotationTimestamp } from '../lib/league-selection.ts';
 const season = (id: string, start = '', demo = false): Season => ({ id, name: `Saison ${id}`, start, end: '', demo, status: 'active', contribution: 1, winnerId: null, minParticipation: .3, version: 1 });
 const player = (id: string): Player => ({ id, name: id, photo: '', bio: '', funFacts: '', archived: false, demo: false, attributes: {}, version: 1 });
 const match = (id: string, date: string, status: Match['status'], ids: string[]): Match => ({ id, date, status, seasonId: '3', number: 1, duration: 60, location: '', scoreA: null, scoreB: null, mvpId: null, level: 1, video: '', events: [], trackedKeys: [], version: 1, participants: ids.map((playerId, i) => ({ playerId, team: i % 2 ? 'B' : 'A', stats: {} })) });
@@ -53,4 +53,25 @@ test('editing an untimed historical action preserves unknown time without invent
   assert.equal(annotationTimestamp(''), undefined);
   assert.equal(annotationTimestamp('', { timestamp: 42 }), undefined);
   assert.equal(annotationTimestamp('1:99'), undefined);
+});
+
+test('positions vary inside each team, while the pitch and locker lineup keep the same players', () => {
+  const roster = ['a','b','c','d','e','f','g','h','i','j'].map((id, i) => ({ player: player(id), side: i < 5 ? 'A' as const : 'B' as const }));
+  const first = homeLineup(roster, 0), next = homeLineup(roster, 1);
+  assert.deepEqual(first.map(p=>p.player.id),next.map(p=>p.player.id));
+  assert.equal(new Set(next.map(p=>p.slot)).size,10);
+  for (const entry of first) {
+    const moved = next.find(p=>p.player.id===entry.player.id)!;
+    assert.notEqual(entry.slot,moved.slot);
+    assert.equal(entry.side,moved.side);
+    assert.equal(moved.fieldSide,moved.side);
+    assert.ok(moved.side==='A'?moved.left<720:moved.left>720);
+  }
+});
+test('partial teams keep their own half and locker wall without shifting the opposing team', () => {
+  const roster = [{player:player('a'),side:'A' as const},{player:player('b'),side:'B' as const},{player:player('c'),side:'B' as const}];
+  const lineup = homeLineup(roster,4);
+  assert.deepEqual(lineup.map(p=>p.player.id),['a','b','c']);
+  assert.deepEqual(lineup.map(p=>p.fieldSide),['A','B','B']);
+  assert.ok(lineup.filter(p=>p.side==='B').every(p=>p.slot>=5));
 });

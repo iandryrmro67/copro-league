@@ -44,7 +44,7 @@ Les exemples de données et les compteurs de démonstration qui remettent les va
 Conformément à la demande de noter les points incertains sans bloquer l’intégration :
 
 - Le module duo `3970e469` reste à reprendre intégralement. La comparaison utilise les six domaines calculés actuellement par le site.
-- Le domaine « Progression », certaines variantes de passes du wizard et la nouvelle définition de « Collectif » nécessitent des champs et règles supplémentaires. Aucune valeur fictive ni nouvelle formule n’a été ajoutée.
+- Les mesures avancées de progression, certaines variantes de passes du wizard et la nouvelle définition de « Collectif » nécessitent des champs et règles supplémentaires. Aucune valeur fictive ni nouvelle formule n’a été ajoutée.
 - La planche de profil propose cinq divisions à seuils ELO fixes, tandis que les autres écrans et le site utilisent une autre échelle. Les seuils et calculs existants sont conservés dans cette livraison.
 - Les kits complets de formulaires et retours d’action ne sont pas encore tous remplacés par leurs modules sources. Le chargement et les transitions sont désormais reliés aux actions réelles : séquence originale de 8 secondes à l’ouverture, rideaux de transition sur les liens internes, chargement sans pourcentage fictif pendant une requête, réduction des animations respectée.
 - Les barres du bandeau Copro d’Or montrent explicitement la pondération réelle des composantes disponibles. Les palmarès déjà figés conservent leurs scores enregistrés.
@@ -58,3 +58,11 @@ Les régressions de sélection de saison, terrain de remplacement, liens directs
 Validation finale : 91 tests réussis, compilation de production réussie, contrôle TypeScript et lint des nouveaux modules réussis. Le lint global des anciens composants contient encore des erreurs préexistantes ; elles sont comparées à la version précédente avant publication.
 
 Le profil affiche les données réellement observées. Le graphique volume/efficacité utilise les passes tentées et réussies, car le taux de passes clés menant à un tir n’est pas disponible. Les domaines incomplets restent inconnus ; le radar garde des interruptions plutôt que des zéros fictifs. La composition du rating conserve le calcul actuel, y compris bonus non linéaire, pénalités, arrondis et ajustements administrateur. Les animations de draft tournent une fois par action, avec les noms, équipes et sommes ELO réels.
+
+## Corrections des remarques du 8 octobre
+
+- Les positions du terrain changent toutes les 12 secondes, avec déplacement doux, sans modifier les équipes ou les données du match. Les équipes partielles restent dans leur camp.
+- Le terrain et les deux murs du vestiaire utilisent une composition commune ; les maillots et noms d’équipe correspondent au match représenté, même si le prochain rendez-vous est encore vide.
+- Les SVG des Awards et badges conservent leurs cadres et proportions sources. Les anciennes règles génériques de taille des icônes ne déforment plus leurs deux couches.
+- Le radar de profil et de comparaison calcule les axes dès un match observé avec trois joueurs comparables. Le seuil configuré indique la maturité de la lecture et ne masque plus les statistiques existantes. Les valeurs inconnues restent inconnues ; un axe absent ne masque plus les autres dans la comparaison.
+- Progression réutilise la famille existante Percussion (dribbles réussis, réussite des dribbles, touches dans la surface, fautes subies). Le détail précise cette base ; aucune passe cassant une ligne ni conduite vers l’avant n’est extrapolée. Les critères d’attribution des Awards et badges sont conservés.
