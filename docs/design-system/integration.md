@@ -39,15 +39,9 @@ Les exemples de données et les compteurs de démonstration qui remettent les va
 - La saisie guidée complète les vues terrain et timeline classique. Les changements restent dans le brouillon jusqu’à l’enregistrement explicite.
 - Les heatmaps utilisent uniquement les actions positionnées ; une donnée non observée reste inconnue.
 
-## Écarts restant à reprendre
+## Reprise des composants du 8 octobre
 
-Conformément à la demande de noter les points incertains sans bloquer l’intégration :
-
-- Le module duo `3970e469` reste à reprendre intégralement. La comparaison utilise les six domaines calculés actuellement par le site.
-- Les mesures avancées de progression, certaines variantes de passes du wizard et la nouvelle définition de « Collectif » nécessitent des champs et règles supplémentaires. Aucune valeur fictive ni nouvelle formule n’a été ajoutée.
-- La planche de profil propose cinq divisions à seuils ELO fixes, tandis que les autres écrans et le site utilisent une autre échelle. Les seuils et calculs existants sont conservés dans cette livraison.
-- Les kits complets de formulaires et retours d’action ne sont pas encore tous remplacés par leurs modules sources. Le chargement et les transitions sont désormais reliés aux actions réelles : séquence originale de 8 secondes à l’ouverture, rideaux de transition sur les liens internes, chargement sans pourcentage fictif pendant une requête, réduction des animations respectée.
-- Les barres du bandeau Copro d’Or montrent explicitement la pondération réelle des composantes disponibles. Les palmarès déjà figés conservent leurs scores enregistrés.
+Les anciens modules partiels de menu joueurs, comparaison, duo, identité, dataviz et dashboard de match sont remplacés par leurs nœuds HTML sources. Les nouveaux imports et les limites restantes sont décrits dans [screen-placement.md](screen-placement.md). Le kit 26/27 est appliqué aux contrôles et retours communs. Les notifications restent liées aux actions réelles.
 
 ## Vérification
 
@@ -55,7 +49,7 @@ Vérification visuelle sur ordinateur et téléphone, avec les données publique
 
 Les régressions de sélection de saison, terrain de remplacement, liens directs et heures historiques sont couvertes par `tests/league-selection.test.ts`.
 
-Validation finale : 91 tests réussis, compilation de production réussie, contrôle TypeScript et lint des nouveaux modules réussis. Le lint global des anciens composants contient encore des erreurs préexistantes ; elles sont comparées à la version précédente avant publication.
+Validation finale de la première intégration : 91 tests réussis, compilation de production réussie, contrôle TypeScript et lint des nouveaux modules réussis. Le lint global des anciens composants contient encore des erreurs préexistantes ; elles sont comparées à la version précédente avant publication.
 
 Le profil affiche les données réellement observées. Le graphique volume/efficacité utilise les passes tentées et réussies, car le taux de passes clés menant à un tir n’est pas disponible. Les domaines incomplets restent inconnus ; le radar garde des interruptions plutôt que des zéros fictifs. La composition du rating conserve le calcul actuel, y compris bonus non linéaire, pénalités, arrondis et ajustements administrateur. Les animations de draft tournent une fois par action, avec les noms, équipes et sommes ELO réels.
 
@@ -70,3 +64,5 @@ Le profil affiche les données réellement observées. Le graphique volume/effic
 ## Espacement du board 44
 
 Le système est appliqué aux pages, templates HTML et contrôles partagés : [valeurs et choix d’intégration](spacing.md), [référence fournie](spacing-reference.md).
+
+La reprise comporte 97 tests réussis, avec contrôle TypeScript et compilation de production réussis. Le lint des composants modifiés ne contient aucune erreur ; sept erreurs préexistantes restent dans les anciens composants vidéo/awards. Un test supplémentaire protège le maintien du vrai contrôle de formulaire et de sa valeur dans le champ source. Le wizard a été essayé localement sur les données publiques, sans sauvegarde serveur : réponse simple, choix du receveur, position inconnue conservée et receveur comme prochain auteur. Le test local temporaire et le proxy de prévisualisation sont retirés avant publication.

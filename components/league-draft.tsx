@@ -6,7 +6,7 @@ import { aggregate, balancedDraft } from '@/lib/engine';
 import { PackMotion, DistributionMotion } from './league-draft-motion';
 import { captainDraftReducer, emptyCaptainDraft } from '@/lib/captain-draft';
 import { Picker, Avatar } from './league-ui';
-import { Checkbox } from '@/components/ui/checkbox';
+import { SourceCheckbox as Checkbox,SourceFeedback,SourceToast } from './league-kit';
 import { Lock, Unlock, Shuffle, Check, ArrowLeftRight, Layers, Scale, Users } from 'lucide-react';
 
 const modes = [
@@ -115,6 +115,6 @@ export function Draft({ data, refresh, match: external, onApply }: { data: Leagu
       {ready && <div className="split draftresult"><p>{equalTeams ? 'Équipes prêtes' : 'Rééquilibrez le nombre de joueurs avant de valider.'} · écart <strong className="accent">{gap} ELO</strong></p>{base && (data.admin || onApply) && <button className="button primary" disabled={busy || !equalTeams} onClick={apply}><Check size={16}/>Valider les équipes</button>}</div>}
       {!generated && <p className="muted filterrow">Choisis tes participants, puis lance le tirage.</p>}
     </section>
-    {error && <p role="alert" className="error">{error}</p>}{notice && <p role="status" className="success">{notice}</p>}
+    {error && <SourceFeedback tone="error" title="Draft impossible" onDismiss={()=>setError('')}>{error}</SourceFeedback>}{notice && <SourceToast title="Draft enregistré" onDismiss={()=>setNotice('')}>{notice}</SourceToast>}
   </div>;
 }

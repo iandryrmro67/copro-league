@@ -1,0 +1,38 @@
+'use client';
+import {Fragment,useState,type ReactNode} from 'react';
+import {metric,type Summary} from '@/lib/engine';
+import type {Match} from '@/lib/model';
+import {isGoal} from '@/lib/actions';
+import {SourceTemplate,hudTemplates,sourceAt,childNodes} from './hud-source-template';
+import {Picker,fmt,Empty} from './league-ui';
+type Slots=Record<string,ReactNode>;
+const source=hudTemplates.statsOverview;
+export function SourceStatsOverview({summaries,matches}:{summaries:Summary[];matches:Match[]}){
+ const [selected,setSelected]=useState('');
+ const rows=summaries.filter(s=>s.appearances).sort((a,b)=>b.elo-a.elo),focus=rows.find(s=>s.player.id===selected)??rows[0];
+ const games=matches.filter(m=>m.status==='finished').sort((a,b)=>a.date.localeCompare(b.date)||a.number-b.number);
+ const scored=games.filter(m=>m.scoreA!=null&&m.scoreB!=null),goals=scored.length?scored.reduce((n,m)=>n+m.scoreA!+m.scoreB!,0):null;
+ const knownAssists=rows.flatMap(s=>s.stats.assists==null?[]:[s.stats.assists]),assists=knownAssists.length?knownAssists.reduce((n,v)=>n+v,0):null;
+ const slots:Slots={};[goals,assists,games.length,goals==null?null:goals/scored.length,rows.length].forEach((v,i)=>{slots[`0.${i}.1.0`]=fmt(v,i===3?2:0);slots[`0.${i}.1.1`]='';});
+ if(!focus)return <section className="source-stats-overview"><SourceTemplate name="statsOverview" slots={slots} props={{'1':{style:{display:'none'}}}}/><Empty>Aucun match terminé sur cette période.</Empty></section>;
+ const top=rows.slice(0,5),historyValues=top.flatMap(s=>s.history.map(h=>h.elo)),low=Math.floor(Math.min(1000,...historyValues)/50)*50-50,high=Math.ceil(Math.max(1000,...historyValues)/50)*50+50;
+ const x=(i:number)=>46+644*i/Math.max(1,games.length),y=(v:number)=>170-(v-low)/(high-low)*150;
+ const elo=childNodes(sourceAt(source,'1.0.1'));
+ slots['1.0.0.1']=`${top.length} JOUEURS · ${games.length} MATCHS`;
+ slots['1.0.1']=<>{Array.from({length:5},(_,i)=>{const v=low+(high-low)*i/4;return <g key={i}><SourceTemplate node={elo[i*2]} props={{'':{y1:y(v),y2:y(v)}}}/><SourceTemplate node={elo[i*2+1]} slots={{'':fmt(v,0)}} props={{'':{y:y(v)+3}}}/></g>})}{[null,...games].map((m,i)=><SourceTemplate node={elo[10]} key={m?.id??'start'} slots={{'':m?`M${m.number}`:'DÉB.'}} props={{'':{x:x(i)}}}/>)}{top.map((s,i)=>{const history=s.history,first=history.findIndex(h=>games.some(m=>m.id===h.matchId));let last=first>0?history[first-1].elo:1000;const values=[last,...games.map(m=>{last=history.find(h=>h.matchId===m.id)?.elo??last;return last})],path=values.map((v,j)=>`${j?'L':'M'}${x(j)} ${y(v)}`).join(' '),color=['#8BE36B','#E9ECE6','#8E978C','#E5484D','#E2B54A'][i];return <g key={s.player.id}><SourceTemplate node={elo[23]} props={{'':{d:path,stroke:color,strokeWidth:i?1.5:3}}}/><SourceTemplate node={elo[24]} slots={{'':`${s.player.name} ${values.at(-1)}`}} props={{'':{x:698,y:y(values.at(-1)!)+3,fill:color}}}/>{i===0&&values.map((v,j)=><SourceTemplate key={j} node={elo[25]} props={{'':{x:x(j)-3.5,y:y(v)-3.5,transform:`rotate(45 ${x(j)} ${y(v)})`,style:{animationDelay:`${.5+j*.2}s`}}}}/>)}</g>})}</>;
+ const radar=childNodes(sourceAt(source,'1.1.1')),keys=['goals','assists','rating','elo','appearances','wins'];
+ const maxima=keys.map(k=>Math.max(1,...rows.flatMap(s=>metric(s,k)==null?[]:[metric(s,k)!]))),values=keys.map((k,i)=>metric(focus,k)==null?null:metric(focus,k)!/maxima[i]),means=keys.map((k,i)=>{const known=rows.flatMap(s=>metric(s,k)==null?[]:[metric(s,k)!]);return known.length?known.reduce((n,v)=>n+v,0)/known.length/maxima[i]:null});
+ const point=(i:number,v:number)=>[160+Math.sin(i*Math.PI/3)*84*v,112-Math.cos(i*Math.PI/3)*84*v];
+ slots['1.1.0.1']='100 % = MAX. DE LA PÉRIODE';slots['1.1.2.0']=`■ ${focus.player.name.toUpperCase()}`;
+ slots['1.1.1']=<>{radar.slice(0,16).map((n,i)=><SourceTemplate node={n} key={i}/>)}{means.every(v=>v!=null)&&<SourceTemplate node={radar[16]} props={{'':{points:means.map((v,i)=>point(i,v!).join(',')).join(' ')}}}/>}{values.every(v=>v!=null)&&<SourceTemplate node={radar[17]} props={{'':{points:values.map((v,i)=>point(i,v!).join(',')).join(' ')}}}/>}{values.map((v,i)=>v==null?null:<g key={i}><title>{focus.player.name} · {keys[i]} : {fmt(metric(focus,keys[i]),2)}</title><SourceTemplate node={radar[18+i]} props={{'':{cx:point(i,v)[0],cy:point(i,v)[1]}}}/></g>)}</>;
+ const bars=childNodes(sourceAt(source,'1.2.1')),max=Math.max(1,...scored.map(m=>m.scoreA!+m.scoreB!)),avg=goals==null?null:goals/scored.length,barWidth=Math.min(40,340/Math.max(1,games.length));
+ slots['1.2.0.1']=`TOTAL ${fmt(goals,0)}`;
+ slots['1.2.1']=<>{games.map((m,i)=>{const value=m.scoreA==null||m.scoreB==null?null:m.scoreA+m.scoreB,cx=30+340*(i+.5)/Math.max(1,games.length),height=(value??0)/max*110;return <g key={m.id}><SourceTemplate node={bars[0]} props={{'':{x:cx-barWidth/2,y:140-height,width:barWidth,height,fill:value===max?'#56B947':'#2A322A',style:{animationDelay:`${.3+i*.1}s`}}}}/><SourceTemplate node={bars[1]} slots={{'':fmt(value,0)}} props={{'':{x:cx,y:134-height}}}/><SourceTemplate node={bars[2]} slots={{'':`M${m.number}`}} props={{'':{x:cx}}}/></g>})}<SourceTemplate node={bars[18]}/>{avg!=null&&<><SourceTemplate node={bars[19]} props={{'':{y1:140-avg/max*110,y2:140-avg/max*110}}}/><SourceTemplate node={bars[20]} slots={{'':`MOY ${fmt(avg,2)}`}} props={{'':{y:136-avg/max*110}}}/></>}</>;
+ const linked=games.flatMap(m=>m.events.filter(e=>isGoal(e)&&e.relatedPlayerId)),network=rows.slice(0,6),matrix=childNodes(sourceAt(source,'1.3.1'));
+ slots['1.3.1']=<><SourceTemplate node={matrix[0]}/>{network.map(s=><SourceTemplate node={matrix[1]} key={'col'+s.player.id} slots={{'':s.player.name}} props={{'':{title:s.player.name}}}/>)}{network.map(from=><Fragment key={from.player.id}><SourceTemplate node={matrix[7]} slots={{'':from.player.name}}/>{network.map(to=>{const count=linked.filter(e=>e.relatedPlayerId===from.player.id&&e.playerId===to.player.id).length;return <SourceTemplate node={matrix[9]} key={to.player.id} slots={{'':from===to?'—':linked.length?count:'—'}} props={{'':{title:`${from.player.name} → ${to.player.name}`,style:{background:count?`rgba(86,185,71,${Math.min(.8,.15+count*.08)})`:'#121512',color:count?'#8BE36B':'#8E978C'}}}}/>})}</Fragment>)}</>;
+ slots['1.3.2']='LIGNE = PASSEUR · COLONNE = BUTEUR · LIENS ANNOTÉS';
+ const scatter=childNodes(sourceAt(source,'1.4.1')),known=rows.filter(s=>s.stats.goals!=null&&s.stats.assists!=null),gx=Math.max(1,...known.map(s=>s.stats.goals!)),ay=Math.max(1,...known.map(s=>s.stats.assists!));
+ slots['1.4.0.1']=`${known.length} JOUEURS OBSERVÉS`;
+ slots['1.4.1']=<>{scatter.slice(0,2).map((n,i)=><SourceTemplate node={n} key={i}/>)}{known.map((s,i)=><g key={s.player.id}><title>{s.player.name} · {fmt(s.stats.goals,0)} buts · {fmt(s.stats.assists,0)} passes décisives</title><SourceTemplate node={scatter[3]} props={{'':{cx:30+s.stats.goals!/gx*340,cy:146-s.stats.assists!/ay*120,r:s===focus?6:4,fill:s===focus?'#8BE36B':'#8E978C',style:{animationDelay:`${i*.04}s`}}}}/></g>)}{scatter.slice(28,30).map((n,i)=><SourceTemplate node={n} key={i}/>)}</>;
+ return <section className="source-stats-overview"><div className="controls filterrow"><Picker label="Joueur du profil et du nuage" value={focus.player.id} onChange={setSelected} options={rows.map(s=>({value:s.player.id,label:s.player.name}))}/></div><SourceTemplate name="statsOverview" slots={slots} props={{'1.3.1':{style:{gridTemplateColumns:`40px repeat(${network.length},minmax(0,1fr))`}}}}/><p className="muted">Buts issus des scores finaux. Passes décisives et connexions limitées aux observations renseignées ; les données absentes restent inconnues.</p></section>;
+}
