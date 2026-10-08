@@ -111,7 +111,8 @@ input:not([type=checkbox]):not([type=range]):not([type=hidden]), textarea, selec
 .source-player-overview .vz { padding: var(--sp-4) !important; }
 .source-stats-page { padding-inline: 0; }
 .source-stats-page .leadersgrid { gap: var(--grid-gap); }
-.faithful-home { display: flex; flex-direction: column; gap: var(--editorial-gap); }
+/* Full-screen scenes meet directly; their spacing stays inside each scene. */
+.faithful-home { display: flex; flex-direction: column; gap: 0; }
 @media (min-width: 701px) {
   /* Keep the exported scene intact while matching the visible page margins. */
   .html-elo { left: calc(var(--page-margin) / var(--design-scale)); }

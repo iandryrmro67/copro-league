@@ -31,6 +31,8 @@ Cartes : 16 px ; panneaux : 24 px ; boutons : 8 × 16 px ; pastilles : 4 × 8 px
 
 Les hauteurs, coordonnées SVG, tailles de dessin et délais d’animation ne sont pas des espacements. Les dégagements de 150 px devant le vestiaire et de 250 px devant la scène mobile évitent une collision avec ces dessins et restent réservés à leur géométrie. Les équipes, la timeline et les calculs des statistiques ne changent pas.
 
+Les quatre scènes de l’accueil se touchent directement, sans espace entre leurs fonds. Les espacements du board 44 restent internes aux scènes ; le gap éditorial ne s’applique pas à ces écrans pleine largeur.
+
 ## Vérification
 
 Contrôle des feuilles CSS et des styles des templates sources ; compilation de production et tests existants. Vérification visuelle de l’accueil, du profil et des pages de consultation. Les règles responsive et les espacements affichés sont contrôlés en production à 1440, 768 et 390 px. Les onglets locaux de prévisualisation restaient à 1280 px ; le navigateur du site public permet la vérification des trois tailles. La ligne de division du profil est ajustée pour garder son marqueur dans les marges mobiles.
