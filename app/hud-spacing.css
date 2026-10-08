@@ -1,0 +1,134 @@
+/* Board 44 — 20c04239-a847-47b9-91e8-ea95fd6ec61b.
+ * Exact spacing scale and responsive grid exceptions from the supplied export.
+ * Scene clearances and drawing dimensions are geometry, not content spacing. */
+:root {
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-24: 96px;
+  --page-margin: 40px;
+  --grid-gap: 20px;
+  --section-gap: var(--sp-12);
+  --title-gap: var(--sp-16);
+  --editorial-gap: var(--sp-24);
+  --content-width: 1360px;
+  --legacy-content-width: 1240px;
+  --scene-locker-clearance: 150px;
+  --home-scene-clearance: 250px;
+}
+@media (max-width: 1023px) {
+  :root {
+    --page-margin: var(--sp-8);
+    --grid-gap: var(--sp-4);
+    --section-gap: 40px;
+    --title-gap: var(--sp-12);
+    --editorial-gap: var(--sp-16);
+  }
+}
+@media (max-width: 639px) {
+  :root {
+    --page-margin: var(--sp-4);
+    --grid-gap: 12px;
+    --section-gap: var(--sp-8);
+    --title-gap: var(--sp-8);
+    --editorial-gap: var(--sp-8);
+  }
+}
+.container {
+  padding: var(--title-gap) var(--page-margin) var(--sp-16);
+}
+.masthead, .mainnav {
+  padding-inline: max(var(--page-margin), calc((100vw - var(--content-width)) / 2));
+}
+.mainnav { gap: var(--sp-8); }
+@media (min-width: 1001px) {
+  .hud-header { padding-inline: max(var(--page-margin), calc((100vw - var(--content-width)) / 2)); }
+}
+.footer {
+  padding: var(--sp-8) max(var(--page-margin), calc((100vw - var(--content-width)) / 2));
+}
+.pagehead {
+  gap: var(--sp-6);
+  margin: 0 0 var(--title-gap);
+}
+.sectionhead {
+  gap: var(--sp-6);
+  margin: var(--section-gap) 0 var(--sp-6);
+}
+.homegrid, .leadersgrid, .playersgrid, .recognition-grid, .badge-grid,
+.factsgrid, .statgrid, .adminsplit, .statseditor, .participantsgrid,
+.match-podium, .match-rest, .draft-modes, .draftteams {
+  gap: var(--grid-gap);
+}
+.controls, .actions, .formactions, .filterrow { gap: var(--sp-4); }
+.formstack, .stack { gap: var(--sp-6); }
+.formgrid { gap: var(--sp-4); }
+.field, .identity-chips, .recognition-checks { gap: var(--sp-2); }
+.panel { padding: var(--sp-6); }
+.panel.flush { padding: 0; }
+.html-fixture, .draft-mode, .hud-player-card, .playercard, .badge-card, .recognition-award,
+.source-profile-panel, .ds-rank .pn, .ds-rank .tl, .ds-individual .tile {
+  padding: var(--sp-4);
+}
+.hud-card-portrait { margin-inline: 0; }
+.source-crown-banner { padding: var(--sp-6); gap: var(--sp-8); }
+.source-crown-score { padding: var(--sp-4); gap: var(--sp-4); }
+.recognition-status { padding: var(--sp-6); gap: var(--sp-4); }
+.recognition-method, .identity-panel, .recognition-palmares {
+  margin-block: var(--section-gap);
+}
+.avatarstack { gap: var(--sp-2); }
+.avatarstack .avatar + .avatar, .duorow .avatar + .avatar { margin-inline-start: 0; }
+.button, .textbutton, .account { gap: var(--sp-1); }
+.faithful-home .html-primary, .html-calendar .button, .button, .account { padding: var(--sp-2) var(--sp-4); }
+.tag, .identity-chip, .division { padding: var(--sp-1) var(--sp-2); }
+input:not([type=checkbox]):not([type=range]):not([type=hidden]), textarea, select {
+  padding: var(--sp-2) var(--sp-4);
+}
+[data-slot=tabs-list] { gap: var(--sp-6) !important; }
+[data-slot=tabs-trigger] { padding-block: var(--sp-4) !important; }
+[data-slot=dialog-content], [data-slot=alert-dialog-content],
+[data-slot=sheet-header], [data-slot=sheet-footer] { padding: var(--sp-6); }
+[data-slot=popover-content], [data-slot=hover-card-content] { padding: var(--sp-4); }
+.ds-profile-page [data-source-template=header] {
+  padding: 0 !important;
+  margin-bottom: var(--title-gap);
+}
+.source-player-overview > [data-source-template] { padding-inline: 0 !important; }
+.source-player-overview > [data-source-template$=Heading] {
+  margin-top: var(--section-gap);
+  padding-block: 0 var(--sp-6) !important;
+}
+.ds-profile-page [data-source-template=kpis] > div { padding: var(--sp-4) !important; }
+.source-player-overview h2.sh {
+  margin-top: var(--section-gap);
+  margin-bottom: var(--sp-6);
+}
+.source-player-overview .vz { padding: var(--sp-4) !important; }
+.source-stats-page { padding-inline: 0; }
+.source-stats-page .leadersgrid { gap: var(--grid-gap); }
+.faithful-home { display: flex; flex-direction: column; gap: var(--editorial-gap); }
+@media (min-width: 701px) {
+  /* Keep the exported scene intact while matching the visible page margins. */
+  .html-elo { left: calc(var(--page-margin) / var(--design-scale)); }
+  .html-fixture { right: calc(var(--page-margin) / var(--design-scale)); }
+  .html-shortcuts, .html-footer {
+    left: calc(var(--page-margin) / var(--design-scale));
+    right: calc(var(--page-margin) / var(--design-scale));
+  }
+  .html-season-bar { padding-inline: calc(var(--page-margin) / var(--design-scale)); }
+}
+@media (max-width: 700px) {
+  .html-canvas, .html-hero .html-canvas {
+    padding: var(--section-gap) var(--page-margin);
+    gap: var(--sp-8);
+  }
+  .html-hero .html-canvas { padding-top: var(--home-scene-clearance); }
+  .html-fixture, .html-elo, .html-shortcuts, .html-footer { inset: auto; }
+  .html-shortcuts, .html-locker-wall { gap: var(--grid-gap); }
+  .html-room-match { padding: var(--sp-6); }
+}

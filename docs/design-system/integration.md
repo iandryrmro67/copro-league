@@ -66,3 +66,7 @@ Le profil affiche les données réellement observées. Le graphique volume/effic
 - Les SVG des Awards et badges conservent leurs cadres et proportions sources. Les anciennes règles génériques de taille des icônes ne déforment plus leurs deux couches.
 - Le radar de profil et de comparaison calcule les axes dès un match observé avec trois joueurs comparables. Le seuil configuré indique la maturité de la lecture et ne masque plus les statistiques existantes. Les valeurs inconnues restent inconnues ; un axe absent ne masque plus les autres dans la comparaison.
 - Progression réutilise la famille existante Percussion (dribbles réussis, réussite des dribbles, touches dans la surface, fautes subies). Le détail précise cette base ; aucune passe cassant une ligne ni conduite vers l’avant n’est extrapolée. Les critères d’attribution des Awards et badges sont conservés.
+
+## Espacement du board 44
+
+Le système est appliqué aux pages, templates HTML et contrôles partagés : [valeurs et choix d’intégration](spacing.md), [référence fournie](spacing-reference.md).

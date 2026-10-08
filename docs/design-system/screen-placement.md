@@ -22,6 +22,8 @@ Référence de conception : [README des écrans fourni le 8 octobre 2026](screen
 
 Le board 05 est ancien. Les boards supprimés 10–16, 32–35 et 38–40 ne servent pas de référence à rechercher. Le board 41 remplace l’ancien 40 pour le flux de saisie.
 
+Board 44, nouvel export du 8 octobre : espacement `20c04239` appliqué partout ; voir [spacing.md](spacing.md).
+
 ## Priorités et exceptions
 
 - « Retenu » indique les versions à privilégier ; « Proposé » désigne une référence conçue dont le README ne prétend pas qu’elle a été validée. L’intégration déjà demandée par le propriétaire continue sans créer une nouvelle procédure de validation.
