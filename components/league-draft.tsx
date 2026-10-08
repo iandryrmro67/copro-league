@@ -1,4 +1,5 @@
 'use client';
+import { defaultSeason } from '@/lib/league-selection';
 import { useEffect, useReducer, useState } from 'react';
 import type { League, Match } from '@/lib/model';
 import { teamName } from '@/lib/model';
@@ -32,7 +33,7 @@ export function Draft({ data, refresh, match: external, onApply }: { data: Leagu
   const m: Match = base ? { ...base, participants: roster ? roster.map(id => base.participants.find(p => p.playerId === id) ?? { playerId: id, team: null, stats: {} }) : base.participants } : { id: 'draft-preview', seasonId: '', number: 1, date: '', duration: 60, location: '', status: 'scheduled', scoreA: null, scoreB: null, mvpId: null, level: 1, video: '', events: [], trackedKeys: [], version: 0, participants: (roster ?? []).map(id => ({ playerId: id, team: null, stats: {} })) };
   const allSummaries = aggregate(data.players, data.matches);
   const elos = Object.fromEntries(allSummaries.map(s => [s.player.id, s.elo]));
-  const population = aggregate(data.players, data.matches.filter(game => game.seasonId === (m.seasonId || data.seasons.find(s => s.status === 'active')?.id)), data.matches);
+  const population = aggregate(data.players, data.matches.filter(game => game.seasonId === (m.seasonId || defaultSeason(data.seasons))), data.matches);
   const players = data.players.filter(p => !p.archived && !p.demo && m.participants.some(x => x.playerId === p.id)).sort((a, b) => elos[b.id] - elos[a.id] || a.name.localeCompare(b.name));
   const generated = Object.keys(teams).length > 0;
   const complete = players.length > 1 && players.every(p => teams[p.id]);

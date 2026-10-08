@@ -6,6 +6,7 @@ import { teamName } from '@/lib/model';
 import { youtubeId, type Summary } from '@/lib/engine';
 import { divisionFor } from '@/lib/divisions';
 import { Calendar, Empty, date, fmt, time } from './league-ui';
+import { homePitch } from '@/lib/league-selection';
 import { homeScenery } from './home-scenery';
 import { ArrowRight, Play } from 'lucide-react';
 
@@ -21,13 +22,11 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
   const [now] = useState(() => Date.now());
   const next = [...matches].filter(m => m.status === 'scheduled' && new Date(m.date).getTime() > now).sort((a, b) => a.date.localeCompare(b.date))[0];
   const done = matches.filter(m => m.status === 'finished');
-  const last = [...done].sort((a, b) => b.date.localeCompare(a.date))[0];
   const eloLeaders = summaries.filter(s => s.appearances > 0 && !s.player.archived).sort((a, b) => b.elo - a.elo).slice(0, 5);
   const goals = done.reduce((n, m) => n + (m.scoreA ?? 0) + (m.scoreB ?? 0), 0);
   const scorer = [...summaries].filter(s => s.stats.assists != null).sort((a, b) => (b.stats.assists ?? 0) - (a.stats.assists ?? 0))[0];
   const wildest = [...done].sort((a, b) => (b.scoreA ?? 0) + (b.scoreB ?? 0) - (a.scoreA ?? 0) - (a.scoreB ?? 0))[0];
-  const pitchMatch = next ?? last;
-  const roster = pitchMatch?.participants.map(p => ({ player: data.players.find(x => x.id === p.playerId), side: p.team })).filter(p => p.player).sort((a,b) => (a.side === 'A' ? 0 : a.side === 'B' ? 1 : 2) - (b.side === 'A' ? 0 : b.side === 'B' ? 1 : 2)) ?? [];
+  const { match: pitchMatch, roster } = homePitch(data, matches, now);
   const active = data.players.filter(p => !p.archived && summaries.some(s => s.player.id === p.id));
   const weekday = next ? new Date(next.date).toLocaleDateString('fr-FR', { weekday: 'long', timeZone: 'Europe/Paris' }) : 'On joue';
   const questions = [
@@ -57,8 +56,8 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
         return <Link className="html-elo-row" href={'/joueurs/' + s.player.id} key={s.player.id}><span className="html-rank">{i + 1}</span><span className="html-player-name"><strong>{s.player.name}</strong><small>{divisionFor(s.player.id, divisionPopulation)?.name ?? 'Non classé'}</small></span><b>{s.elo}</b><small className={delta != null && delta < 0 ? 'negative' : 'accent'}>{delta == null || !delta ? '—' : delta > 0 ? `▲ ${delta}` : `▼ ${Math.abs(delta)}`}</small></Link>;
       })}{!eloLeaders.length && <Empty>Le classement commence après le premier match.</Empty>}<Link className="html-text-link" href="/stats">Voir tout →</Link></section>
       <section className="html-fixture"><span className="eyebrow accent">Prochain match{next ? ' · #' + next.number : ''}</span><h1>{next ? weekday : 'On joue'}<br/><em>{next ? kickoff : 'quand ?'}</em></h1>{next ? <><p className="html-teams"><span>{teamName(next, 'A')}</span><b>VS</b><span>{teamName(next, 'B')}</span></p><p className="html-fixture-context">{date(next.date)} · {next.participants.length} joueurs</p><Link className="html-primary" href={'/matchs/' + next.id}>Voir le match <ArrowRight size={26}/></Link></> : <><p className="html-fixture-context">Le prochain rendez-vous reste à programmer.</p><Link className="html-primary" href={data.admin ? '/admin' : '/matchs'}>{data.admin ? 'Créer un match' : 'Voir les matchs'}<ArrowRight size={26}/></Link></>}</section>
-      {pitchMatch && <><div className="html-team-label team-a">{teamName(pitchMatch, 'A')}</div><div className="html-team-label team-b">{teamName(pitchMatch, 'B')}</div><Link className="html-pitch-context" href={'/matchs/' + pitchMatch.id}>{next ? 'Prochain match' : 'Dernier match'} · #{pitchMatch.number}</Link></>}
-      <div className="html-pitch-players">{roster.slice(0, 10).map(({ player, side }, i) => <Link href={'/joueurs/' + player!.id} className={'html-pitch-player ' + (side === 'B' ? 'white' : side === 'A' ? '' : 'unassigned-player')} key={player!.id} style={{ left: pitchPositions[i][0], top: pitchPositions[i][1], width: pitchPositions[i][1] > 600 ? 68 : pitchPositions[i][1] < 520 ? 51 : 57, animationDelay: `${i * .23}s` }}><span className="html-pitch-tooltip"><b>{player!.name}</b><small>{summaries.find(s => s.player.id === player!.id)?.elo ?? '—'} ELO</small></span><span className="html-player-hex"><span>{player!.name.charAt(0).toUpperCase()}</span></span><span className="html-pitch-name">{player!.name}</span></Link>)}</div>
+      {pitchMatch && <><div className="html-team-label team-a">{teamName(pitchMatch, 'A')}</div><div className="html-team-label team-b">{teamName(pitchMatch, 'B')}</div><Link className="html-pitch-context" href={'/matchs/' + pitchMatch.id}>{pitchMatch.status === 'scheduled' && Date.parse(pitchMatch.date) > now ? 'Prochain match' : 'Dernières équipes'} · #{pitchMatch.number}</Link></>}
+      {!pitchMatch && <span className="html-pitch-context">Joueurs de la ligue</span>}<div className="html-pitch-players">{roster.slice(0, 10).map(({ player, side }, i) => <Link href={'/joueurs/' + player!.id} className={'html-pitch-player ' + (side === 'B' ? 'white' : side === 'A' ? '' : 'unassigned-player')} key={player!.id} style={{ left: pitchPositions[i][0], top: pitchPositions[i][1], width: pitchPositions[i][1] > 600 ? 68 : pitchPositions[i][1] < 520 ? 51 : 57, animationDelay: `${i * .23}s` }}><span className="html-pitch-tooltip"><b>{player!.name}</b><small>{summaries.find(s => s.player.id === player!.id)?.elo ?? '—'} ELO</small></span><span className="html-player-hex"><span>{player!.name.charAt(0).toUpperCase()}</span></span><span className="html-pitch-name">{player!.name}</span></Link>)}</div>
       <div className="html-shortcuts">{[['Matchs', '/matchs', `${done.length} joués`], ['Draft', '/draft', next ? weekday : '3 modes'], ['Joueurs', '/joueurs', String(active.length)], ['Stats', '/stats', `${goals} buts`], ['Awards', '/awards', '25 à gagner']].map(([name, href, value]) => <Link href={href} key={href}><span>{name}</span><strong>{value}</strong></Link>)}</div>
       <div className="html-season-bar"><div className="controls">{filters}</div><span><i/> {seasonName} · {active.length} joueurs</span></div>
     </DesignFrame>
