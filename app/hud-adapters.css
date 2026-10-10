@@ -190,6 +190,13 @@ body:has(.faithful-home) .source-footer{display:none}
  .html-canvas>:is(.html-grid,.html-footer){translate:none}
  .html-canvas>.html-room-lamp{translate:var(--cx,0) 0}
  .html-canvas>.html-faq-list{right:calc(80px + var(--cx,0px) * 2)}
+ /* When the scene is cropped vertically, panels stay inside the frame. */
+ .html-canvas>:is(.html-elo,.html-fixture){translate:0 max(var(--cy,0px),-48px)}
+ .html-canvas>.html-calendar{translate:0 calc(var(--cy,0px) * 2)}
+ .html-canvas>.html-shortcuts{translate:0 calc(var(--cy,0px) * 1.5)}
+ /* The atmosphere layers span the whole frame; only the pitch drawing is recentred. */
+ .html-canvas>.html-scenery{translate:0 var(--cy,0)}
+ .html-canvas>.html-scenery>svg{translate:var(--cx,0) 0;overflow:visible}
  .html-canvas>.html-team-label.team-b{translate:calc(var(--cx,0px) * -1) var(--cy,0)}
 }
 @media(max-width:700px){.html-frame,.html-frame.html-hero{min-height:calc(100svh - 64px)}}
@@ -270,3 +277,16 @@ body:has(.faithful-home) .source-footer{display:none}
 .masthead .motion-toggle{display:inline-flex;align-items:center;gap:var(--sp-2);white-space:nowrap}
 .masthead .motion-toggle[aria-pressed=false]{color:var(--ash)}
 @media(max-width:700px){.masthead .motion-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
+/* Board 27 · Infobulle (.tt/.tip) applied to every statistic help marker. */
+.stat-tip{position:relative;display:inline-flex;vertical-align:middle;margin-left:var(--sp-2);line-height:1}
+.stat-tip-mark{position:relative;display:inline-grid;place-items:center;flex:none;width:16px;height:16px;padding:0;border:1px solid var(--line);background:transparent;color:var(--ash);font:700 10px/1 var(--font-hud);text-transform:none;letter-spacing:0;cursor:help;transition:color .2s,border-color .2s,background .2s;vertical-align:middle}
+.stat-tip-mark::before{content:"";position:absolute;inset:-8px}
+button.stat-tip-mark:hover,button.stat-tip-mark:focus-visible{color:var(--trichome);border-color:var(--kush);background:var(--resin)}
+button.stat-tip-mark:focus-visible{outline:2px solid var(--trichome);outline-offset:2px}
+.stat-tip .tip{position:absolute;bottom:calc(100% + 10px);left:50%;z-index:40;width:max-content;max-width:260px;padding:7px 10px;background:var(--bone);color:var(--void);font:400 11px/1.45 var(--font-hud);letter-spacing:0;text-transform:none;text-align:left;white-space:normal;opacity:0;pointer-events:none;transform:translateX(-50%) translateY(4px);transition:opacity .2s,transform .2s}
+.stat-tip .tip::after{content:"";position:absolute;top:100%;left:50%;margin-left:-5px;border:5px solid transparent;border-top-color:var(--bone)}
+.stat-tip:hover .tip,.stat-tip:focus-within .tip{opacity:1;transform:translateX(-50%)}
+.button .stat-tip-mark{margin-left:var(--sp-1);color:inherit;border-color:currentColor}
+@media(hover:none){.stat-tip .tip{display:none}}
+@media(prefers-reduced-motion:reduce){.stat-tip .tip,.stat-tip-mark{transition:none}}
+.statrow>span>.stat-tip,h3>.stat-tip,h4>.stat-tip{margin-left:var(--sp-2)}.statrow>span>.stat-tip{margin-left:0}

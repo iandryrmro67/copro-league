@@ -4,7 +4,7 @@ import type { League, Match } from '@/lib/model';
 import { labels } from '@/lib/model';
 import type { Summary } from '@/lib/engine';
 import { divisionFor, divisions } from '@/lib/divisions';
-import { playerDomains, profileValue, profilePercentile, recentRatings, averageContributions, matchDomainHistory } from '@/lib/player-analytics';
+import { playerDomains, leagueDomainAverages, profileValue, profilePercentile, recentRatings, averageContributions, matchDomainHistory } from '@/lib/player-analytics';
 import { SourceTemplate, hudTemplates, sourceAt, childNodes, type SourceNode } from './hud-source-template';
 import { fmt } from './league-ui';
 const extraLabels: Record<string,string> = { secondaryAssists:'Passes décisives secondaires', ratingStd:'Écart-type des notes', keyPassShotPct:'Passes clés menant à un tir', passPressurePct:'Réussite sous pression', lineBreakingPasses:'Passes cassant les lignes', receivedLastThird:'Passes reçues dans le dernier tiers', forwardCarries:'Conduites vers l’avant', successfulTackles:'Tacles réussis', offensiveDuelPct:'Duels offensifs gagnés', unmarkedPassPct:'Passes vers un coéquipier démarqué' };
@@ -13,13 +13,18 @@ const measureLabel = (key:string) => label(key)+(!key.endsWith('Pct')&&!['conver
 const level = (v:number|null) => v == null ? 'NON OBSERVÉ' : v >= 85 ? 'TRÈS FORT' : v >= 65 ? 'FORT' : v >= 45 ? 'CORRECT' : 'À DÉVELOPPER';
 const signed = (v:number|null) => v == null ? '—' : `${v > 0 ? '+' : ''}${fmt(v,2)}`;
 function notes(node:SourceNode, texts:string[]) { return childNodes(node).map((child,i)=><SourceTemplate node={child} key={i} slots={{'1':texts[i] ?? ''}}/>); }
+/** Dashed league-average shape of a seven-domain radar, drawn from the source polygon node. */
+export function LeagueAverageShape({ node, averages, point }: { node: SourceNode; averages: (number | null)[]; point: (i: number, value: number) => number[] }) {
+  if (averages.every(v => v != null)) return <SourceTemplate node={node} props={{ '': { points: averages.map((v, i) => point(i, v!).join(',')).join(' ') } }}/>;
+  return <>{averages.map((v, i) => { const next = averages[(i + 1) % averages.length]; if (v == null || next == null) return null; const [x1, y1] = point(i, v), [x2, y2] = point((i + 1) % averages.length, next); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#8E978C" strokeDasharray="4 3"/>; })}</>;
+}
 export function SourcePlayerHeader({summary,population,controls}:{summary:Summary;population:Summary[];controls:ReactNode}) {
  const division=divisionFor(summary.player.id,population);
  return <div className="ds-profile-page"><SourceTemplate name="header" slots={{'0':controls,'1.0':summary.player.photo?<img src={summary.player.photo} alt=""/>:summary.player.name.slice(0,2).toUpperCase(),'1.1.0':summary.player.name,'1.1.1.0':division?.name.toUpperCase()??'DIVISION À VENIR','1.1.1.1':`ELO ${summary.elo}`,'1.1.1.2':`${summary.appearances} MATCHS`}}/></div>;
 }
 export function SourcePlayerOverview({ summary:s, population, divisionPopulation, matches, data }: { summary:Summary; population:Summary[]; divisionPopulation:Summary[]; matches:Match[]; data:League }) {
  const [selected,setSelected]=useState(1);
- const domains=playerDomains(s,population,1,matches), division=divisionFor(s.player.id,divisionPopulation), recent=recentRatings(s);
+ const domains=playerDomains(s,population,1,matches),leagueAverages=leagueDomainAverages(population,1,matches), division=divisionFor(s.player.id,divisionPopulation), recent=recentRatings(s);
  const known=domains.filter((d):d is typeof d & {value:number}=>d.value!=null).sort((a,b)=>b.value-a.value), collective=domains[6].value;
  const mean=known.length ? known.reduce((sum,d)=>sum+d.value,0)/known.length : null;
  const explain=(i:number)=>domains[i].value==null ? 'Un match observé et au moins 3 joueurs comparables sont nécessaires.' : `Score ${fmt(domains[i].value,0)}/100, calculé sur les données observées de la période.${i===3?' Ce domaine reprend la percussion observée : dribbles, touches dans la surface et fautes subies. Les conduites vers l’avant et passes cassant les lignes restent non observées.':''}`;
@@ -38,8 +43,9 @@ export function SourcePlayerOverview({ summary:s, population, divisionPopulation
  });
  const radarChildren=childNodes(sourceAt(hudTemplates.domains,'7.1'));
  const point=(i:number,value:number)=>{const angle=-Math.PI/2+i*Math.PI*2/7;return [220+Math.cos(angle)*118*value/100,165+Math.sin(angle)*118*value/100];};
- domainSlots['7.1']=<>{radarChildren.slice(0,19).map((n,i)=><SourceTemplate node={n} key={i}/>)}{domains.every(d=>d.value!=null)&&<SourceTemplate node={radarChildren[19]} props={{'':{points:domains.map((d,i)=>point(i,d.value!).join(',')).join(' ')}}}/>}{domains.map((d,i)=>{if(d.value==null)return null;const [x,y]=point(i,d.value),next=domains[(i+1)%7];return <g key={d.name}>{next.value!=null&&<line x1={x} y1={y} x2={point((i+1)%7,next.value)[0]} y2={point((i+1)%7,next.value)[1]} stroke="#8BE36B" strokeWidth="2"/>}<SourceTemplate node={radarChildren[20+i]} slots={{'0':`${d.name} : ${fmt(d.value,0)}/100`}} props={{'':{cx:x,cy:y,onClick:()=>setSelected(i),role:'button',tabIndex:0,'aria-label':`${d.name} : ${fmt(d.value,0)}`,onKeyDown:(e:React.KeyboardEvent)=>{if(e.key==='Enter'||e.key===' ')setSelected(i)}}}}/></g>;})}</>;
- domainSlots['7.3']=notes(sourceAt(hudTemplates.domains,'7.3'),[known.length?`${known.length} domaines disposent d’un score comparable.`:'Les statistiques sont visibles même quand les scores ne sont pas encore calculables.','La référence 50 correspond au milieu du groupe. Les mesures absentes ne sont pas des zéros.',`Scores disponibles dès le premier match observé. Lecture provisoire avant ${data.settings.minRadar} matchs ; les mesures manquantes restent inconnues.`]);
+ domainSlots['7.1']=<>{radarChildren.slice(0,18).map((n,i)=><SourceTemplate node={n} key={i}/>)}<LeagueAverageShape node={radarChildren[18]} averages={leagueAverages} point={point}/>{domains.every(d=>d.value!=null)&&<SourceTemplate node={radarChildren[19]} props={{'':{points:domains.map((d,i)=>point(i,d.value!).join(',')).join(' ')}}}/>}{domains.map((d,i)=>{if(d.value==null)return null;const [x,y]=point(i,d.value),next=domains[(i+1)%7];return <g key={d.name}>{next.value!=null&&<line x1={x} y1={y} x2={point((i+1)%7,next.value)[0]} y2={point((i+1)%7,next.value)[1]} stroke="#8BE36B" strokeWidth="2"/>}<SourceTemplate node={radarChildren[20+i]} slots={{'0':`${d.name} : ${fmt(d.value,0)}/100`}} props={{'':{cx:x,cy:y,onClick:()=>setSelected(i),role:'button',tabIndex:0,'aria-label':`${d.name} : ${fmt(d.value,0)}`,onKeyDown:(e:React.KeyboardEvent)=>{if(e.key==='Enter'||e.key===' ')setSelected(i)}}}}/></g>;})}</>;
+ domainSlots['7.2.0']='┄ MOYENNE LIGUE';
+ domainSlots['7.3']=notes(sourceAt(hudTemplates.domains,'7.3'),[known.length?`${known.length} domaines disposent d’un score comparable.`:'Les statistiques sont visibles même quand les scores ne sont pas encore calculables.','La ligne pointillée est la moyenne de la ligue dans chaque domaine. Les mesures absentes ne sont pas des zéros.',`Scores disponibles dès le premier match observé. Lecture provisoire avant ${data.settings.minRadar} matchs ; les mesures manquantes restent inconnues.`]);
  const row=sourceAt(hudTemplates.domains,'9.0.1.0');
  domainSlots['9.0.1']=domains.flatMap((d,i)=>d.keys.map(key=>{const value=profileValue(s,key),rank=profilePercentile(s,population,key);return <SourceTemplate node={row} key={key} slots={{'0':measureLabel(key),'1':`${fmt(value,key==='ratingStd'?2:1)}${value!=null&&(key.endsWith('Pct')||key==='conversion'||key==='winRate')?' %':''}`,'2.1':value==null?'NON OBSERVÉ':rank==null?'Pas assez de données comparables':`Percentile ${fmt(rank,0)} dans la ligue`,'3':rank==null?'—':rank>55?'▲':rank<45?'▼':'—'}} props={{'':{className:`sx sx${i} prow`},'2.0.0':{style:{width:`${rank??0}%`}}}}/>;}));
  const strengthSlots:Record<string,ReactNode>={'1.0.1':mean==null?'DONNÉES INSUFFISANTES':`MOYENNE DES DOMAINES : ${fmt(mean,0)}`};

@@ -27,6 +27,8 @@ Export du 10 octobre : board 45 appliqué à la liste des matchs ; les boards 46
 
 Demandes du 10 octobre : accueil en plein écran sur toutes les tailles (chaque scène remplit l’écran sous l’en-tête, la scène 1440 × 900 est recentrée) et sans « La saison en chiffres » ; composition d’un match sur le terrain de l’accueil ; « Les performances » avant « Détail du match » ; fiche du joueur centrée sur `/joueurs` ; interrupteur Animations dans l’en-tête, qui peut forcer les animations quand le système (par exemple Windows sans effets d’animation) demande de les réduire, ou les couper.
 
+Radars des fiches joueurs (Aperçu et Comparer) : la ligne pointillée est le joueur moyen de la ligue. Chaque mesure prend sa moyenne réelle dans la ligue, puis reçoit le même score que celui d’un joueur ; Collectif fait la moyenne des scores. Elle remplace l’ancien repère fixe à 50. Les aides « i » utilisent l’infobulle du board 27 (`.tt/.tip`) : repère aligné sur le libellé, définition au survol, explication complète au clic.
+
 Board 44, nouvel export du 8 octobre : espacement `20c04239` appliqué partout ; voir [spacing.md](spacing.md).
 
 ## Priorités et exceptions

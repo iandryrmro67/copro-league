@@ -1,5 +1,5 @@
 import type { League, Match, Stats } from './model';
-import { aggregate, metric, radar, type Summary } from './engine';
+import { aggregate, averageRadar, metric, radar, type Summary } from './engine';
 import { candidates, percentile } from './recognition';
 import { automaticRating, ratingConfig } from './performance';
 
@@ -17,6 +17,13 @@ export function playerDomains(summary: Summary, population: Summary[], minimum: 
   const metrics = candidates({ players: population.map(p => p.player), matches });
   const collective = metrics.find(p => p.id === summary.player.id)?.values.collective;
   return profileDomains.map(domain => ({ ...domain, value: domain.axis ? axes.find(a => a.name === domain.axis)?.value ?? null : domain.name === 'Collectif' && summary.appearances >= minimum ? collective ?? null : null }));
+}
+/** League-average player on the seven domains: mean measures scored like any player; Collectif averages the players' scores. */
+export function leagueDomainAverages(population: Summary[], minimum: number, matches: Match[]): (number | null)[] {
+  const axes = averageRadar(population, minimum);
+  const metrics = candidates({ players: population.map(p => p.player), matches });
+  const collective = population.filter(p => p.appearances >= minimum).flatMap(p => { const v = metrics.find(m => m.id === p.player.id)?.values.collective; return v == null ? [] : [v]; });
+  return profileDomains.map(domain => domain.axis ? axes.find(a => a.name === domain.axis)?.value ?? null : collective.length ? collective.reduce((sum, v) => sum + v, 0) / collective.length : null);
 }
 export function profileValue(summary: Summary, key: string): number | null {
   if (key === 'ratingStd') {

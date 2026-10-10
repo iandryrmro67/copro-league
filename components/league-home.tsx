@@ -84,9 +84,10 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
   </div></div>;
 }
 
-// The export defines 1440 × 900 frames. Each frame fills the screen: the design is
-// scaled to fit, the canvas grows to the frame and --cx/--cy recentre the scene.
-// Narrow screens reflow the same content instead of shrinking its text.
+// The export defines 1440 × 900 frames. Each frame fills the screen edge to edge: the
+// scene is scaled to cover the frame, cropping at most 40px per side horizontally and
+// 15 % vertically, so its panels stay visible. The canvas takes the frame size and
+// --cx/--cy recentre the scene. Narrow screens reflow the content instead.
 function DesignFrame({ children, hero = false, label, id, screen }: { children: React.ReactNode; hero?: boolean; label: string; id:string; screen:number }) {
   const outer = useRef<HTMLElement>(null), [fit, setFit] = useState({ scale: 1, width: 1440, height: hero ? 836 : 900 });
   useEffect(() => {
@@ -94,7 +95,8 @@ function DesignFrame({ children, hero = false, label, id, screen }: { children: 
     if (!el) return;
     const visible = hero ? 836 : 900;
     const observer = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect, scale = Math.min(width / 1440, height / visible) || 1;
+      const { width, height } = entry.contentRect, x = width / 1440, y = height / visible;
+      const scale = Math.max(Math.min(x, y), Math.min(Math.max(x, y), width / 1360, y * 1.15)) || 1;
       setFit({ scale, width: width / scale, height: height / scale });
     });
     observer.observe(el);
