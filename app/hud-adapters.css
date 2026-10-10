@@ -177,3 +177,96 @@ body:has(.faithful-home) .source-footer{display:none}
  .source-match-dashboard .mp [data-source-template=matchTop]>div:first-child{padding:var(--sp-4)!important;min-width:0}
  .source-match-dashboard .mp .tlbox{overflow:hidden}
 }
+/* Full-screen home: every scene fills the screen below the header on all sizes.
+   DesignFrame fits the 1440 × 900 design; --cx/--cy recentre the scene, while
+   full-bleed and edge-anchored layers keep following the frame edges. */
+.container:has(.faithful-home){max-width:none}
+@media(min-width:701px){
+ .html-frame,.html-frame.html-hero{height:calc(100svh - 64px);min-height:480px}
+ .html-canvas{width:var(--canvas-w,1440px);height:var(--canvas-h,900px)}
+ .html-canvas>*{translate:var(--cx,0) var(--cy,0)}
+ .html-canvas>:is(.outlined-season,.html-pitch-context,.html-elo,.html-fixture,.html-shortcuts,.html-room-floor,.html-room-heading,.html-locker-wall,.html-calendar,.html-scan){translate:0 var(--cy,0)}
+ .html-canvas>.html-season-bar{translate:0 calc(var(--cy,0px) * 2)}
+ .html-canvas>:is(.html-grid,.html-footer){translate:none}
+ .html-canvas>.html-room-lamp{translate:var(--cx,0) 0}
+ .html-canvas>.html-faq-list{right:calc(80px + var(--cx,0px) * 2)}
+ .html-canvas>.html-team-label.team-b{translate:calc(var(--cx,0px) * -1) var(--cy,0)}
+}
+@media(max-width:700px){.html-frame,.html-frame.html-hero{min-height:calc(100svh - 64px)}}
+/* Match lineup on the home pitch: a 1000 × 430 crop of the 1440 × 900 scene. */
+.match-pitch{display:flex;flex-direction:column;gap:var(--sp-4);color:var(--bone)}
+.match-pitch-frame *{box-sizing:border-box}
+.match-pitch-frame{position:relative;height:calc(430px * var(--design-scale));overflow:hidden;background:#050605;border:1px solid var(--line)}
+.match-pitch-canvas{position:absolute;left:0;top:0;width:1440px;height:900px;transform:scale(var(--design-scale)) translate(-220px,-370px);transform-origin:0 0}
+.match-pitch .html-pitch-players,.match-pitch .html-team-label{display:block}
+.match-pitch button.html-pitch-player{background:none;border:0;padding:0;color:inherit;cursor:pointer;font:inherit}
+.match-pitch-roster{display:none;grid-template-columns:1fr 1fr;gap:var(--grid-gap)}
+.match-pitch-roster h3{font:800 18px var(--font-display);text-transform:uppercase;margin-bottom:var(--sp-2)}
+.match-pitch-roster button{display:flex;justify-content:space-between;width:100%;padding:var(--sp-2) 0;background:none;border:0;border-top:1px solid var(--graphite);color:inherit;font:500 14px var(--font-body);cursor:pointer}
+.match-pitch-roster span{font-family:var(--font-hud);color:var(--trichome)}
+@media(max-width:700px){.match-pitch-roster{display:grid}.match-pitch .html-pitch-name,.match-pitch .html-pitch-tooltip{display:none}}
+/* Board 45 · Liste des matchs A · Billets (5e42c8f9). */
+.match-tickets{display:flex;flex-direction:column;gap:var(--sp-12);margin-top:var(--sp-8)}
+.match-tickets>section{display:flex;flex-direction:column;gap:var(--sp-4)}
+.match-tickets>section>.ticket-label{margin-bottom:var(--sp-2)}
+.ticket-label{font:400 11px var(--font-hud);letter-spacing:.16em;text-transform:uppercase;color:var(--trichome)}
+.match-tickets .muted{color:var(--ash)}
+.match-tickets .accent{color:var(--trichome)}
+.match-ticket{position:relative;display:grid;background:#121512;color:var(--bone);text-decoration:none;overflow:hidden;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.match-ticket .ticket-stub{position:relative;border-left:2px dashed var(--line);display:flex;flex-direction:column}
+.match-ticket .ticket-stub::before,.match-ticket .ticket-stub::after{content:"";position:absolute;left:-11px;width:20px;height:20px;border-radius:50%;background:var(--void)}
+.match-ticket .ticket-stub::before{top:-11px}.match-ticket .ticket-stub::after{bottom:-11px}
+.match-ticket.next{grid-template-columns:1fr minmax(0,520px);min-height:300px;border-left:4px solid var(--kush)}
+.ticket-ghost{position:absolute;right:430px;top:-40px;font:900 420px/1 var(--font-display);color:rgba(86,185,71,.07);pointer-events:none}
+.match-ticket.next .ticket-main{position:relative;container-type:inline-size;padding:34px 40px;display:flex;flex-direction:column;justify-content:space-between;gap:var(--sp-6)}
+.ticket-meta{display:flex;flex-wrap:wrap;gap:var(--sp-4);align-items:center}
+.ticket-live{width:10px;height:10px;border-radius:50%;background:var(--kush);animation:zpulse 1.6s ease-in-out infinite}
+@keyframes zpulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ticket-teams{display:flex;flex-wrap:wrap;align-items:center;column-gap:var(--sp-8);row-gap:var(--sp-2);margin:0;font:900 clamp(40px,10cqi,120px)/.85 var(--font-display);text-transform:uppercase}
+.ticket-teams small{font:400 20px var(--font-hud);letter-spacing:.2em;color:var(--kush)}
+.ticket-squad{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.ticket-squad>div{display:flex;gap:6px}
+.ticket-squad i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line)}
+.ticket-squad i.on{background:var(--kush);border-color:var(--kush)}
+.match-ticket.next .ticket-stub{padding:34px 40px;justify-content:space-between;gap:var(--sp-6)}
+.ticket-countdown{display:flex;gap:18px;margin-top:10px}
+.ticket-countdown b{display:block;font:900 72px/.9 var(--font-display)}
+.ticket-countdown span{font:400 10px var(--font-hud);letter-spacing:.2em;text-transform:uppercase;color:var(--ash)}
+.ticket-actions{display:flex;flex-wrap:wrap;gap:12px}
+.match-ticket.row{grid-template-columns:128px 1fr 220px;min-height:132px;transition:transform .25s cubic-bezier(.22,1,.36,1),background .2s}
+.match-ticket.row:hover{background:var(--resin)}
+.match-ticket.row:focus-visible{outline:2px solid var(--trichome);outline-offset:2px}
+.ticket-day{display:flex;flex-direction:column;justify-content:center;align-items:center;border-right:1px solid #1B1F1B}
+.ticket-day b{font:900 68px/.9 var(--font-display)}
+.ticket-day span{font:400 11px var(--font-hud);letter-spacing:.2em;color:var(--ash)}
+.match-ticket.row .ticket-main{display:flex;flex-direction:column;justify-content:center;gap:10px;padding:var(--sp-4) 32px}
+.ticket-score{display:flex;flex-wrap:wrap;align-items:center;gap:20px}
+.ticket-score strong{font:800 34px/1 var(--font-display);text-transform:uppercase}
+.ticket-score b{font:900 50px/1 var(--font-display)}
+.ticket-score i{width:14px;height:2px;background:var(--line)}
+.ticket-score small{font:400 14px var(--font-hud);letter-spacing:.2em;color:var(--kush)}
+.match-ticket.row .ticket-stub{justify-content:center;gap:6px;padding:0 24px}
+.match-ticket.row .ticket-stub strong{font:800 26px/1 var(--font-display);text-transform:uppercase}
+.ticket-link{font:400 12px var(--font-hud);color:var(--trichome)}
+@media(max-width:1000px){.match-ticket.next{grid-template-columns:1fr}.match-ticket.next .ticket-stub{border-left:0;border-top:2px dashed var(--line)}.match-ticket.next .ticket-stub::before,.match-ticket.next .ticket-stub::after{display:none}.ticket-ghost{right:0}}
+@media(max-width:700px){
+ .match-ticket.next .ticket-main,.match-ticket.next .ticket-stub{padding:var(--sp-6)}
+ .ticket-teams{column-gap:var(--sp-4)}
+ .ticket-countdown b{font-size:52px}
+ .match-ticket.row{grid-template-columns:72px 1fr}
+ .match-ticket.row .ticket-stub{grid-column:1/-1;border-left:0;border-top:2px dashed var(--line);flex-direction:row;flex-wrap:wrap;align-items:baseline;padding:var(--sp-4)}
+ .match-ticket.row .ticket-stub::before,.match-ticket.row .ticket-stub::after{display:none}
+ .match-ticket.row .ticket-stub .ticket-link{margin-left:auto}
+ .ticket-day b{font-size:44px}
+ .match-ticket.row .ticket-main{padding:var(--sp-4)}
+ .ticket-score{gap:var(--sp-2) var(--sp-4)}.ticket-score strong{font-size:24px}.ticket-score b{font-size:36px}
+}
+@media(prefers-reduced-motion:reduce){.ticket-live{animation:none}.match-ticket.row{transition:none}}
+/* Players menu: the selected player's sheet and card sit centred in their column. */
+.source-players-menu [data-source-template=playersFocus]{width:100%;max-width:616px;margin-inline:auto}
+/* Header actions: animation switch next to the account button. */
+.masthead-actions{display:flex;align-items:center;gap:var(--sp-2)}
+.hud-header .masthead>.masthead-actions{grid-column:3;grid-row:1}
+.masthead .motion-toggle{display:inline-flex;align-items:center;gap:var(--sp-2);white-space:nowrap}
+.masthead .motion-toggle[aria-pressed=false]{color:var(--ash)}
+@media(max-width:700px){.masthead .motion-toggle span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}

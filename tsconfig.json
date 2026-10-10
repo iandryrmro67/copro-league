@@ -44,6 +44,8 @@
   "exclude": [
     "node_modules",
     "examples",
-    "vite.config.ts"
+    "vite.config.ts",
+    "work",
+    "outputs"
   ]
 }

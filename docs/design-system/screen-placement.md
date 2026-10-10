@@ -6,6 +6,7 @@ Référence de conception : [README des écrans fourni le 8 octobre 2026](screen
 | --- | --- | --- | --- |
 | Accueil `/` | 42, 43 ; terrain 20 | `f87fd84e`, `9cac9de3`, `15b95fd5` | Quatre sections ; navigation et repères copiés du board 42, apparition après le terrain, compteurs, barres, révélations et sprite lié au défilement avec animation de repli. Terrain et vestiaire partagent leurs joueurs ; positions variables dans chaque équipe. |
 | Chargement et navigation | 29 | `3d6c36e1` | Logo et rideaux reliés au chargement et aux liens internes. |
+| Liste des matchs `/matchs` | 45 (A · Billets) | `5e42c8f9` | Billet du prochain match (compte à rebours, joueurs confirmés, calendrier) et billets des matchs terminés avec score et MVP. Le bouton « Je suis partant » n’est pas repris : les présences viennent du sondage WhatsApp. Les blocs « autres listes » du board restent des exemples. |
 | Consultation d’un match `/matchs/:id` | 31 | `fb889e94` | Bandeau et MVP, timeline, résumé, stats d’équipe, huit leaders, heatmap, tableau individuel et détail filtrable des actions repris du HTML. Onglets et édition historique conservés. |
 | Draft `/draft` | 37, 28, 04 | `ba954663`, `6e94c8fd`, `d311690e` | Trois modes, révélation et déplacements animés. Choix capitaine de 60 secondes puis tirage automatique. |
 | Menu et liste `/joueurs` | 08 | `a100c8c7` | Menu, lignes, fiche sélectionnée, carte et callouts, barres de stats, recherche et tri ; tous raccordés aux joueurs réels. Vue Toutes les cartes conservée. |
@@ -21,6 +22,10 @@ Référence de conception : [README des écrans fourni le 8 octobre 2026](screen
 00 logo `a3ec616f` ; 01 couleurs `47a981b1` ; 02 typographie `9816bba4` ; 03 composants `9b9dd6b4` ; 21 grille `d9ae609e` ; 22 hiérarchie `bcb0716d` ; 26 saisie/navigation `01c44d70` ; 27 retours/données `d963d2bf`.
 
 Le board 05 est ancien. Les boards supprimés 10–16, 32–35 et 38–40 ne servent pas de référence à rechercher. Le board 41 remplace l’ancien 40 pour le flux de saisie.
+
+Export du 10 octobre : board 45 appliqué à la liste des matchs ; les boards 46 (`78923e3e`) et 47 (`5ba01c8e`) sont des variantes non retenues.
+
+Demandes du 10 octobre : accueil en plein écran sur toutes les tailles (chaque scène remplit l’écran sous l’en-tête, la scène 1440 × 900 est recentrée) et sans « La saison en chiffres » ; composition d’un match sur le terrain de l’accueil ; « Les performances » avant « Détail du match » ; fiche du joueur centrée sur `/joueurs` ; interrupteur Animations dans l’en-tête, qui peut forcer les animations quand le système (par exemple Windows sans effets d’animation) demande de les réduire, ou les couper.
 
 Board 44, nouvel export du 8 octobre : espacement `20c04239` appliqué partout ; voir [spacing.md](spacing.md).
 

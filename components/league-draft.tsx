@@ -4,6 +4,7 @@ import type { League, Match } from '@/lib/model';
 import { teamName } from '@/lib/model';
 import { aggregate, balancedDraft } from '@/lib/engine';
 import { PackMotion, DistributionMotion } from './league-draft-motion';
+import { prefersReducedMotion } from './league-motion';
 import { captainDraftReducer, emptyCaptainDraft } from '@/lib/captain-draft';
 import { Picker, Avatar } from './league-ui';
 import { SourceCheckbox as Checkbox,SourceFeedback,SourceToast } from './league-kit';
@@ -48,14 +49,14 @@ export function Draft({ data, refresh, match: external, onApply }: { data: Leagu
 
   useEffect(() => {
     if (mode !== 'balanced' || !generated || reveal >= players.length) return;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = prefersReducedMotion();
     const timer = window.setTimeout(() => setReveal(value => reduced ? players.length : value + 1), reduced ? 0 : reveal === 0 ? 2600 : 1500);
     return () => window.clearTimeout(timer);
   }, [mode, generated, reveal, players.length, run]);
 
   useEffect(() => {
     if (mode !== 'pack' || !packActive || !generated) return;
-    const timer = window.setTimeout(() => { setReveal(value => value + 1); setPackActive(false); }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 10000);
+    const timer = window.setTimeout(() => { setReveal(value => value + 1); setPackActive(false); }, prefersReducedMotion() ? 0 : 10000);
     return () => window.clearTimeout(timer);
   }, [mode, packActive, generated, run]);
 
