@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import {createPortal} from 'react-dom';
 import type { League, Match, Player } from '@/lib/model';
-import { teamName } from '@/lib/model';
+import { counted, teamName } from '@/lib/model';
 import { youtubeId, type Summary } from '@/lib/engine';
 import { divisionFor } from '@/lib/divisions';
 import { Calendar, Empty, date, fmt, time } from './league-ui';
@@ -30,7 +30,7 @@ export function Home({ data, summaries, matches, seasonName, filters, divisionPo
     return () => window.clearInterval(timer);
   }, []);
   const next = [...matches].filter(m => m.status === 'scheduled' && new Date(m.date).getTime() > now).sort((a, b) => a.date.localeCompare(b.date))[0];
-  const done = matches.filter(m => m.status === 'finished');
+  const done = matches.filter(counted);
   const eloLeaders = summaries.filter(s => s.appearances > 0 && !s.player.archived).sort((a, b) => b.elo - a.elo).slice(0, 5);
   const goals = done.reduce((n, m) => n + (m.scoreA ?? 0) + (m.scoreB ?? 0), 0);
   const { match: pitchMatch, roster } = homePitch(data, matches, now);

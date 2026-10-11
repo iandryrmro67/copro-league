@@ -14,7 +14,7 @@ export const actionLabels:Record<string,string>={GOAL:'But',ON_TARGET:'Cadré',O
 export const annotationRules={interceptionIsRecovery:true,boxStart:85,boxLeft:25,boxRight:75,finalThird:200/3,pitchLength:40,pitchWidth:20};
 export const isV2=(e:MatchEvent)=>e.metadata.schemaVersion===2;
 export const isGoal=(e:MatchEvent)=>e.type==='GOAL'||(isV2(e)&&e.type==='SHOT'&&e.metadata.outcome==='GOAL');
-export function eventLabel(e:MatchEvent){return isV2(e)?`${actionDefinitions[e.type]?.label??e.type}${e.metadata.outcome?' · '+(actionLabels[String(e.metadata.outcome)]??e.metadata.outcome):''}`:e.type.replaceAll('_',' ')}
+export function eventLabel(e:MatchEvent){return isV2(e)?`${actionDefinitions[e.type]?.label??e.type}${e.metadata.outcome?' · '+(actionLabels[String(e.metadata.outcome)]??e.metadata.outcome):''}`:e.type==='INJURY'?'Blessure · sorti du terrain':e.type.replaceAll('_',' ')}
 export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,string][]{
  const out:[string,string][]=[],a=e.playerId,b=String(e.metadata.opponentPlayerId??''),mate=e.relatedPlayerId,o=e.metadata.outcome,t=(e.metadata.tags??[]) as string[],has=(s:string)=>t.includes(s),add=(k:string,id=a)=>{if(id)out.push([id,k])};
  const linked=events.find(x=>x.id===e.metadata.linkedEventId);const pos=e.metadata.position as Point|undefined;

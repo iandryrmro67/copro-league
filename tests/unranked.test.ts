@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { aggregate, eloHistory, duos } from '../lib/engine.ts';
+import { projectEvents } from '../lib/events.ts';
+import { currentInjury, counted } from '../lib/model.ts';
+import { matchSchema } from '../lib/validation.ts';
+const players:any[] = ['a','b','c','d'].map(id=>({id,name:id,archived:false,attributes:{overall:50}}));
+const game=(id:string,date:string,scoreA:number,scoreB:number,extra:any={}):any=>({id,seasonId:'s',number:Number(id.slice(1)),date,duration:60,location:'Five',status:'finished',scoreA,scoreB,mvpId:null,level:1,video:'',trackedKeys:[],version:0,events:[],participants:[{playerId:'a',team:'A',stats:{goals:scoreA}},{playerId:'c',team:'A',stats:{}},{playerId:'b',team:'B',stats:{goals:scoreB}},{playerId:'d',team:'B',stats:{}}],...extra});
+const ranked=game('m1','2026-10-01T10:00:00Z',2,1), unranked=game('m2','2026-10-05T10:00:00Z',0,5,{unranked:true,unrankedReason:'Blessure'});
+
+test('unranked matches leave ELO untouched',()=>{assert.deepEqual(eloHistory(players,[ranked,unranked]).a,eloHistory(players,[ranked]).a);assert.equal(counted(unranked),false);assert.equal(counted(ranked),true)});
+test('unranked matches stay out of totals, record and duos',()=>{const a=aggregate(players,[ranked,unranked]).find(s=>s.player.id==='a')!;assert.equal(a.appearances,1);assert.equal(a.stats.goals,2);assert.equal(a.wins,1);assert.equal(duos(aggregate(players,[ranked,unranked]),[ranked,unranked],1).find(d=>d.a.id==='a'&&d.b.id==='c')!.matches,1)});
+test('a match page can still summarise its own unranked game',()=>{const b=aggregate(players,[unranked],[unranked],true).find(s=>s.player.id==='b')!;assert.equal(b.appearances,1);assert.equal(b.stats.goals,5)});
+test('an injury leaves stats unchanged and clears once the player plays again',()=>{const injury={id:'i1',playerId:'c',team:'A',type:'INJURY',timestamp:1380,relatedPlayerId:null,metadata:{note:'cheville'}};const hurt=projectEvents({...unranked,events:[injury]});assert.deepEqual(hurt.participants.find((p:any)=>p.playerId==='c')!.stats,{});assert.equal(currentInjury('c',[ranked,hurt])?.event.id,'i1');assert.equal(currentInjury('c',[ranked,hurt,game('m3','2026-10-12T10:00:00Z',1,1)]),null);assert.equal(currentInjury('a',[ranked,hurt]),null)});
+test('validation keeps the unranked flag and accepts injury events',()=>{const parsed:any=matchSchema.parse({...unranked,unrankedNote:'Fini à 4 contre 5',events:[{id:'i1',playerId:'c',team:'A',type:'INJURY',timestamp:1380,relatedPlayerId:null,metadata:{}}]});assert.equal(parsed.unranked,true);assert.equal(parsed.unrankedReason,'Blessure');assert.equal(parsed.unrankedNote,'Fini à 4 contre 5');assert.equal(parsed.events[0].type,'INJURY')});

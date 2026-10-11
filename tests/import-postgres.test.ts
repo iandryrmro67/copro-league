@@ -8,6 +8,7 @@ test('raw restore preserves settings, votes and history, resets identity IDs, ne
  const pg=new PGlite();
  const wrap=(client:any):SQLConnection=>({query:async(s,a)=>{const r=await client.query(s,a);return {rows:r.rows,count:r.affectedRows}},transaction:fn=>client.transaction((tx:any)=>fn(wrap(tx)))});
  await pg.exec(await readFile(new URL('../supabase/migrations/202609200001_league.sql',import.meta.url),'utf8'));
+ await pg.exec(await readFile(new URL('../supabase/migrations/202610110001_unranked_matches.sql',import.meta.url),'utf8'));
  const backup:RawBackup={format:'copro-raw-v1',tables:Object.fromEntries(leagueTables.map(t=>[t,[]]))};
  backup.tables.players=[{id:'a',name:'A'}];
  backup.tables.seasons=[{id:'s',name:'Saison',start:'',end:'',status:'finished'}];

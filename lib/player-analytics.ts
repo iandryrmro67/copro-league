@@ -1,4 +1,5 @@
 import type { League, Match, Stats } from './model';
+import { counted } from './model';
 import { aggregate, averageRadar, metric, radar, type Summary } from './engine';
 import { candidates, percentile } from './recognition';
 import { automaticRating, ratingConfig } from './performance';
@@ -66,7 +67,7 @@ export function ratingContributions(stats: Stats, peers: Stats[], weights: Recor
   return { values, penalty, correction, rating: result.value };
 }
 export function averageContributions(summary: Summary, league: Pick<League, 'matches' | 'settings'>) {
-  const peers = league.matches.filter(m => m.status === 'finished').flatMap(m => m.participants.map(p => p.stats));
+  const peers = league.matches.filter(counted).flatMap(m => m.participants.map(p => p.stats));
   const rows = summary.form.flatMap(f => {
     if (f.participant.stats.rating == null) return [];
     const composition = ratingContributions(f.participant.stats, peers, league.settings.ratingWeights);

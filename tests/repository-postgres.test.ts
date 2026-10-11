@@ -7,6 +7,7 @@ test('all season 2 records round-trip through the real repositories on PostgreSQ
  const pg=new PGlite();
  const wrap=(client:any):SQLConnection=>({query:async(s,a)=>{const r=await client.query(s,a);return {rows:r.rows,count:r.affectedRows??r.rows.length}},transaction:fn=>client.transaction((tx:any)=>fn(wrap(tx)))});
  await pg.exec(await readFile(new URL('../supabase/migrations/202609200001_league.sql',import.meta.url),'utf8'));
+ await pg.exec(await readFile(new URL('../supabase/migrations/202610110001_unranked_matches.sql',import.meta.url),'utf8'));
  const database=createDatabase(wrap(pg));
  mock.module('../lib/server/database.ts',{namedExports:{db:()=>database}});
  const {savePlayer,saveSeason,saveMatch,readLeague}=await import('../lib/repository.ts');

@@ -8,6 +8,7 @@ test('PostgreSQL preserves atomic edits, versions and frozen awards',async()=>{
  const pg=new PGlite();
  const connection=(client:any):SQLConnection=>({query:async(sql,args)=>{const r=await client.query(sql,args);return {rows:r.rows,count:r.affectedRows??r.rows.length}},transaction:fn=>client.transaction((tx:any)=>fn(connection(tx)))});
  await pg.exec(await readFile(new URL('../supabase/migrations/202609200001_league.sql',import.meta.url),'utf8'));
+ await pg.exec(await readFile(new URL('../supabase/migrations/202610110001_unranked_matches.sql',import.meta.url),'utf8'));
  const db=createDatabase(connection(pg));
  await db.prepare('INSERT INTO players(id,name) VALUES(?,?)').bind('mathis','Mathis').run();
  await db.prepare('INSERT INTO seasons(id,name,start,end,status) VALUES(?,?,?,?,?)').bind('s2','Saison 2','','','finished').run();

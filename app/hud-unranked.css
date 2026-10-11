@@ -1,0 +1,38 @@
+/* Unranked matches and injuries */
+:root{--unranked:#e0a63b}
+.unranked-card{display:grid;grid-template-columns:auto 1fr;gap:var(--sp-4);align-items:start;padding:var(--sp-4);border:1px dashed var(--line)}
+.unranked-card.on{border:1px solid var(--unranked);background:color-mix(in srgb,var(--unranked) 6%,transparent)}
+.unranked-card h3{margin:0}
+.unranked-card p{margin:var(--sp-1) 0 0}
+.unranked-switch{width:44px;height:24px;border-radius:12px;background:var(--graphite);border:1px solid var(--line);position:relative;cursor:pointer;margin-top:2px;padding:0}
+.unranked-switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--ash);transition:left .2s}
+.unranked-card.on .unranked-switch{background:var(--unranked);border-color:var(--unranked)}
+.unranked-card.on .unranked-switch::after{left:23px;background:var(--void)}
+.unranked-switch:focus-visible{outline:2px solid var(--bone);outline-offset:2px}
+.unranked-detail{display:grid;gap:var(--sp-2);margin-top:var(--sp-4)}
+.unranked-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.unranked-chips button{font:500 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border:1px solid var(--line);background:none;color:var(--ash);cursor:pointer}
+.unranked-chips button.on{border-color:var(--unranked);color:var(--unranked)}
+.unranked-impact{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}
+.unranked-impact span{font-size:13px;padding:8px;background:var(--graphite);border:1px solid var(--line)}
+.unranked-impact .yes::before{content:'✓ ';color:var(--kush)}
+.unranked-impact .no::before{content:'✕ ';color:var(--unranked)}
+.unranked-banner{display:flex;gap:var(--sp-4);align-items:flex-start;padding:var(--sp-3) var(--sp-4);border:1px solid var(--unranked);background:color-mix(in srgb,var(--unranked) 7%,transparent);margin-bottom:var(--sp-4)}
+.unranked-banner p{margin:var(--sp-1) 0 0;color:var(--ash);font-size:14px}
+.unranked-code{font-family:var(--font-display);font-weight:800;font-size:22px;line-height:1;color:var(--unranked)}
+.unranked-tag{font:500 10px 'JetBrains Mono',monospace;letter-spacing:.12em;padding:2px 6px;border:1px solid var(--unranked);color:var(--unranked);vertical-align:middle}
+.injury-mark{display:inline-grid;place-items:center;width:15px;height:15px;background:var(--danger);color:#fff;font-weight:700;font-size:13px;line-height:1;border-radius:2px;flex:none}
+.injury-tag{display:inline-flex;align-items:center;gap:6px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--danger);color:var(--danger);white-space:nowrap}
+.injury-button{border-color:var(--danger)!important;color:var(--danger)!important;display:inline-flex;align-items:center;gap:6px}
+.injury-panel{border:1px solid var(--danger);padding:var(--sp-4);display:grid;gap:var(--sp-3);margin:var(--sp-3) 0}
+.injury-panel .seq-options button.active{border-color:var(--danger);color:var(--danger)}
+.injury-prompt{border:1px solid var(--unranked);background:color-mix(in srgb,var(--unranked) 7%,transparent);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.eventrow.injury-row{color:var(--danger)}
+.form-unranked{border-style:dashed!important;opacity:.6}
+.injury-pin{position:absolute;top:0;bottom:0;border-left:1px dashed var(--danger);z-index:30;pointer-events:auto}
+.injury-pin>span{position:absolute;left:4px;display:inline-flex;align-items:center;gap:4px;font:600 9px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--danger);white-space:nowrap;background:var(--void);padding:1px 3px}
+.injury-pin.a>span{top:2px}
+.injury-pin.b>span{bottom:2px}
+.player-flags{display:flex;flex-wrap:wrap;gap:var(--sp-3);align-items:center;margin:var(--sp-3) 0;font-size:13px}
+.player-flags a.injury-tag{text-decoration:none}
+.rw .injury-tag{padding:0 4px;font-size:9px;margin-left:6px;vertical-align:middle}

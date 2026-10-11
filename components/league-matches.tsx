@@ -48,7 +48,7 @@ function TicketRow({ match: m, players, now }: { match: Match; players: Player[]
   return <Link className="match-ticket row" href={'/matchs/' + m.id}>
     <div className="ticket-day"><b>{day(m.date)}</b><span>{month(m.date)}</span></div>
     <div className="ticket-main">
-      <span className="ticket-label muted">Match #{m.number} · {state}</span>
+      <span className="ticket-label muted">Match #{m.number} · {state}{m.unranked && <> <span className="unranked-tag" title={'Hors classement' + (m.unrankedReason ? ' · ' + m.unrankedReason : '')}>HC</span></>}</span>
       <div className="ticket-score"><strong className={bWins ? 'muted' : ''}>{teamName(m, 'A')}</strong>{finished ? <><b className={aWins ? 'accent' : 'muted'}>{m.scoreA ?? '—'}</b><i aria-label="à"/><b className={bWins ? 'accent' : 'muted'}>{m.scoreB ?? '—'}</b></> : <small>VS</small>}<strong className={aWins ? 'muted' : ''}>{teamName(m, 'B')}</strong></div>
     </div>
     <div className="ticket-stub"><span className="ticket-label muted">{finished ? 'MVP' : time(m.date)}</span><strong>{finished ? mvp?.name ?? 'Non attribué' : date(m.date)}</strong><span className="ticket-link">Voir le match ↗</span></div>

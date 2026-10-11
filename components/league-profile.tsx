@@ -1,7 +1,7 @@
 'use client';
 import {useState,type ReactNode} from 'react';
 import type {Match,Settings} from '@/lib/model';
-import {labels} from '@/lib/model';
+import {counted,labels} from '@/lib/model';
 import {aggregate,duos,metric,type Summary} from '@/lib/engine';
 import {pairedProduction,linkedAssists} from '@/lib/duo-analytics';
 import {playerDomains,profilePercentile,leagueDomainAverages} from '@/lib/player-analytics';
@@ -59,7 +59,7 @@ export function PlayerDuo({summary:a,population,matches,minimum}:{summary:Summar
  const [selected,setSelected]=useState('');const pairs=duos(population,matches,1).filter(p=>p.a.id===a.player.id||p.b.id===a.player.id),partner=(p:typeof pairs[number])=>p.a.id===a.player.id?p.b.id:p.a.id;
  const pair=pairs.find(p=>partner(p)===selected)??pairs[0],b=population.find(s=>s.player.id===(pair?partner(pair):''));
  if(!pair||!b)return <Empty>Aucun match partagé dans la même équipe sur cette période.</Empty>;
- const games=matches.filter(m=>m.status==='finished'&&m.participants.some(p=>p.playerId===a.player.id&&p.team&&m.participants.some(q=>q.playerId===b.player.id&&q.team===p.team)));
+ const games=matches.filter(m=>counted(m)&&m.participants.some(p=>p.playerId===a.player.id&&p.team&&m.participants.some(q=>q.playerId===b.player.id&&q.team===p.team)));
  const common=aggregate([a.player,b.player],games),sa=common.find(s=>s.player.id===a.player.id)!,sb=common.find(s=>s.player.id===b.player.id)!;
  const apart=(s:Summary)=>aggregate([s.player],matches.filter(m=>!games.some(g=>g.id===m.id)))[0],aa=apart(a),ab=apart(b);
  const paired=(key:string)=>pairedProduction(games,a.player.id,b.player.id,key);

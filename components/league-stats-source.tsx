@@ -2,6 +2,7 @@
 import {Fragment,useState,type ReactNode} from 'react';
 import {metric,type Summary} from '@/lib/engine';
 import type {Match} from '@/lib/model';
+import {counted} from '@/lib/model';
 import {isGoal} from '@/lib/actions';
 import {SourceTemplate,hudTemplates,sourceAt,childNodes} from './hud-source-template';
 import {Picker,fmt,Empty} from './league-ui';
@@ -10,7 +11,7 @@ const source=hudTemplates.statsOverview;
 export function SourceStatsOverview({summaries,matches}:{summaries:Summary[];matches:Match[]}){
  const [selected,setSelected]=useState('');
  const rows=summaries.filter(s=>s.appearances).sort((a,b)=>b.elo-a.elo),focus=rows.find(s=>s.player.id===selected)??rows[0];
- const games=matches.filter(m=>m.status==='finished').sort((a,b)=>a.date.localeCompare(b.date)||a.number-b.number);
+ const games=matches.filter(counted).sort((a,b)=>a.date.localeCompare(b.date)||a.number-b.number);
  const scored=games.filter(m=>m.scoreA!=null&&m.scoreB!=null),goals=scored.length?scored.reduce((n,m)=>n+m.scoreA!+m.scoreB!,0):null;
  const knownAssists=rows.flatMap(s=>s.stats.assists==null?[]:[s.stats.assists]),assists=knownAssists.length?knownAssists.reduce((n,v)=>n+v,0):null;
  const slots:Slots={};[goals,assists,games.length,goals==null?null:goals/scored.length,rows.length].forEach((v,i)=>{slots[`0.${i}.1.0`]=fmt(v,i===3?2:0);slots[`0.${i}.1.1`]='';});

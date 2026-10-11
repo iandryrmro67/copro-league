@@ -1,7 +1,7 @@
 'use client';
 import { useState, type ReactNode } from 'react';
 import type { League, Match } from '@/lib/model';
-import { labels } from '@/lib/model';
+import { counted, labels } from '@/lib/model';
 import type { Summary } from '@/lib/engine';
 import { divisionFor, divisions } from '@/lib/divisions';
 import { playerDomains, leagueDomainAverages, profileValue, profilePercentile, recentRatings, averageContributions, matchDomainHistory } from '@/lib/player-analytics';
@@ -72,7 +72,7 @@ export function SourcePlayerOverview({ summary:s, population, divisionPopulation
  const divisionSlots:Record<string,ReactNode>={};
  divisionSlots['0.1']=[...divisions].reverse().map(d=><SourceTemplate node={sourceAt(hudTemplates.division,'0.1.0')} key={d.id} slots={{'0':d.name.toUpperCase(),'1':`PERCENTILE ELO ≥ ${d.minimum}`,'2':division?.id===d.id?`TOI · ${s.elo}`:''}} props={{'':{style:{background:division?.id===d.id?'#12290F':undefined}},'0':{style:{color:division?.id===d.id?'#8BE36B':'#8E978C'}}}}/>);
  divisionSlots['0.2']=notes(sourceAt(hudTemplates.division,'0.2'),[division?`Division actuelle : ${division.name}.`:'La division nécessite au moins deux joueurs ayant joué.',`ELO actuel : ${s.elo}.`,'Les divisions actuelles utilisent le rang ELO relatif dans la ligue.']);
- const finished=matches.filter(m=>m.status==='finished').length,attendance=finished?100*s.appearances/finished:null;
+ const finished=matches.filter(counted).length,attendance=finished?100*s.appearances/finished:null;
  const collectiveRows=[{name:'PRÉSENCE',value:attendance,text:attendance==null?'—':`${s.appearances}/${finished}`},{name:'ÉCART-TYPE NOTES',value:profilePercentile(s,population,'ratingStd'),text:fmt(profileValue(s,'ratingStd'),2)},{name:'VICTOIRES ÉQUIPE',value:s.stats.winRate??null,text:`${fmt(s.stats.winRate,0)} %`},{name:'PASSES VERS COÉQUIPIERS',value:null,text:'—'}];
  divisionSlots['1.0.1']=`${fmt(collective,0)} / 100`;
  divisionSlots['1.1']=collectiveRows.map(c=><SourceTemplate node={sourceAt(hudTemplates.division,'1.1.0')} key={c.name} slots={{'0':c.name,'2':c.text}} props={{'1.0':{style:{width:`${c.value??0}%`}},'1.1':{style:{display:'none'}}}}/>);
