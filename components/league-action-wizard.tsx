@@ -1,7 +1,7 @@
 'use client';
 import { useState, type MouseEvent } from 'react';
 import type { Match } from '@/lib/model';
-import { actionDefinitions, actionLabels, type Point } from '@/lib/actions';
+import { actionDefinitions, actionLabels, toggleTag, type Point } from '@/lib/actions';
 import { SourceTemplate, hudTemplates, sourceAt, childNodes } from './hud-source-template';
 import { SourceCheckbox } from './league-kit';
 type Stage = 'actor' | 'action' | 'outcome' | 'details' | 'player' | 'position';
@@ -26,7 +26,7 @@ export function ActionWizard({ match, actor, type, outcome, tags, mate, opponent
   const options=stage==='actor'?match.participants.filter(p=>p.team).map(p=>option(name(p.playerId),p.playerId,()=>{onFreeze();onActor(p.playerId);setStage('action')}))
     :stage==='action'?Object.entries(actionDefinitions).map(([key,d])=>option(d.label,key,()=>{onType(key);setCombine(false);setStage(d.outcomes.length?'outcome':d.tags.length?'details':['BLOCK','INTERCEPTION'].includes(key)?'player':'position')}))
     :stage==='outcome'?definition.outcomes.map(key=>option(actionLabels[key],key,()=>{onOutcome(key);setStage(relevantTags.length?'details':type==='PASS'||['DRIBBLE','DUEL','TACKLE','FOUL','SAVE'].includes(type)||type==='SHOT'&&['GOAL','BLOCKED'].includes(key)?'player':'position')}))
-    :stage==='details'?[option(type==='PASS'?'Normale':'Sans précision','normal',()=>{onTags([]);nextPlayer()}),...relevantTags.map(tag=>option(actionLabels[tag],tag,()=>{onTags(combine?(tags.includes(tag)?tags.filter(x=>x!==tag):[...tags,tag]):[tag]);if(!combine)nextPlayer()},tags.includes(tag))),option('Type inconnu','unknown',()=>{onTags([]);nextPlayer()})]
+    :stage==='details'?[option(type==='PASS'?'Normale':'Sans précision','normal',()=>{onTags([]);nextPlayer()}),...relevantTags.map(tag=>option(actionLabels[tag],tag,()=>{onTags(combine?toggleTag(tags,tag):[tag]);if(!combine)nextPlayer()},tags.includes(tag))),option('Type inconnu','unknown',()=>{onTags([]);nextPlayer()})]
     :stage==='player'?match.participants.filter(p=>p.playerId!==actor&&(mateNeeded||mateOptional?p.team===side:p.team&&p.team!==side)).map(p=>option(name(p.playerId),p.playerId,()=>{if(mateNeeded||mateOptional)onMate(p.playerId);else onOpponent(p.playerId);setStage('position')})):[];
   return <section className="source-action-wizard"><div className="an">
     <SourceTemplate name="wizardState" slots={{'0':`BROUILLON LOCAL · ${match.events.length} ACTIONS`}} props={{'1':{hidden:true},'2':{hidden:true}}}/>

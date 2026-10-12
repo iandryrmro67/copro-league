@@ -11,6 +11,7 @@ const activeMatchSchema=z.object({id,seasonId:id,number:z.number().int().min(1),
 if(isV2(e)){
 const d=actionDefinitions[e.type],v=e.metadata,o=v.outcome,t=v.tags;
 if(!d)fail('Action inconnue');else{if(d.outcomes.length&&!d.outcomes.includes(String(o)))fail('Résultat invalide');if(!Array.isArray(t)||t.some(x=>typeof x!=='string'||!d.tags.includes(x)))fail('Tags invalides');}
+if(e.type==='PASS'&&Array.isArray(t)&&t.includes('LATERAL')&&t.includes('BACKWARD'))fail('Une passe est latérale ou en retrait, pas les deux');
 if(typeof v.sequenceId!=='string'||v.sequenceId.length>100||!v.sequenceId)fail('Séquence requise');
 const opponent=m.participants.find(q=>q.playerId===v.opponentPlayerId);
 if(v.opponentPlayerId&&(!opponent||opponent.team===e.team))fail('Adversaire invalide');
