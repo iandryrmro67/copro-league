@@ -1,0 +1,89 @@
+/* Video annotation layouts: stack (video on top), split (video + side panel), cinema (video + floating card + team lanes) */
+.seq-layouts{display:inline-flex;flex-wrap:wrap;gap:var(--sp-1)}
+.seq-layout .seq-media video{max-height:none!important;width:100%;height:auto;aspect-ratio:16/9;background:#000;object-fit:contain}
+.seq-layout .seq-media .youtube{max-height:none}
+.seq-layout .seq-player{--video-room:380px}
+.seq-layout .seq-player video,.seq-layout .seq-player .youtube{width:min(100%,calc((100vh - var(--video-room))*16/9));min-width:min(100%,320px);margin-inline:auto}
+.seq-layout-split .seq-player{--video-room:330px}
+.seq-layout-cinema .seq-player{--video-room:300px}
+.seq-full{position:fixed;inset:0;z-index:60;background:var(--void);padding:var(--sp-4);overflow:auto;align-content:start}
+.seq-full .seq-player{--video-room:260px}
+
+/* scrubber with annotated actions: team A above the line, team B below */
+.seq-track{position:relative;height:40px;background:var(--carbon);border:1px solid var(--line);cursor:pointer;user-select:none}
+.seq-track::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.seq-track-done{position:absolute;left:0;top:0;bottom:0;background:color-mix(in srgb,var(--kush) 10%,transparent);pointer-events:none}
+.seq-track-head{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--bone);pointer-events:none;z-index:3}
+.seq-mark{position:absolute;top:6px;width:10px;height:10px;margin-left:-5px;padding:0;border:0;border-radius:50%;background:var(--bone);cursor:pointer;z-index:1}
+.seq-mark.b{top:auto;bottom:6px;background:var(--kush)}
+.seq-mark.goal{width:14px;height:14px;margin-left:-7px;top:4px;box-shadow:0 0 0 3px color-mix(in srgb,var(--bone) 18%,transparent)}
+.seq-mark.b.goal{top:auto;bottom:4px}
+.seq-mark.injury{background:var(--danger);border-radius:0;transform:rotate(45deg)}
+.seq-mark.picked{outline:2px solid var(--bone);outline-offset:2px;z-index:2}
+.seq-mark:focus-visible{outline:2px solid var(--kush);outline-offset:2px}
+.eventrow.picked{background:color-mix(in srgb,var(--kush) 10%,transparent);box-shadow:inset 2px 0 var(--kush)}
+
+/* A · video on top */
+.seq-stack-below{display:grid;gap:var(--sp-4);align-items:start}
+.seq-stack-work,.seq-stack-list{display:grid;gap:var(--sp-4);min-width:0}
+.seq-stack-list .eventlist{max-height:520px;overflow:auto;margin-top:0}
+@media(min-width:1280px){.seq-stack-below{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
+
+/* B · side by side */
+.seq-split{display:grid;gap:var(--sp-4);align-items:start}
+.seq-split-main{min-width:0;display:grid;gap:var(--sp-2)}
+.seq-split-side{display:grid;gap:var(--sp-4);align-content:start;min-width:0;background:var(--carbon);border:1px solid var(--line);padding:var(--sp-4)}
+.seq-split-tabs{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-1)}
+.seq-split-side .eventlist{margin-top:0}
+.seq-split-side .eventrow{min-width:0;flex-wrap:wrap;gap:var(--sp-2)}
+.seq-split-side .seq-board{grid-template-columns:1fr}
+.seq-split-side .seq-roster{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.seq-split-side .seq-roster h3{width:100%}
+.seq-split-side .seq-field-dock .seq-palette{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seq-split-side .source-action-wizard{min-width:0}
+@media(min-width:1000px){
+  .seq-split{grid-template-columns:minmax(0,1fr) minmax(360px,420px)}
+  .seq-split-main{position:sticky;top:var(--sp-4)}
+  .seq-split-side{max-height:calc(100vh - 2*var(--sp-4));overflow:auto;position:sticky;top:var(--sp-4)}
+}
+
+/* C · cinema */
+.seq-cinema-stage{position:relative;min-width:0}
+.seq-cinema-card{display:grid;gap:var(--sp-4);background:color-mix(in srgb,var(--carbon) 94%,transparent);border:1px solid var(--line);padding:var(--sp-4);margin-top:var(--sp-4)}
+.seq-cinema-open{margin-top:var(--sp-4)}
+.seq-cinema-card .seq-board{grid-template-columns:1fr}
+.seq-cinema-card .seq-roster{display:flex;flex-wrap:wrap;gap:var(--sp-1)}
+.seq-cinema-card .seq-roster h3{width:100%}
+.seq-cinema-card .seq-field-dock .seq-palette{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(min-width:1000px){
+  .seq-layout-cinema .seq-player{--video-room:240px}
+  .seq-cinema-card{position:absolute;right:var(--sp-4);top:var(--sp-12);width:min(460px,42%);max-height:calc(100% - 140px);overflow:auto;margin:0;z-index:5;box-shadow:0 12px 40px rgba(0,0,0,.5);backdrop-filter:blur(6px)}
+  .seq-cinema-open{position:absolute;right:var(--sp-4);top:var(--sp-12);margin:0;z-index:5}
+}
+.seq-lanes{background:var(--carbon);border:1px solid var(--line);user-select:none}
+.seq-lane{display:grid;grid-template-columns:110px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.seq-lane:last-child{border-bottom:0}
+.seq-lane-label{display:flex;align-items:center;padding:0 var(--sp-2);font:600 10px 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);border-right:1px solid var(--line);overflow-wrap:anywhere}
+.seq-lane-body{position:relative;height:36px;cursor:pointer;overflow:hidden}
+.seq-chip{position:absolute;top:5px;height:26px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 var(--sp-2);border:0;border-left:2px solid var(--bone);background:color-mix(in srgb,var(--bone) 14%,transparent);color:var(--bone);font:500 10px 'JetBrains Mono',monospace;cursor:pointer}
+.seq-chip.b{border-left-color:var(--kush);background:color-mix(in srgb,var(--kush) 18%,transparent)}
+.seq-chip.goal{background:var(--bone);color:var(--void);font-weight:700}
+.seq-chip.b.goal{background:var(--kush)}
+.seq-chip.injury{border-left-color:var(--danger);background:color-mix(in srgb,var(--danger) 22%,transparent)}
+.seq-chip:hover,.seq-chip.picked{z-index:2;max-width:none}
+.seq-chip.picked{outline:2px solid var(--bone);outline-offset:-2px}
+@media(max-width:600px){.seq-lane{grid-template-columns:64px minmax(0,1fr)}.seq-chip{max-width:90px}}
+
+/* narrow panels reuse the wizard's small-screen arrangement */
+.seq-split-side .source-action-wizard .two,.seq-split-side .source-action-wizard .land,.seq-cinema-card .source-action-wizard .two,.seq-cinema-card .source-action-wizard .land{grid-template-columns:minmax(0,1fr)}.seq-split-side .source-action-wizard .stepper,.seq-cinema-card .source-action-wizard .stepper{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.seq-split-side .source-action-wizard .opts,.seq-cinema-card .source-action-wizard .opts{grid-template-columns:repeat(2,minmax(0,1fr))}.seq-split-side .source-action-wizard .tbar,.seq-cinema-card .source-action-wizard .tbar{flex-wrap:wrap}
+.seq-split-side .source-action-wizard .an .opts,.seq-cinema-card .source-action-wizard .an .opts,.seq-split-side .source-action-wizard .an .pr,.seq-cinema-card .source-action-wizard .an .pr{grid-template-columns:repeat(2,minmax(0,1fr))}
+.seq-layouts .button.active,.seq-split-tabs .button.active{background:color-mix(in srgb,var(--kush) 16%,transparent);border-color:var(--kush);color:var(--bone)}
+.seq-split-side .source-action-wizard .an .two,.seq-cinema-card .source-action-wizard .an .two{grid-template-columns:minmax(0,1fr)}
+/* dense matches: secondary actions become thin ticks, goals and injuries stay readable */
+.seq-mark.minor{width:2px;height:9px;margin-left:-1px;border-radius:0;opacity:.45;z-index:0}
+.seq-mark.minor.b{bottom:7px}
+.seq-mark.minor:hover,.seq-mark.minor.picked{opacity:1;width:4px;margin-left:-2px}
+.seq-chip.minor{width:3px;padding:0;border:0;opacity:.5;background:var(--bone);z-index:0}
+.seq-chip.minor.b{background:var(--kush)}
+.seq-chip.minor:hover,.seq-chip.minor.picked{opacity:1;width:5px}
+.seq-mark.goal,.seq-chip.goal,.seq-mark.injury,.seq-chip.injury{z-index:1}
