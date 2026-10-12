@@ -21,7 +21,7 @@ export function canonicalEffects(e:MatchEvent,events:MatchEvent[]):[string,strin
  const recovery=()=>{add('recoveries');if(pos&&pos.x>=annotationRules.finalThird)add('highRecoveries')};
  switch(e.type){
  case'SHOT':add('shots');if(o==='GOAL'||o==='ON_TARGET')add('shotsOnTarget');if(o==='GOAL'){add('goals');if(mate)add('assists',mate)}if(o==='BLOCKED')add('blocks',b);break;
- case'PASS':add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')){add('keyPasses');add('chancesCreated')}if(has('ASSIST')&&!events.some(x=>isGoal(x)&&x.metadata.linkedEventId===e.id&&x.relatedPlayerId===a))add('assists');break;
+ case'PASS':add('passesAttempted');if(o==='COMPLETED')add('passesCompleted');if(o==='FAILED'&&b){add('interceptions',b);if(annotationRules.interceptionIsRecovery)add('recoveries',b)}for(const [tag,k]of [['LONG_PASS','longPasses'],['CROSS','crosses']])if(has(tag)){add(k+'Attempted');if(o==='COMPLETED')add(k+'Completed')}if(has('KEY_PASS')){add('keyPasses');add('chancesCreated')}if(has('ASSIST')&&!events.some(x=>isGoal(x)&&x.metadata.linkedEventId===e.id&&x.relatedPlayerId===a))add('assists');break;
  case'DRIBBLE':add('dribblesAttempted');if(o==='COMPLETED'){add('dribblesCompleted');add('dribbledPast',b)}if(has('FOUL_WON')){add('foulsWon');add('fouls',b)}break;
  case'DUEL':add('duelsAttempted');add('duelsAttempted',b);add('duelsWon',o==='WON'?a:b);if(has('AERIAL')){add('aerialDuelsAttempted');add('aerialDuelsAttempted',b);add('aerialDuelsWon',o==='WON'?a:b)}break;
  case'TACKLE':add('tackles');if(o==='FOUL'){add('fouls');add('foulsWon',b)}if(has('BALL_RECOVERED'))recovery();break;

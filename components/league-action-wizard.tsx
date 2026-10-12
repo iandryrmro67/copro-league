@@ -12,15 +12,15 @@ export function ActionWizard({ match, actor, type, outcome, tags, mate, opponent
   const [stage, setStage] = useState<Stage>('actor'), [combine, setCombine] = useState(false), [x,setX]=useState(''),[y,setY]=useState('');
   const definition = actionDefinitions[type] ?? {label:type,outcomes:[],tags:[]};
   const side = match.participants.find(p => p.playerId === actor)?.team;
-  const mateNeeded = type === 'PASS', mateOptional = type === 'SHOT' && outcome === 'GOAL';
+  const mateNeeded = type === 'PASS' && outcome !== 'FAILED', interceptor = type === 'PASS' && outcome === 'FAILED', mateOptional = type === 'SHOT' && outcome === 'GOAL';
   const opponentNeeded = ['DRIBBLE', 'DUEL', 'TACKLE', 'FOUL'].includes(type) || type === 'SHOT' && outcome === 'BLOCKED';
-  const optionalOpponent = ['BLOCK', 'SAVE', 'INTERCEPTION'].includes(type);
+  const optionalOpponent = ['BLOCK', 'SAVE', 'INTERCEPTION'].includes(type) || interceptor;
   const relevantTags = definition.tags.filter(tag => !['KEY_PASS', 'ASSIST'].includes(tag));
   const nextPlayer = () => setStage(mateNeeded || mateOptional || opponentNeeded || optionalOpponent ? 'player' : 'position');
-  const stages: [Stage, string, string][] = [['actor', 'AUTEUR', name(actor)], ['action', 'ACTION', definition.label], ['outcome', 'RÉSULTAT', actionLabels[outcome] ?? '—'], ['details', type==='PASS'?'TYPE DE PASSE':'PRÉCISION', tags.map(tag => actionLabels[tag]).join(' · ') || 'À choisir'], ['player', mateNeeded || mateOptional ? 'RECEVEUR / PASSEUR' : 'ADVERSAIRE', name(mate || opponent) || 'À choisir'], ['position', 'POSITION', 'Dernière étape']];
+  const stages: [Stage, string, string][] = [['actor', 'AUTEUR', name(actor)], ['action', 'ACTION', definition.label], ['outcome', 'RÉSULTAT', actionLabels[outcome] ?? '—'], ['details', type==='PASS'?'TYPE DE PASSE':'PRÉCISION', tags.map(tag => actionLabels[tag]).join(' · ') || 'À choisir'], ['player', mateNeeded || mateOptional ? 'RECEVEUR / PASSEUR' : interceptor ? 'INTERCEPTEUR' : 'ADVERSAIRE', name(mate || opponent) || 'À choisir'], ['position', 'POSITION', 'Dernière étape']];
   const index = stages.findIndex(([key]) => key === stage);
-  const heading: Record<Stage, string> = { actor: 'Qui fait l’action ?', action: 'Quelle action ?', outcome: 'Quel résultat ?', details: type === 'PASS' ? 'Quel type de passe ?' : 'Quelle précision ?', player: mateNeeded ? 'Qui reçoit la passe ?' : mateOptional ? 'Qui fait la passe décisive ?' : 'Quel adversaire ?', position: 'Position finale · un clic enregistre' };
-  const commit=(point:Point|null)=>{if(onCommit(point)){setStage(type==='PASS'&&outcome==='COMPLETED'?'action':'actor');setX('');setY('');setCombine(false);onTags([]);onOutcome('')}};
+  const heading: Record<Stage, string> = { actor: 'Qui fait l’action ?', action: 'Quelle action ?', outcome: 'Quel résultat ?', details: type === 'PASS' ? 'Quel type de passe ?' : 'Quelle précision ?', player: mateNeeded ? 'Qui reçoit la passe ?' : mateOptional ? 'Qui fait la passe décisive ?' : interceptor ? 'Qui a intercepté la passe ?' : 'Quel adversaire ?', position: 'Position finale · un clic enregistre' };
+  const commit=(point:Point|null)=>{if(onCommit(point)){setStage(type==='PASS'&&(outcome==='COMPLETED'||outcome==='FAILED'&&opponent)?'action':'actor');setX('');setY('');setCombine(false);onTags([]);onOutcome('')}};
   const place=(event:MouseEvent<HTMLDivElement>)=>{const rect=event.currentTarget.getBoundingClientRect();commit({x:Math.round(Math.max(0,Math.min(100,(event.clientX-rect.left)/rect.width*100))),y:Math.round(Math.max(0,Math.min(100,(event.clientY-rect.top)/rect.height*100)))})};
   const option=(label:string,key:string,choose:()=>void,active=false)=><SourceTemplate key={key} node={sourceAt(hudTemplates.wizardQuestion,'0.2.1')} slots={{'':label}} props={{'':{as:'button',role:'button','aria-checked':undefined,type:'button',htmlFor:undefined,onClick:choose,'aria-pressed':active,className:'op'+(active?' selected':'')}}}/>;
   const options=stage==='actor'?match.participants.filter(p=>p.team).map(p=>option(name(p.playerId),p.playerId,()=>{onFreeze();onActor(p.playerId);setStage('action')}))
