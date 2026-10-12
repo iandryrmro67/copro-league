@@ -15,9 +15,7 @@ if(e.type==='PASS'&&Array.isArray(t)&&t.includes('LATERAL')&&t.includes('BACKWAR
 if(typeof v.sequenceId!=='string'||v.sequenceId.length>100||!v.sequenceId)fail('Séquence requise');
 const opponent=m.participants.find(q=>q.playerId===v.opponentPlayerId);
 if(v.opponentPlayerId&&(!opponent||opponent.team===e.team))fail('Adversaire invalide');
-if(['DUEL','DRIBBLE','TACKLE','FOUL'].includes(e.type)&&!opponent)fail('Choisissez un adversaire');
-if(e.type==='PASS'&&!e.relatedPlayerId)fail('Choisissez un receveur');
-if(e.type==='SHOT'&&o==='BLOCKED'&&!opponent)fail('Choisissez le défenseur');
+// Missing receiver / opponent is incomplete annotation, not corrupt data: the editor asks for it, saving never blocks on it.
 if(e.type==='PASS'&&o==='FAILED'&&Array.isArray(t)&&t.includes('ASSIST'))fail('Une passe ratée ne peut être décisive');
 if(v.linkedEventId){const linked=m.events.find(x=>x.id===v.linkedEventId);if(!linked||linked.id===e.id)fail('Action liée introuvable');else if(e.type==='SHOT'){if(linked.type!=='PASS'||linked.playerId!==e.relatedPlayerId||linked.relatedPlayerId!==e.playerId||linked.metadata.outcome!=='COMPLETED'||o!=='GOAL')fail('Passe liée incompatible');}else if(['SAVE','BLOCK'].includes(e.type)){if(linked.type!=='SHOT'||linked.playerId!==v.opponentPlayerId||linked.team===e.team||linked.metadata.outcome!==(e.type==='SAVE'?'ON_TARGET':'BLOCKED'))fail('Tir lié incompatible');}else fail('Lien non applicable');}
 if(v.scene){const scene=v.scene as any;if(!scene.players||typeof scene.players!=='object')fail('Scène invalide');else for(const [id,point]of Object.entries(scene.players)){const q=point as any;if(!m.participants.some(p=>p.playerId===id)||!q||!Number.isFinite(q.x)||!Number.isFinite(q.y)||q.x<0||q.x>100||q.y<0||q.y>100)fail('Position de scène invalide');}const b=scene.ball;if(b&&(!Number.isFinite(b.x)||!Number.isFinite(b.y)||b.x<0||b.x>100||b.y<0||b.y>100))fail('Ballon invalide');}
